@@ -18,7 +18,7 @@ int main(){
     //prueba funcionamiento arreglos
     cromosoma[0]=1;
     fitnessPob[0]=0.1;
-    //memoria XD (Buascar como trabajar bien con la memoria)
+    //memoria XD (Buscar como trabajar bien con la memoria)
     cout << cromosoma[0];
     cout << "\n";
     cout << fitnessPob[0];
