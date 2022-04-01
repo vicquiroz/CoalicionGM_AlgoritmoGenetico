@@ -1,0 +1,22 @@
+﻿# CMakeList.txt: proyecto de CMake para algoritmoc++, incluya el origen y defina
+# la lógica específica del proyecto aquí.
+#
+cmake_minimum_required (VERSION 3.8)
+
+project ("algoritmoc++")
+
+include_directories(
+	${PROJECT_SOURCE_DIR}/include
+)
+
+file(GLOB all_SRCS
+	"${PROJECT_SOURCE_DIR}/src/*.cpp"
+	"${PROJECT_SOURCE_DIR}/src/*.c"
+)
+
+# Agregue un origen al ejecutable de este proyecto.
+add_executable (algoritmoc++ ${all_SRCS} ejemplo2.json)
+set_target_properties(algoritmoc++ PROPERTIES LINKER_LANGUAGE CXX)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/data/ejemplo2.json
+	${CMAKE_CURRENT_SOURCE_DIR} COPYONLY)
+# TODO: Agregue pruebas y destinos de instalación si es necesario.
