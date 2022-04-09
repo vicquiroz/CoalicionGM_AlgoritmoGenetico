@@ -5,16 +5,18 @@
 #include <math.h>
 #include <string>
 #include <stdlib.h>
+#include <nlohmann/json.hpp>
 
 // srand() para usar la semilla
 using namespace std;
+using json = nlohmann::json;
 
 int m = 5;
 float pmutacion_threshold = 0.2;
 float pr = 0.1;
 int seed = 20;
 
-/*float eval_sol(float pos[], nlohmann::json data) {
+float eval_sol(float pos[], json data) {
 	float suma = 0;
 	for (size_t i = 0; i < (sizeof(pos) - 1); i++)
 	{
@@ -24,7 +26,7 @@ int seed = 20;
 		}
 	}
 	return suma;
-}*/
+}
 
 float dis_euc(float x1, float y1, float x2, float y2)
 {
@@ -34,7 +36,7 @@ float dis_euc(float x1, float y1, float x2, float y2)
 
 float suma(float *array, int largo)
 {
-	int suma = 0;
+	float suma = 0;
 	for (size_t i = 0; i < largo; i++)
 	{
 		suma = suma + array[i];
@@ -55,7 +57,7 @@ int suma_bool(bool *array, int largo)
 	return suma;
 }
 // ver return null (posible return -1)
-/*float smallest_greater(float *seq, float value)
+int smallest_greater(float *seq, int largo, float value)
 {
 	int i = 0;
 	bool flag = true;
@@ -68,12 +70,15 @@ int suma_bool(bool *array, int largo)
 		}
 		else
 		{
-			return NULL;
+			if(i==largo)
+			{
+				return NULL;
+			}
 		}
 	}
-}*/
+}
 
-void *sample(int *arreglo, int limite, int largo)
+void sample(int *arreglo, int limite, int largo)
 {
 	int i = 0;
 	bool repetido = false;
@@ -269,7 +274,86 @@ int **which(bool *array, int largo)
 	return ret;
 }
 
-int main(int argc, char *argv[])
+int* crear_arreglo(int largo)
+{
+	int* arreglo = (int*)malloc(sizeof(int) * largo);
+	for (size_t i = 0; i < largo; i++)
+	{
+		arreglo[i] = i;
+	}
+
+	return arreglo;
+}
+
+int** repetidos(int* arreglo, int largo)
+{
+	int cont = 0;
+	int aux = 0;
+	int newlargo = largo;
+	int* newarr = (int*)malloc(sizeof(int) * largo);
+	for (size_t i = 0; i < newlargo; i++)
+	{
+		newarr[i] = arreglo[i];
+	}
+	for (size_t i = 0; i < newlargo; i++)
+	{
+		for (size_t j = 0; j < newlargo; j++)
+		{
+			if (newarr[i] == newarr[j]) cont++;
+		}
+		if (cont > 1) {
+			aux = i + 1;
+			for (size_t j = i + 1; j < newlargo; j++)
+			{
+				if (newarr[j] != newarr[i]) newarr[aux] = newarr[j];
+			}
+			newlargo = newlargo - cont + 1;
+			aux = 0;
+			cont = 0;
+		}
+	}
+	cout << newlargo << endl;
+	int* finalarr = (int*)malloc(sizeof(int) * newlargo);
+	for (size_t i = 0; i < newlargo; i++)
+	{
+		finalarr[i] = newarr[i];
+	}
+	delete[] newarr;
+	int** ret = (int**)malloc(sizeof(int*) * 2);
+	int* pointCont = (int*)malloc(sizeof(int) * 1);
+	pointCont[0] = newlargo;
+	ret[0] = finalarr;
+	ret[1] = pointCont;
+	return ret;
+}
+
+void sample_arreglo(int* arreglo, int cant, int* valores, int largo)
+{
+	int indice = 0;
+	int valor = 0;
+	int i = 0;
+	bool repetido = false;
+	int valor = 0;
+	while (i < cant)
+	{
+		indice = rand() % largo;
+		valor = valores[indice];
+		for (size_t j = 0; j < i; j++)
+		{
+			if (valor == arreglo[j])
+				repetido = true;
+		}
+		if (repetido == false)
+		{
+			arreglo[i] = valor;
+			i++;
+		}
+		repetido = false;
+	}
+}
+
+
+void main(int argc, char *argv[])
 {
 	int quorum = 20;
 	if (argc > 1)
@@ -286,33 +370,4 @@ int main(int argc, char *argv[])
 	{
 		cromosoma[i] = (int *)malloc(quorum * sizeof(int));
 	}
-
-	sample(cromosoma[0], 25, quorum);
-	sample(cromosoma[1], 25, quorum);
-
-	sort(cromosoma[0], quorum);
-	sort(cromosoma[1], quorum);
-
-	for (size_t i = 0; i < 2; i++)
-	{
-		for (size_t j = 0; j < quorum; j++)
-		{
-			cout << cromosoma[i][j] << " ";
-		}
-		cout << endl;
-	}
-	cout << endl;
-	int **pointerDisimilar12 = notin(cromosoma[0], cromosoma[1], quorum);
-	for (size_t i = 0; i < pointerDisimilar12[1][0]; i++)
-	{
-		cout << pointerDisimilar12[0][i] << " ";
-	}
-	cout << endl;
-	bool *pointerIn = in_boolean(cromosoma[0], cromosoma[1], quorum);
-	for (size_t i = 0; i < quorum; i++)
-	{
-		cout << pointerIn[i] << " ";
-	}
-	cout << endl;
-	return 0;
 }

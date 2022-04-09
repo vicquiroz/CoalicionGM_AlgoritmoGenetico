@@ -20,3 +20,10 @@ set_target_properties(algoritmoc++ PROPERTIES LINKER_LANGUAGE CXX)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/data/ejemplo2.json
 	${CMAKE_CURRENT_SOURCE_DIR} COPYONLY)
 # TODO: Agregue pruebas y destinos de instalación si es necesario.
+
+include(FetchContent)
+
+FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.10.5/json.tar.xz)
+FetchContent_MakeAvailable(json)
+
+target_link_libraries(algoritmoc++ PRIVATE nlohmann_json::nlohmann_json)
