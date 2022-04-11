@@ -11,27 +11,27 @@
 using namespace std;
 using json = nlohmann::json;
 
-int m = 5;
+int m = 40;
 float pmutacion_threshold = 0.2;
 float pr = 0.1;
 int seed = 20;
 
-float eval_sol(float pos[], json data) {
+float dis_euc(float x1, float y1, float x2, float y2)
+{
+	float calculo = pow(pow((x2 - x1), 2) + pow((y2 - y1), 2), 1 / (float)2);
+	return calculo;
+}
+
+float eval_sol(int* pos, json data,int largo) {
 	float suma = 0;
-	for (size_t i = 0; i < (sizeof(pos) - 1); i++)
+	for (size_t i = 0; i < (largo - 1); i++)
 	{
-		for (size_t j = i + 1; j < sizeof(pos); j++)
+		for (size_t j = i + 1; j < largo; j++)
 		{
 			suma = suma + dis_euc(data["diputados"][pos[i]]["coordX"], data["diputados"][pos[i]]["coordY"], data["diputados"][pos[j]]["coordX"], data["diputados"][pos[j]]["coordY"]);
 		}
 	}
 	return suma;
-}
-
-float dis_euc(float x1, float y1, float x2, float y2)
-{
-	float calculo = pow(pow((x2 - x1), 2) + pow((y2 - y1), 2), 1 / 2);
-	return calculo;
 }
 
 float suma(float *array, int largo)
@@ -72,7 +72,7 @@ int smallest_greater(float *seq, int largo, float value)
 		{
 			if(i==largo)
 			{
-				return NULL;
+				EXIT_FAILURE;
 			}
 		}
 	}
@@ -85,7 +85,11 @@ void sample(int *arreglo, int limite, int largo)
 	int valor = 0;
 	while (i < largo)
 	{
-		valor = rand() % limite;
+		//valor = rand() % limite;
+		std::random_device rd;
+		std::mt19937 rng(rd());
+		std::uniform_int_distribution<int> uni(0, limite-1);
+		int valor = uni(rng);
 		for (size_t j = 0; j < i; j++)
 		{
 			if (valor == arreglo[j])
@@ -106,7 +110,7 @@ void sort(int *array, int largo)
 	for (size_t i = 0; i < largo; i++)
 	{
 		bool already_sorted = true;
-		for (size_t j = 0; j < largo - 1; j++)
+		for (size_t j = 0; j < largo -i- 1; j++)
 		{
 			if (array[j] > array[j + 1])
 			{
@@ -118,6 +122,33 @@ void sort(int *array, int largo)
 		}
 		if (already_sorted)
 			break;
+	}
+}
+
+void order(float* fitness, int**cromosoma, int quorum, int m)
+{
+	int temp = 0;
+	int* arrTemp = (int*)malloc(quorum * sizeof(int));
+	for (size_t i = 0; i < m; i++)
+	{
+		bool already_sorted = true;
+		for (size_t j = 0; j < m -i- 1; j++)
+		{
+			if (fitness[j] > fitness[j + 1])
+			{
+				temp = fitness[j];
+				fitness[j] = fitness[j + 1];
+				fitness[j + 1] = temp;
+
+				memcpy(arrTemp, cromosoma[j], sizeof(int)*quorum);
+				memcpy(cromosoma[j], cromosoma[j+1], sizeof(int)*quorum);
+				memcpy(cromosoma[j+1], arrTemp, sizeof(int)*quorum);
+				already_sorted = false;
+			}
+		}
+		if (already_sorted)
+			break;
+		
 	}
 }
 // revisar si esta bien (memcpy, para copiar un arreglo de una posicion a otra)
@@ -333,10 +364,12 @@ void sample_arreglo(int* arreglo, int cant, int* valores, int largo)
 	int valor = 0;
 	int i = 0;
 	bool repetido = false;
-	int valor = 0;
 	while (i < cant)
 	{
-		indice = rand() % largo;
+		std::random_device rd;
+		std::mt19937 rng(rd());
+		std::uniform_int_distribution<int> uni(0, largo - 1);
+		indice = uni(rng);
 		valor = valores[indice];
 		for (size_t j = 0; j < i; j++)
 		{
@@ -355,7 +388,11 @@ void sample_arreglo(int* arreglo, int cant, int* valores, int largo)
 
 void main(int argc, char *argv[])
 {
-	int quorum = 20;
+
+	ifstream archivo("ejemplo2.json");
+	json data = json::parse(archivo);
+
+	int quorum = 74;
 	if (argc > 1)
 	{
 		m = stoi(argv[0]);
@@ -365,9 +402,37 @@ void main(int argc, char *argv[])
 	}
 
 	int **cromosoma = (int **)malloc(m * sizeof(int *));
+	float* fitnessPob = (float*)malloc(m * sizeof(float));
 
 	for (size_t i = 0; i < m; i++)
 	{
 		cromosoma[i] = (int *)malloc(quorum * sizeof(int));
+	}
+
+	int n = data["diputados"].size();
+	for (size_t i = 0; i < m; i++)
+	{
+		sample(cromosoma[i],n, quorum);
+		sort(cromosoma[i], quorum);
+		fitnessPob[i] = eval_sol(cromosoma[i],data,quorum);
+	}
+	for (size_t i = 0; i < m; i++)
+	{
+		for (size_t j = 0; j < quorum; j++)
+		{
+			cout << cromosoma[i][j] << " ";
+		}
+		cout <<endl<< fitnessPob[i] << endl<<endl;
+	}
+	cout << "-------------------------------------------------------------------------------------------------"<<endl;
+	order(fitnessPob, cromosoma, quorum, m);
+
+	for (size_t i = 0; i < 3; i++)
+	{
+		for (size_t j = 0; j < quorum; j++)
+		{
+			cout << cromosoma[i][j] << " ";
+		}
+		cout << endl << fitnessPob[i] << endl << endl;
 	}
 }

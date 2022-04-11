@@ -18,7 +18,7 @@ file(GLOB all_SRCS
 add_executable (algoritmoc++ ${all_SRCS} ejemplo2.json)
 set_target_properties(algoritmoc++ PROPERTIES LINKER_LANGUAGE CXX)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/data/ejemplo2.json
-	${CMAKE_CURRENT_SOURCE_DIR} COPYONLY)
+	${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
 # TODO: Agregue pruebas y destinos de instalación si es necesario.
 
 include(FetchContent)
