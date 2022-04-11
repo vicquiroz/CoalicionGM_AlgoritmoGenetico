@@ -150,27 +150,8 @@ void order(float* fitness, int**cromosoma, int quorum, int m)
 			break;
 		
 	}
+	free(arrTemp);
 }
-// revisar si esta bien (memcpy, para copiar un arreglo de una posicion a otra)
-/*float* order(float* array[]) {
-	int n = sizeof(array[1]);
-	bool already_sorted = true;
-	for (size_t i = 0; i < n; i++)
-	{
-		already_sorted = true;
-		for (size_t j = 0; j < (n - i - 1); j++)
-		{
-			if (array[1][j] > array[1][j + 1])
-			{
-				array[0][j], array[0][j + 1] = array[0][j + 1], array[0][j];
-				array[1][j], array[1][j + 1] = array[1][j + 1], array[1][j];
-				already_sorted = false;
-			}
-		}
-		if (already_sorted) break;
-	}
-	return (array[0], array[1]);
-}*/
 
 int **notin(int *array1, int *array2, int largo)
 {
