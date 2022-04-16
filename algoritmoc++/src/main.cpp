@@ -14,7 +14,7 @@ using json = nlohmann::json;
 int m = 40;
 float pmutacion_threshold = 0.2;
 float pr = 0.1;
-int seed = 20;
+int seed = 1234;
 
 float dis_euc(float x1, float y1, float x2, float y2)
 {
@@ -37,7 +37,7 @@ float eval_sol(int* pos, json data,int largo) {
 float suma(float *array, int largo)
 {
 	float suma = 0;
-	for (size_t i = 0; i < largo; i++)
+	for (size_t i = 0; i <= largo; i++)
 	{
 		suma = suma + array[i];
 	}
@@ -86,9 +86,9 @@ void sample(int *arreglo, int limite, int largo)
 	while (i < largo)
 	{
 		//valor = rand() % limite;
-		std::random_device rd;
-		std::mt19937 rng(rd());
-		std::uniform_int_distribution<int> uni(0, limite-1);
+		random_device rd;
+		mt19937 rng(rd());
+		uniform_int_distribution<int> uni(0, limite-1);
 		int valor = uni(rng);
 		for (size_t j = 0; j < i; j++)
 		{
@@ -341,6 +341,7 @@ int** repetidos(int* arreglo, int largo)
 
 void sample_arreglo(int* arreglo, int cant, int* valores, int largo)
 {
+	default_random_engine generator(seed);
 	int indice = 0;
 	int valor = 0;
 	int i = 0;
@@ -397,23 +398,65 @@ void main(int argc, char *argv[])
 		sort(cromosoma[i], quorum);
 		fitnessPob[i] = eval_sol(cromosoma[i],data,quorum);
 	}
-	for (size_t i = 0; i < m; i++)
-	{
-		for (size_t j = 0; j < quorum; j++)
-		{
-			cout << cromosoma[i][j] << " ";
-		}
-		cout <<endl<< fitnessPob[i] << endl<<endl;
-	}
-	cout << "-------------------------------------------------------------------------------------------------"<<endl;
 	order(fitnessPob, cromosoma, quorum, m);
 
-	for (size_t i = 0; i < 3; i++)
+	float* p = (float *)malloc(m * sizeof(float));
+	float* cump = (float*)malloc(m * sizeof(float));
+
+	p[0] = 0.1;
+	cump[0] = 0.1;
+
+	for (size_t i = 1; i < m; i++)
 	{
-		for (size_t j = 0; j < quorum; j++)
-		{
-			cout << cromosoma[i][j] << " ";
-		}
-		cout << endl << fitnessPob[i] << endl << endl;
+		p[i] = pr*pow(1 - pr, i);
+		cump[i] = suma(p,i);
+	}
+	cump[m - 1] = 1;
+	int max_k = 10 * (m - 21);
+	int i = 0;
+	int k = 0;
+	int it = 0;
+
+	//itera y fitnessEvol hay que almacenarlos en un archivo
+	int cual1;
+	int cual2;
+	while (k<max_k)
+	{
+		it++;
+		random_device rd;
+		mt19937 rng(rd());
+		uniform_real_distribution<float> uni(0, 1);
+		cual1 = smallest_greater(cump, m, uni(rng));
+		cual2 = smallest_greater(cump, m, uni(rng));
+		while (cual1 == cual2)cual2 = smallest_greater(cump, m, uni(rng));
+
+		int* cromosoma1=(int*)malloc(quorum*sizeof(int));
+		int* cromosoma2 = (int*)malloc(quorum * sizeof(int));
+		memcpy(cromosoma1, cromosoma[cual1], quorum * sizeof(int));
+		memcpy(cromosoma2, cromosoma[cual2], quorum * sizeof(int));
+
+		int** mDis12 = notin(cromosoma1, cromosoma2, quorum);
+		int** mDis21 = notin(cromosoma2, cromosoma1, quorum);
+
+		int* disimilar12 = (int*)malloc(quorum * sizeof(int));
+		int* disimilar21 = (int*)malloc(quorum * sizeof(int));
+
+		memcpy(disimilar12, mDis12[0], quorum * sizeof(int));
+		memcpy(disimilar21, mDis21[0], quorum * sizeof(int));
+
+		int* arrMin = (int*)malloc(2 * sizeof(int));
+		arrMin[0] = mDis12[1][0];
+		arrMin[1] = mDis21[1][0];
+
+		int* crossovern = (int*)malloc(sizeof(int));
+
+		sample(crossovern, minimo(arrMin, 2), 1);
+
+
+
+	}
+	for (size_t i = 0; i < m; i++)
+	{
+		cout << p[i] << " " << cump[i] << endl;
 	}
 }
