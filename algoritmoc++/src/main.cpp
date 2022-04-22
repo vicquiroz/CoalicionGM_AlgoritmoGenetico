@@ -27,8 +27,10 @@ float dis_euc(float x1, float y1, float x2, float y2)
 
 float eval_sol(int* pos, json data,int largo) {
 	float suma = 0;
+	//cout << largo << endl << endl;
 	for (size_t i = 0; i < (largo - 1); i++)
 	{
+		cout << i << endl;
 		for (size_t j = i + 1; j < largo; j++)
 		{
 			suma = suma + dis_euc(data["diputados"][pos[i]]["coordX"], data["diputados"][pos[i]]["coordY"], data["diputados"][pos[j]]["coordX"], data["diputados"][pos[j]]["coordY"]);
@@ -240,7 +242,7 @@ int maximo(int *array, int largo)
 	return maxi;
 }
 
-int which_max(int *array, int largo)
+int which_max(float *array, int largo)
 {
 	int maxi = 0;
 	for (size_t i = 0; i < largo - 1; i++)
@@ -392,6 +394,7 @@ void main(int argc, char *argv[])
 	}
 
 	int n = data["diputados"].size();
+	cout << "primero --------------------" << endl;
 	for (size_t i = 0; i < m; i++)
 	{
 		sample(cromosoma[i],n, quorum);
@@ -427,6 +430,11 @@ void main(int argc, char *argv[])
 	bool flag3;
 	
 	int idxpop;
+	int contCromNuevo =0;
+
+	int peor;
+
+	float fitnessCambio;
 
 	while (k<max_k)
 	{
@@ -540,10 +548,14 @@ void main(int argc, char *argv[])
 			{
 				cromosomaNuevo[a] = (int*)malloc(quorum * sizeof(int));
 			}
-			memcpy(cromosomaNuevo[0], cromosoma1, quorum * sizeof(int));
-			memcpy(cromosomaNuevo[1], cromosoma2, quorum * sizeof(int));
-			fitnessPobNuevo[0] = eval_sol(cromosoma1, data, quorum);
-			fitnessPobNuevo[1] = eval_sol(cromosoma2, data, quorum);
+			//revisar porque falla
+			memcpy(cromosomaNuevo[contCromNuevo], cromosoma1, quorum * sizeof(int));
+			fitnessPobNuevo[contCromNuevo] = eval_sol(cromosoma1, data, quorum);
+			contCromNuevo++;
+			cout << "tercero --------------------" << endl;
+			memcpy(cromosomaNuevo[contCromNuevo], cromosoma2, quorum * sizeof(int));
+			fitnessPobNuevo[contCromNuevo] = eval_sol(cromosoma2, data, quorum);
+			contCromNuevo++;
 		}
 		else {
 			flag2 = true;
@@ -551,17 +563,172 @@ void main(int argc, char *argv[])
 			while (flag2) {
 				if (suma_bool(in_boolean(cromosoma1, cromosomaNuevo[idxpop], quorum), quorum) == quorum) {
 					int* cualSacar = (int*)malloc(sizeof(int));//linea 294 py
+					sample(cualSacar, quorum, 1);
+					int** mNotInCromosoma1 = (int**)malloc(2 * sizeof(int*));
+					mNotInCromosoma1 = notin(crear_arreglo(n), cromosoma1, n);
+					int* notInCromosoma1 = (int*)malloc(mNotInCromosoma1[1][0] * sizeof(int));
+					notInCromosoma1 = mNotInCromosoma1[0];
+					int* cualIntroducir = (int*)malloc(sizeof(int));
+					sample_arreglo(cualIntroducir, 1, notInCromosoma1, mNotInCromosoma1[1][0]);
+					cromosoma1[cualSacar[0]] = cualIntroducir[0];
+					sort(cromosoma1, quorum);
+					free(cualSacar);
+					free(mNotInCromosoma1);
+					free(notInCromosoma1);
+					free(cualIntroducir);
+					idxpop = 0;
+				}
+				else
+				{
+					if (idxpop==contCromNuevo-1)
+					{
+						flag2 = false;
+					}
+					else
+					{
+						idxpop++;
+					}
 				}
 			}
+
+			flag2 = true;
+			idxpop = 0;
+			while (flag2) {
+				if (suma_bool(in_boolean(cromosoma2, cromosomaNuevo[idxpop], quorum), quorum) == quorum) {
+					int* cualSacar = (int*)malloc(sizeof(int));
+					sample(cualSacar, quorum, 1);
+					int** mNotInCromosoma2 = (int**)malloc(2 * sizeof(int*));
+					mNotInCromosoma2 = notin(crear_arreglo(n), cromosoma2, n);
+					int* notInCromosoma2 = (int*)malloc(mNotInCromosoma2[1][0] * sizeof(int));
+					notInCromosoma2 = mNotInCromosoma2[0];
+					int* cualIntroducir = (int*)malloc(sizeof(int));
+					sample_arreglo(cualIntroducir, 1, notInCromosoma2, mNotInCromosoma2[1][0]);
+					cromosoma1[cualSacar[0]] = cualIntroducir[0];
+					sort(cromosoma2, quorum);
+					free(cualSacar);
+					free(mNotInCromosoma2);
+					free(notInCromosoma2);
+					free(cualIntroducir);
+					idxpop = 0;
+				}
+				else
+				{
+					if (idxpop == contCromNuevo - 1)
+					{
+						flag2 = false;
+					}
+					else
+					{
+						idxpop++;
+					}
+				}
+			}
+			memcpy(cromosomaNuevo[contCromNuevo], cromosoma1, quorum * sizeof(int));
+			fitnessPobNuevo[contCromNuevo] = eval_sol(cromosoma1, data, quorum);
+			contCromNuevo++;
+			memcpy(cromosomaNuevo[contCromNuevo], cromosoma2, quorum * sizeof(int));
+			fitnessPobNuevo[contCromNuevo] = eval_sol(cromosoma2, data, quorum);
+			contCromNuevo++;
+
+		}
+		i++;
+		if (i==m/2)
+		{
+			i = 0;
+			contCromNuevo = 0;
+			order(fitnessPobNuevo, cromosomaNuevo, quorum, m);
+
+			flag2 = true;
+			flag3 = false;
+			idxpop = 0;
+
+			while (flag2)
+			{
+				if (suma_bool(in_boolean(cromosoma[0], cromosomaNuevo[idxpop], quorum), quorum) == quorum)
+				{
+					flag2 = false;
+					flag3 = true;
+				}
+				else
+				{
+					idxpop++;
+				}
+				if (idxpop>m-1)
+				{
+					flag2 = false;
+				}
+			}
+			float* pNuevo = (float*)malloc(m * sizeof(float));
+			float* cumpNuevo = (float*)malloc(m * sizeof(float));
+			if (flag3 == false)
+			{
+				peor = which_max(fitnessPobNuevo, m);
+				memcpy(cromosomaNuevo[peor], cromosoma[0], quorum * sizeof(int));
+				fitnessPobNuevo[peor] = fitnessPob[0];
+				order(fitnessPobNuevo, cromosomaNuevo, quorum, m);
+
+				//aqui va lo que no se deberia tener que hacer
+				memcpy(pNuevo, p, m * sizeof(float));
+				memcpy(cumpNuevo, cump, m * sizeof(float));
+
+				if (fitnessPobNuevo[0] == fitnessPob[0])
+				{
+					k++;
+				}
+
+			}
+			else
+			{
+				memcpy(pNuevo, p, m * sizeof(float));
+				memcpy(cumpNuevo, cump, m * sizeof(float));
+
+				if (fitnessPobNuevo[0] == fitnessPob[0])
+				{
+					k++;
+				}
+			}
+			for (size_t a = 0; a < m; a++)
+			{
+				memcpy(cromosoma[a], cromosomaNuevo[a], quorum * sizeof(int));
+				//revisar
+				fitnessPob[a] = fitnessPobNuevo[a];
+				p[a] = pNuevo[a];
+				cump[a] = cumpNuevo[a];
+			}
+
+			free(cromosomaNuevo);
+			free(fitnessPobNuevo);
+			free(pNuevo);
+			free(cumpNuevo);
+
+
+			int* cromosomaCambio = (int*)malloc(quorum * sizeof(int));
+			for (size_t j = round(m/2); j < m; j++)
+			{
+				sample(cromosomaCambio, n, quorum);
+				sort(cromosomaCambio, quorum);
+				fitnessCambio = eval_sol(cromosomaCambio, data, quorum);
+				memcpy(cromosoma[j], cromosomaCambio, quorum * sizeof(int));
+				fitnessPob[j] = fitnessCambio;
+			}
+			order(fitnessPob, cromosoma, quorum, m);
+			
+			p[0] = pr;
+			cump[0] = pr;
+
+			for (size_t j = 1; j < m; j++)
+			{
+				p[j] = pr * pow(1 - pr, j);
+				cump[j] = suma(p, j);
+			}
+			cump[m - 1] = 1;
+			i = 0;
 		}
 
 	}
-	for (size_t i = 0; i < 2; i++)
+	for (size_t i = 0; i < quorum; i++)
 	{
-		for (size_t j = 0; j < quorum; j++)
-		{
-			cout << cromosoma[i][j] << " ";
-		}
-		cout << endl;
+		cout << cromosoma[0][i] << " ";
 	}
+	cout << endl << fitnessPob[0];
 }
