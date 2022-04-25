@@ -14,7 +14,7 @@ using json = nlohmann::json;
 int m = 40;
 float pmutacion_threshold = 0.2;
 float pr = 0.1;
-unsigned seed = 1234;
+unsigned seed = 12345;
 random_device rng;
 //default_random_engine generator(seed);
 mt19937 mt(rng());
@@ -30,7 +30,7 @@ float eval_sol(int* pos, json data,int largo) {
 	//cout << largo << endl << endl;
 	for (size_t i = 0; i < (largo - 1); i++)
 	{
-		cout << i << endl;
+		//cout << i << endl;
 		for (size_t j = i + 1; j < largo; j++)
 		{
 			suma = suma + dis_euc(data["diputados"][pos[i]]["coordX"], data["diputados"][pos[i]]["coordY"], data["diputados"][pos[j]]["coordX"], data["diputados"][pos[j]]["coordY"]);
@@ -265,17 +265,22 @@ int which_max(float *array, int largo)
 
 int **which(bool *array, int largo)
 {
+	int* result = nullptr;
 	int **ret = (int **)malloc(sizeof(int *) * 2);
 	int cont = 0;
-	for (size_t i = 0; i < largo; i++)
+	cout << "arreglo:";
+	for (size_t i = 0; i < largo-1; i++)
 	{
+		cout << array[i] << " ";
 		if (array[i])
 			cont++;
 	}
-	int *result = (int *)malloc(sizeof(int) * cont);
+	cout << endl;
+	result = (int *)malloc(sizeof(int) * cont);
 	cont = 0;
 	for (size_t i = 0; i < largo; i++)
 	{
+		cout << "a"<<endl;
 		if (array[i])
 		{
 			result[cont] = i;
@@ -286,6 +291,9 @@ int **which(bool *array, int largo)
 	pointerCont[0] = cont;
 	ret[0] = result;
 	ret[1] = pointerCont;
+	free(result);
+	free(pointerCont);
+
 	return ret;
 }
 
@@ -436,6 +444,8 @@ void main(int argc, char *argv[])
 
 	float fitnessCambio;
 
+	int min;
+
 	while (k<max_k)
 	{
 		it++;
@@ -448,14 +458,17 @@ void main(int argc, char *argv[])
 		memcpy(cromosoma1, cromosoma[cual1], quorum * sizeof(int));
 		memcpy(cromosoma2, cromosoma[cual2], quorum * sizeof(int));
 
-		int** mDis12 = notin(cromosoma1, cromosoma2, quorum);
-		int** mDis21 = notin(cromosoma2, cromosoma1, quorum);
+		int** mDis12 = (int**)malloc(2 * sizeof(int*));
+		int** mDis21 = (int**)malloc(2 * sizeof(int*));
 
-		int* disimilar12 = (int*)malloc(quorum * sizeof(int));
-		int* disimilar21 = (int*)malloc(quorum * sizeof(int));
+		mDis12 = notin(cromosoma1, cromosoma2, quorum);
+		mDis21 = notin(cromosoma2, cromosoma1, quorum);
 
-		memcpy(disimilar12, mDis12[0], quorum * sizeof(int));
-		memcpy(disimilar21, mDis21[0], quorum * sizeof(int));
+		int* disimilar12 = (int*)malloc(mDis12[1][0] * sizeof(int));
+		int* disimilar21 = (int*)malloc(mDis21[1][0] * sizeof(int));
+
+		memcpy(disimilar12, mDis12[0], mDis12[1][0] * sizeof(int));
+		memcpy(disimilar21, mDis21[0], mDis21[1][0] * sizeof(int));
 
 		int* arrMin = (int*)malloc(2 * sizeof(int));
 		arrMin[0] = mDis12[1][0];
@@ -463,7 +476,10 @@ void main(int argc, char *argv[])
 
 		int* crossovern = (int*)malloc(sizeof(int));
 
-		sample(crossovern, minimo(arrMin, 2), 1);
+		min = minimo(arrMin, 2);
+		cout << min << endl;
+		sample(crossovern, min, 1);
+		cout << crossovern[0] << endl;
 
 		int* selecCrossover12 = (int*)malloc(crossovern[0] * sizeof(int));
 		int* selecCrossover21 = (int*)malloc(crossovern[0] * sizeof(int));
@@ -484,7 +500,7 @@ void main(int argc, char *argv[])
 
 		int** mCual12 = (int**)malloc(2 * sizeof(int*));
 		int** mCual21 = (int**)malloc(2 * sizeof(int*));
-
+		//revisar which y in_boolean,ademas seeed.
 		mCual12 = which(in_boolean(cromosoma1, crossover12, quorum), quorum);
 		mCual21 = which(in_boolean(cromosoma2, crossover21, quorum), quorum);
 
@@ -505,6 +521,11 @@ void main(int argc, char *argv[])
 
 		sort(cromosoma1, quorum);
 		sort(cromosoma2, quorum);
+
+		free(mDis12);
+		free(mDis21);
+		free(mCual12);
+		free(mCual21);
 
 		pmutacion = uni(mt);
 		if (pmutacion < pmutacion_threshold) {
@@ -549,6 +570,11 @@ void main(int argc, char *argv[])
 				cromosomaNuevo[a] = (int*)malloc(quorum * sizeof(int));
 			}
 			//revisar porque falla
+			/*for (size_t q = 0; q < quorum; q++)
+			{
+				cout << cromosoma1[q] << " ";
+			}
+			cout << endl;*/
 			memcpy(cromosomaNuevo[contCromNuevo], cromosoma1, quorum * sizeof(int));
 			fitnessPobNuevo[contCromNuevo] = eval_sol(cromosoma1, data, quorum);
 			contCromNuevo++;
@@ -562,7 +588,7 @@ void main(int argc, char *argv[])
 			idxpop = 0;
 			while (flag2) {
 				if (suma_bool(in_boolean(cromosoma1, cromosomaNuevo[idxpop], quorum), quorum) == quorum) {
-					int* cualSacar = (int*)malloc(sizeof(int));//linea 294 py
+					int* cualSacar = (int*)malloc(sizeof(int));
 					sample(cualSacar, quorum, 1);
 					int** mNotInCromosoma1 = (int**)malloc(2 * sizeof(int*));
 					mNotInCromosoma1 = notin(crear_arreglo(n), cromosoma1, n);
@@ -726,9 +752,5 @@ void main(int argc, char *argv[])
 		}
 
 	}
-	for (size_t i = 0; i < quorum; i++)
-	{
-		cout << cromosoma[0][i] << " ";
-	}
-	cout << endl << fitnessPob[0];
+	
 }
