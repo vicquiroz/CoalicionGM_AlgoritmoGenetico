@@ -14,7 +14,7 @@ using json = nlohmann::json;
 int m = 40;
 float pmutacion_threshold = 0.2;
 float pr = 0.1;
-unsigned seed = 12345;
+unsigned seed = 84;
 random_device rng;
 //default_random_engine generator(seed);
 mt19937 mt(rng());
@@ -191,14 +191,14 @@ int **notin(int *array1, int *array2, int largo)
 	return ret;
 }
 
-bool *in_boolean(int *array1, int *array2, int largo)
+bool *in_boolean(int *array1, int *array2, int largo1, int largo2)
 {
-	bool *result = (bool *)malloc(sizeof(bool) * largo);
+	bool *result = (bool *)malloc(sizeof(bool) * largo1);
 	int result_len = 0;
 	bool flag = false;
-	for (size_t i = 0; i < largo; i++)
+	for (size_t i = 0; i < largo1; i++)
 	{
-		for (size_t j = 0; j < largo; j++)
+		for (size_t j = 0; j < largo2; j++)
 		{
 			if (array1[i] == array2[j])
 			{
@@ -268,19 +268,19 @@ int **which(bool *array, int largo)
 	int* result = nullptr;
 	int **ret = (int **)malloc(sizeof(int *) * 2);
 	int cont = 0;
-	cout << "arreglo:";
+	//cout << "arreglo:";
 	for (size_t i = 0; i < largo-1; i++)
 	{
-		cout << array[i] << " ";
+		//cout << array[i] << " ";
 		if (array[i])
 			cont++;
 	}
-	cout << endl;
+	//cout << endl;
 	result = (int *)malloc(sizeof(int) * cont);
 	cont = 0;
 	for (size_t i = 0; i < largo; i++)
 	{
-		cout << "a"<<endl;
+		//cout << "a"<<endl;
 		if (array[i])
 		{
 			result[cont] = i;
@@ -291,8 +291,8 @@ int **which(bool *array, int largo)
 	pointerCont[0] = cont;
 	ret[0] = result;
 	ret[1] = pointerCont;
-	free(result);
-	free(pointerCont);
+	//free(result);
+	//free(pointerCont);
 
 	return ret;
 }
@@ -335,7 +335,7 @@ int** repetidos(int* arreglo, int largo)
 			cont = 0;
 		}
 	}
-	cout << newlargo << endl;
+	//cout << newlargo << endl;
 	int* finalarr = (int*)malloc(sizeof(int) * newlargo);
 	for (size_t i = 0; i < newlargo; i++)
 	{
@@ -402,7 +402,7 @@ void main(int argc, char *argv[])
 	}
 
 	int n = data["diputados"].size();
-	cout << "primero --------------------" << endl;
+	 //cout << "primero --------------------" << endl;
 	for (size_t i = 0; i < m; i++)
 	{
 		sample(cromosoma[i],n, quorum);
@@ -446,8 +446,12 @@ void main(int argc, char *argv[])
 
 	int min;
 
+	int** cromosomaNuevo = (int**)malloc(m * sizeof(int*));
+	float* fitnessPobNuevo = (float*)malloc(m * sizeof(float));
+
 	while (k<max_k)
 	{
+		cout << "iteracion: " << it+1 << endl;
 		it++;
 		cual1 = smallest_greater(cump, m, uni(mt));
 		cual2 = smallest_greater(cump, m, uni(mt));
@@ -477,9 +481,7 @@ void main(int argc, char *argv[])
 		int* crossovern = (int*)malloc(sizeof(int));
 
 		min = minimo(arrMin, 2);
-		cout << min << endl;
 		sample(crossovern, min, 1);
-		cout << crossovern[0] << endl;
 
 		int* selecCrossover12 = (int*)malloc(crossovern[0] * sizeof(int));
 		int* selecCrossover21 = (int*)malloc(crossovern[0] * sizeof(int));
@@ -500,16 +502,15 @@ void main(int argc, char *argv[])
 
 		int** mCual12 = (int**)malloc(2 * sizeof(int*));
 		int** mCual21 = (int**)malloc(2 * sizeof(int*));
-		//revisar which y in_boolean,ademas seeed.
-		mCual12 = which(in_boolean(cromosoma1, crossover12, quorum), quorum);
-		mCual21 = which(in_boolean(cromosoma2, crossover21, quorum), quorum);
-
+		//revisar which y in_boolean.
+		mCual12 = which(in_boolean(cromosoma1, crossover12, quorum, crossovern[0]), quorum);
+		mCual21 = which(in_boolean(cromosoma2, crossover21, quorum, crossovern[0]), quorum);
+		
 		int* cual12 = (int*)malloc(mCual12[1][0] * sizeof(int));
 		int* cual21 = (int*)malloc(mCual21[1][0] * sizeof(int));
 
 		cual12 = mCual12[0];
 		cual21 = mCual21[0];
-
 		for (size_t a = 0; a < mCual12[1][0]; a++)
 		{
 			cromosoma1[cual12[a]] = crossover21[a];
@@ -562,24 +563,20 @@ void main(int argc, char *argv[])
 			free(notInCromosoma2);
 			free(cualIntroducir);
 		}
-		int** cromosomaNuevo = (int**)malloc(m * sizeof(int*));
-		float* fitnessPobNuevo = (float*)malloc(m * sizeof(float));
+
 		if (i == 0) {
+			
 			for (size_t a = 0; a < m; a++)
 			{
 				cromosomaNuevo[a] = (int*)malloc(quorum * sizeof(int));
 			}
-			//revisar porque falla
-			/*for (size_t q = 0; q < quorum; q++)
-			{
-				cout << cromosoma1[q] << " ";
-			}
-			cout << endl;*/
+
 			memcpy(cromosomaNuevo[contCromNuevo], cromosoma1, quorum * sizeof(int));
+			//cromosomaNuevo[contCromNuevo] = cromosoma1;
 			fitnessPobNuevo[contCromNuevo] = eval_sol(cromosoma1, data, quorum);
 			contCromNuevo++;
-			cout << "tercero --------------------" << endl;
 			memcpy(cromosomaNuevo[contCromNuevo], cromosoma2, quorum * sizeof(int));
+			//cromosomaNuevo[contCromNuevo] = cromosoma2;
 			fitnessPobNuevo[contCromNuevo] = eval_sol(cromosoma2, data, quorum);
 			contCromNuevo++;
 		}
@@ -587,7 +584,7 @@ void main(int argc, char *argv[])
 			flag2 = true;
 			idxpop = 0;
 			while (flag2) {
-				if (suma_bool(in_boolean(cromosoma1, cromosomaNuevo[idxpop], quorum), quorum) == quorum) {
+				if (suma_bool(in_boolean(cromosoma1, cromosomaNuevo[idxpop], quorum,quorum), quorum) == quorum) {
 					int* cualSacar = (int*)malloc(sizeof(int));
 					sample(cualSacar, quorum, 1);
 					int** mNotInCromosoma1 = (int**)malloc(2 * sizeof(int*));
@@ -620,7 +617,7 @@ void main(int argc, char *argv[])
 			flag2 = true;
 			idxpop = 0;
 			while (flag2) {
-				if (suma_bool(in_boolean(cromosoma2, cromosomaNuevo[idxpop], quorum), quorum) == quorum) {
+				if (suma_bool(in_boolean(cromosoma2, cromosomaNuevo[idxpop], quorum,quorum), quorum) == quorum) {
 					int* cualSacar = (int*)malloc(sizeof(int));
 					sample(cualSacar, quorum, 1);
 					int** mNotInCromosoma2 = (int**)malloc(2 * sizeof(int*));
@@ -670,7 +667,7 @@ void main(int argc, char *argv[])
 
 			while (flag2)
 			{
-				if (suma_bool(in_boolean(cromosoma[0], cromosomaNuevo[idxpop], quorum), quorum) == quorum)
+				if (suma_bool(in_boolean(cromosoma[0], cromosomaNuevo[idxpop], quorum,quorum), quorum) == quorum)
 				{
 					flag2 = false;
 					flag3 = true;
@@ -721,12 +718,12 @@ void main(int argc, char *argv[])
 				p[a] = pNuevo[a];
 				cump[a] = cumpNuevo[a];
 			}
-
+			//XD
 			free(cromosomaNuevo);
 			free(fitnessPobNuevo);
 			free(pNuevo);
 			free(cumpNuevo);
-
+			
 
 			int* cromosomaCambio = (int*)malloc(quorum * sizeof(int));
 			for (size_t j = round(m/2); j < m; j++)
