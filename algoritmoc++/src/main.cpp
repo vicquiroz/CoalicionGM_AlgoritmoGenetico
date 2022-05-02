@@ -17,7 +17,10 @@ float pr = 0.1;
 unsigned seed = 84;
 random_device rng;
 //default_random_engine generator(seed);
-mt19937 mt(rng());
+mt19937 mt{ rng() };
+
+uniform_int_distribution<int> uni;
+uniform_real_distribution<double> uni2;
 
 float dis_euc(float x1, float y1, float x2, float y2)
 {
@@ -28,11 +31,29 @@ float dis_euc(float x1, float y1, float x2, float y2)
 float eval_sol(int* pos, json data,int largo) {
 	float suma = 0;
 	//cout << largo << endl << endl;
-	for (size_t i = 0; i < (largo - 1); i++)
+	for (size_t i = 0; i <= (largo - 2); i++)
 	{
+		
 		//cout << i << endl;
-		for (size_t j = i + 1; j < largo; j++)
+		for (size_t j = i + 1; j <= largo-1; j++)
 		{
+			suma = suma + dis_euc(data["diputados"][pos[i]]["coordX"], data["diputados"][pos[i]]["coordY"], data["diputados"][pos[j]]["coordX"], data["diputados"][pos[j]]["coordY"]);
+		}
+	}
+	return suma;
+}
+
+float eval_sol2(int* pos, json data, int largo) {
+	float suma = 0;
+	//cout << largo << endl << endl;
+	for (size_t i = 0; i <= (largo - 2); i++)
+	{
+		if (i == 72) {
+			cout << i << endl;
+		}
+		for (size_t j = i + 1; j <= largo-1; j++)
+		{	
+			//cout << "i: " << i << "j: " << j << endl;
 			suma = suma + dis_euc(data["diputados"][pos[i]]["coordX"], data["diputados"][pos[i]]["coordY"], data["diputados"][pos[j]]["coordX"], data["diputados"][pos[j]]["coordY"]);
 		}
 	}
@@ -88,11 +109,12 @@ void sample(int *arreglo, int limite, int largo)
 	int i = 0;
 	bool repetido = false;
 	int valor = 0;
+	uni = uniform_int_distribution<int> (0, limite - 1);
 	while (i < largo)
 	{
+		//cout << uni(mt)<<endl;
 		//valor = rand() % limite;
-		uniform_int_distribution<int> uni(0, limite-1);
-		int valor = uni(mt);
+		valor = uni(mt);
 		for (size_t j = 0; j < i; j++)
 		{
 			if (valor == arreglo[j])
@@ -356,9 +378,10 @@ void sample_arreglo(int* arreglo, int cant, int* valores, int largo)
 	int valor = 0;
 	int i = 0;
 	bool repetido = false;
+	uni = uniform_int_distribution<int> (0, largo - 1);
 	while (i < cant)
 	{
-		uniform_int_distribution<int> uni(0, largo - 1);
+		cout << uni(mt) << endl;
 		indice = uni(mt);
 		valor = valores[indice];
 		for (size_t j = 0; j < i; j++)
@@ -378,7 +401,6 @@ void sample_arreglo(int* arreglo, int cant, int* valores, int largo)
 
 void main(int argc, char *argv[])
 {
-	uniform_real_distribution<float> uni(0, 1);
 	ifstream archivo("ejemplo2.json");
 	json data = json::parse(archivo);
 
@@ -390,8 +412,9 @@ void main(int argc, char *argv[])
 		pr = stod(argv[2]);
 		seed = stoi(argv[3]);
 	}
-
 	mt.seed(seed);
+	
+	uni2 = uniform_real_distribution<double>(0, 1);
 
 	int **cromosoma = (int **)malloc(m * sizeof(int *));
 	float* fitnessPob = (float*)malloc(m * sizeof(float));
@@ -452,10 +475,12 @@ void main(int argc, char *argv[])
 	while (k<max_k)
 	{
 		cout << "iteracion: " << it+1 << endl;
+		//cout << uni(mt) << endl;
 		it++;
-		cual1 = smallest_greater(cump, m, uni(mt));
-		cual2 = smallest_greater(cump, m, uni(mt));
-		while (cual1 == cual2)cual2 = smallest_greater(cump, m, uni(mt));
+		//cout << mt << endl;
+		cual1 = smallest_greater(cump, m, (float)uni2(mt));
+		cual2 = smallest_greater(cump, m, (float)uni2(mt));
+		while (cual1 == cual2)cual2 = smallest_greater(cump, m, (float)uni2(mt));
 
 		int* cromosoma1=(int*)malloc(quorum*sizeof(int));
 		int* cromosoma2 = (int*)malloc(quorum * sizeof(int));
@@ -528,7 +553,7 @@ void main(int argc, char *argv[])
 		free(mCual12);
 		free(mCual21);
 
-		pmutacion = uni(mt);
+		pmutacion = (float)uni2(mt);
 		if (pmutacion < pmutacion_threshold) {
 			int* cualSacar = (int*)malloc(sizeof(int));
 			sample(cualSacar, quorum,1);
@@ -546,7 +571,7 @@ void main(int argc, char *argv[])
 			free(cualIntroducir);
 		}
 
-		pmutacion = uni(mt);
+		pmutacion = (float)uni2(mt);
 		if (pmutacion < pmutacion_threshold) {
 			int* cualSacar = (int*)malloc(sizeof(int));
 			sample(cualSacar, quorum, 1);
@@ -576,6 +601,7 @@ void main(int argc, char *argv[])
 			fitnessPobNuevo[contCromNuevo] = eval_sol(cromosoma1, data, quorum);
 			contCromNuevo++;
 			memcpy(cromosomaNuevo[contCromNuevo], cromosoma2, quorum * sizeof(int));
+			
 			//cromosomaNuevo[contCromNuevo] = cromosoma2;
 			fitnessPobNuevo[contCromNuevo] = eval_sol(cromosoma2, data, quorum);
 			contCromNuevo++;
@@ -719,10 +745,10 @@ void main(int argc, char *argv[])
 				cump[a] = cumpNuevo[a];
 			}
 			//XD
-			free(cromosomaNuevo);
+			/*free(cromosomaNuevo);
 			free(fitnessPobNuevo);
 			free(pNuevo);
-			free(cumpNuevo);
+			free(cumpNuevo);*/
 			
 
 			int* cromosomaCambio = (int*)malloc(quorum * sizeof(int));
