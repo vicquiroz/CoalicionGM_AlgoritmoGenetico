@@ -1,13 +1,13 @@
 #include <iostream>
 #include <cstdlib>
 #include <fstream>
-//#include <random>
+#include <random>
 #include <math.h>
 #include <string>
 #include <stdio.h>
 #include <stdlib.h>
 #include <nlohmann/json.hpp>
-
+#include <chrono>
 // srand() para usar la semilla
 using namespace std;
 using json = nlohmann::json;
@@ -15,14 +15,14 @@ using json = nlohmann::json;
 int m = 40;
 float pmutacion_threshold = 0.2;
 float pr = 0.1;
-int seed = 84;
+int seed = time(NULL);
 
-//random_device rng;
-//default_random_engine generator(seed);
-//mt19937 mt{ rng() };
+random_device rng;
+default_random_engine generator(seed);
+mt19937 mt{ rng() };
 
-//uniform_int_distribution<int> uni;
-//uniform_real_distribution<double> uni2;
+uniform_int_distribution<int> uni;
+uniform_real_distribution<double> uni2;
 
 float dis_euc(float x1, float y1, float x2, float y2)
 {
@@ -30,16 +30,16 @@ float dis_euc(float x1, float y1, float x2, float y2)
 	return calculo;
 }
 
-float eval_sol(int* pos, json data,int largo) {
+float eval_sol(int* pos,float** mat,int largo) {
 	float suma = 0;
 	//cout << largo << endl << endl;
 	for (size_t i = 0; i <= (largo - 2); i++)
 	{
 		
 		//cout << i << endl;
-		for (size_t j = i + 1; j <= largo-1; j++)
+		for (size_t j = i + 1; j <= (largo-1); j++)
 		{
-			suma = suma + dis_euc(data["diputados"][pos[i]]["coordX"], data["diputados"][pos[i]]["coordY"], data["diputados"][pos[j]]["coordX"], data["diputados"][pos[j]]["coordY"]);
+			suma = suma + mat[pos[i]][pos[j]];
 		}
 	}
 	return suma;
@@ -50,9 +50,6 @@ float eval_sol2(int* pos, json data, int largo) {
 	//cout << largo << endl << endl;
 	for (size_t i = 0; i <= (largo - 2); i++)
 	{
-		if (i == 72) {
-			cout << i << endl;
-		}
 		for (size_t j = i + 1; j <= largo-1; j++)
 		{	
 			//cout << "i: " << i << "j: " << j << endl;
@@ -111,19 +108,19 @@ void sample(int *arreglo, int limite, int largo)
 	int i = 0;
 	bool repetido = false;
 	int valor = 0;
-	//uni = uniform_int_distribution<int> (0, limite - 1);
+	uni = uniform_int_distribution<int> (0, limite - 1);
 	while (i < largo)
 	{
 		//cout << uni(mt)<<endl;
 		//valor = rand() % limite;
-		//valor = uni(mt);
-		if (limite - 1 == 0) {
+		valor = uni(mt);
+		/*if (limite - 1 == 0) {
 			valor = 0;
 		}
 		else {
 			valor = rand() % (limite - 1);
 		}
-
+		*/
 		for (size_t j = 0; j < i; j++)
 		{
 			if (valor == arreglo[j])
@@ -393,13 +390,13 @@ void sample_arreglo(int* arreglo, int cant, int* valores, int largo)
 	int valor = 0;
 	int i = 0;
 	bool repetido = false;
-	//uni = uniform_int_distribution<int> (0, largo - 1);
+	uni = uniform_int_distribution<int> (0, largo - 1);
 	while (i < cant)
 	{
 		//cout << uni(mt) << endl;
-		//indice = uni(mt);
+		indice = uni(mt);
 		//cout << largo << endl;
-		indice = rand() % (largo - 1);
+		//indice = rand() % (largo - 1);
 		valor = valores[indice];
 		for (size_t j = 0; j < i; j++)
 		{
@@ -420,7 +417,26 @@ void main(int argc, char *argv[])
 {
 	ifstream archivo("ejemplo2.json");
 	json data = json::parse(archivo);
-	srand(seed);
+	int n = data["diputados"].size();
+
+	float** matDis = (float**)malloc(n * sizeof(float*));
+	for (size_t i = 0; i < n; i++)
+	{
+		matDis[i] = (float*)malloc(n * sizeof(float));
+	}
+
+
+	for (size_t i = 0; i <= (n - 2); i++)
+	{
+
+		//cout << i << endl;
+		for (size_t j = i + 1; j <= (n - 1); j++)
+		{
+			matDis[i][j] = dis_euc(data["diputados"][i]["coordX"], data["diputados"][i]["coordY"], data["diputados"][j]["coordX"], data["diputados"][j]["coordY"]);
+		}
+	}
+	auto tInicial = chrono::high_resolution_clock::now();
+	//srand(seed);
 	int quorum = 74;
 	if (argc > 1)
 	{
@@ -429,9 +445,9 @@ void main(int argc, char *argv[])
 		pr = stod(argv[2]);
 		seed = stoi(argv[3]);
 	}
-	//mt.seed(seed);
+	mt.seed(seed);
 	
-	//uni2 = uniform_real_distribution<double>(0, 1);
+	uni2 = uniform_real_distribution<double>(0, 1);
 
 	int **cromosoma = (int **)malloc(m * sizeof(int *));
 	float* fitnessPob = (float*)malloc(m * sizeof(float));
@@ -441,13 +457,13 @@ void main(int argc, char *argv[])
 		cromosoma[i] = (int *)malloc(quorum * sizeof(int));
 	}
 
-	int n = data["diputados"].size();
 	 //cout << "primero --------------------" << endl;
+
 	for (size_t i = 0; i < m; i++)
 	{
 		sample(cromosoma[i],n, quorum);
 		sort(cromosoma[i], quorum);
-		fitnessPob[i] = eval_sol(cromosoma[i],data,quorum);
+		fitnessPob[i] = eval_sol(cromosoma[i],matDis,quorum);
 	}
 	
 	order(fitnessPob, cromosoma, quorum, m);
@@ -488,7 +504,6 @@ void main(int argc, char *argv[])
 
 	int** cromosomaNuevo = (int**)malloc(m * sizeof(int*));
 	float* fitnessPobNuevo = (float*)malloc(m * sizeof(float));
-
 	while (k<max_k)
 	{
 
@@ -496,12 +511,12 @@ void main(int argc, char *argv[])
 		//cout << rand() / static_cast<float>(RAND_MAX) << endl;
 		it++;
 		//cout << mt << endl;
-		//cual1 = smallest_greater(cump, m, (float)uni2(mt));
-		//cual2 = smallest_greater(cump, m, (float)uni2(mt));
-		cual1 = smallest_greater(cump, m, rand() / static_cast<float>(RAND_MAX));
-		cual2 = smallest_greater(cump, m, rand() / static_cast<float>(RAND_MAX));
-		//while (cual1 == cual2)cual2 = smallest_greater(cump, m, (float)uni2(mt));
-		while (cual1 == cual2)cual2 = smallest_greater(cump, m, rand() / static_cast<float>(RAND_MAX));
+		cual1 = smallest_greater(cump, m, (float)uni2(mt));
+		cual2 = smallest_greater(cump, m, (float)uni2(mt));
+		//cual1 = smallest_greater(cump, m, rand() / static_cast<float>(RAND_MAX));
+		//cual2 = smallest_greater(cump, m, rand() / static_cast<float>(RAND_MAX));
+		while (cual1 == cual2)cual2 = smallest_greater(cump, m, (float)uni2(mt));
+		//while (cual1 == cual2)cual2 = smallest_greater(cump, m, rand() / static_cast<float>(RAND_MAX));
 
 		int* cromosoma1=(int*)malloc(quorum*sizeof(int));
 		int* cromosoma2 = (int*)malloc(quorum * sizeof(int));
@@ -574,8 +589,8 @@ void main(int argc, char *argv[])
 		free(mCual12);
 		free(mCual21);
 		
-		//pmutacion = (float)uni2(mt);
-		pmutacion = rand() / static_cast<float>(RAND_MAX);
+		pmutacion = (float)uni2(mt);
+		//pmutacion = rand() / static_cast<float>(RAND_MAX);
 		if (pmutacion < pmutacion_threshold) {
 			int* cualSacar = (int*)malloc(sizeof(int));
 			sample(cualSacar, quorum,1);
@@ -596,8 +611,8 @@ void main(int argc, char *argv[])
 			
 		}
 
-		//pmutacion = (float)uni2(mt);
-		pmutacion = rand() / static_cast<float>(RAND_MAX);
+		pmutacion = (float)uni2(mt);
+		//pmutacion = rand() / static_cast<float>(RAND_MAX);
 		if (pmutacion < pmutacion_threshold) {
 			int* cualSacar = (int*)malloc(sizeof(int));
 			sample(cualSacar, quorum, 1);
@@ -626,12 +641,12 @@ void main(int argc, char *argv[])
 
 			memcpy(cromosomaNuevo[contCromNuevo], cromosoma1, quorum * sizeof(int));
 			//cromosomaNuevo[contCromNuevo] = cromosoma1;
-			fitnessPobNuevo[contCromNuevo] = eval_sol(cromosoma1, data, quorum);
+			fitnessPobNuevo[contCromNuevo] = eval_sol(cromosoma1, matDis, quorum);
 			contCromNuevo++;
 			memcpy(cromosomaNuevo[contCromNuevo], cromosoma2, quorum * sizeof(int));
 			
 			//cromosomaNuevo[contCromNuevo] = cromosoma2;
-			fitnessPobNuevo[contCromNuevo] = eval_sol(cromosoma2, data, quorum);
+			fitnessPobNuevo[contCromNuevo] = eval_sol(cromosoma2, matDis, quorum);
 			contCromNuevo++;
 		}
 		else {
@@ -720,10 +735,10 @@ void main(int argc, char *argv[])
 				}
 			}
 			memcpy(cromosomaNuevo[contCromNuevo], cromosoma1, quorum * sizeof(int));
-			fitnessPobNuevo[contCromNuevo] = eval_sol(cromosoma1, data, quorum);
+			fitnessPobNuevo[contCromNuevo] = eval_sol(cromosoma1, matDis, quorum);
 			contCromNuevo++;
 			memcpy(cromosomaNuevo[contCromNuevo], cromosoma2, quorum * sizeof(int));
-			fitnessPobNuevo[contCromNuevo] = eval_sol(cromosoma2, data, quorum);
+			fitnessPobNuevo[contCromNuevo] = eval_sol(cromosoma2, matDis, quorum);
 			contCromNuevo++;
 
 		}
@@ -813,7 +828,7 @@ void main(int argc, char *argv[])
 			{
 				sample(cromosomaCambio, n, quorum);
 				sort(cromosomaCambio, quorum);
-				fitnessCambio = eval_sol(cromosomaCambio, data, quorum);
+				fitnessCambio = eval_sol(cromosomaCambio, matDis, quorum);
 				memcpy(cromosoma[j], cromosomaCambio, quorum * sizeof(int));
 				fitnessPob[j] = fitnessCambio;
 			}
@@ -832,5 +847,13 @@ void main(int argc, char *argv[])
 		}
 
 	}
-	cout << fitnessPob[0]<<"it: " << it;
+	auto tFinal = chrono::high_resolution_clock::now();
+	double tTomado = chrono::duration_cast<chrono::nanoseconds>(tFinal-tInicial).count();
+	tTomado *= 1e-9;
+	cout << fitnessPob[0] << "it: " << it << endl;
+	cout << "T=" << fixed<<tTomado<<setprecision(9) << endl;
+	for (size_t j = 0; j < quorum; j++)
+	{
+		cout << cromosoma[0][j] << " ";
+	}
 }
