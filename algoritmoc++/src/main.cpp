@@ -12,10 +12,10 @@
 using namespace std;
 using json = nlohmann::json;
 
-int m = 50;
+int m = 40;
 float pmutacion_threshold = 0.2;
 float pr = 0.1;
-int seed = time(NULL);
+int seed = 12345;
 
 random_device rng;
 default_random_engine generator(seed);
@@ -36,7 +36,6 @@ float eval_sol(int* pos,float** mat,int largo) {
 	for (size_t i = 0; i <= (largo - 2); i++)
 	{
 		
-		//cout << i << endl;
 		for (size_t j = i + 1; j <= (largo-1); j++)
 		{
 			suma = suma + mat[pos[i]][pos[j]];
@@ -44,20 +43,18 @@ float eval_sol(int* pos,float** mat,int largo) {
 	}
 	return suma;
 }
-
+/*
 float eval_sol2(int* pos, json data, int largo) {
 	float suma = 0;
-	//cout << largo << endl << endl;
 	for (size_t i = 0; i <= (largo - 2); i++)
 	{
 		for (size_t j = i + 1; j <= largo-1; j++)
 		{	
-			//cout << "i: " << i << "j: " << j << endl;
 			suma = suma + dis_euc(data["diputados"][pos[i]]["coordX"], data["diputados"][pos[i]]["coordY"], data["diputados"][pos[j]]["coordX"], data["diputados"][pos[j]]["coordY"]);
 		}
 	}
 	return suma;
-}
+}*/
 
 float suma(float *array, int largo)
 {
@@ -111,16 +108,7 @@ void sample(int *arreglo, int limite, int largo)
 	uni = uniform_int_distribution<int> (0, limite - 1);
 	while (i < largo)
 	{
-		//cout << uni(mt)<<endl;
-		//valor = rand() % limite;
 		valor = uni(mt);
-		/*if (limite - 1 == 0) {
-			valor = 0;
-		}
-		else {
-			valor = rand() % (limite - 1);
-		}
-		*/
 		for (size_t j = 0; j < i; j++)
 		{
 			if (valor == arreglo[j])
@@ -193,8 +181,6 @@ int **notin(int *array1, int *array2, int largo1,int largo2)
 	{
 		for (int j = 0; j < largo2; j++)
 		{
-			/*cout << "Arreglo 1=" << array1[i] << endl;
-			cout << "Arreglo 2=" << array2[j] << endl;*/
 			if (array1[i] == array2[j])
 			{
 				flag = true;
@@ -207,13 +193,11 @@ int **notin(int *array1, int *array2, int largo1,int largo2)
 		}
 		flag = false;
 	}
-	//cout << cont << endl;
 	int *result = (int *)malloc(sizeof(int) * cont);
 	for (size_t i = 0; i < cont; i++)
 	{
 		result[i] = temp[i];
 	}
-	//delete[] temp; // revisar si esta bien
 	int **ret = (int **)malloc(sizeof(int *) * 2);
 	int *pointCont = (int *)malloc(sizeof(int) * 1);
 	pointCont[0] = cont;
@@ -276,7 +260,6 @@ int maximo(int *array, int largo)
 int which_max(float *array, int largo)
 {
 	int maxi = array[0];
-	//cout << largo << endl;
 	for (size_t i = 0; i < largo - 1; i++)
 	{
 		if (array[i] > array[i + 1])
@@ -290,11 +273,9 @@ int which_max(float *array, int largo)
 	}
 	for (int i = 0; i < largo; i++)
 	{
-		//cout << i << " ";
 		if (array[i] == maxi)
 			return i;
 	}
-	//cout << endl;
 }
 
 int **which(bool *array, int largo)
@@ -302,19 +283,15 @@ int **which(bool *array, int largo)
 	int* result = nullptr;
 	int **ret = (int **)malloc(sizeof(int *) * 2);
 	int cont = 0;
-	//cout << "arreglo:";
 	for (size_t i = 0; i < largo-1; i++)
 	{
-		//cout << array[i] << " ";
 		if (array[i])
 			cont++;
 	}
-	//cout << endl;
 	result = (int *)malloc(sizeof(int) * cont);
 	cont = 0;
 	for (size_t i = 0; i < largo; i++)
 	{
-		//cout << "a"<<endl;
 		if (array[i])
 		{
 			result[cont] = i;
@@ -369,7 +346,6 @@ int** repetidos(int* arreglo, int largo)
 			cont = 0;
 		}
 	}
-	//cout << newlargo << endl;
 	int* finalarr = (int*)malloc(sizeof(int) * newlargo);
 	for (size_t i = 0; i < newlargo; i++)
 	{
@@ -393,10 +369,7 @@ void sample_arreglo(int* arreglo, int cant, int* valores, int largo)
 	uni = uniform_int_distribution<int> (0, largo - 1);
 	while (i < cant)
 	{
-		//cout << uni(mt) << endl;
 		indice = uni(mt);
-		//cout << largo << endl;
-		//indice = rand() % (largo - 1);
 		valor = valores[indice];
 		for (size_t j = 0; j < i; j++)
 		{
@@ -415,11 +388,24 @@ void sample_arreglo(int* arreglo, int cant, int* valores, int largo)
 
 void main(int argc, char *argv[])
 {
-	//ifstream archivo("ejemplo2.json");
-	//json data = json::parse(archivo);
-	ifstream archivo("ingles.json");
+	//para camara de diputados chile
+	ifstream archivo("ejemplo2.json");
 	json data = json::parse(archivo);
-	int n = data["rollcalls"][0]["votes"].size();
+
+	//para parlamento de estados unidos
+	//ifstream archivo("ingles.json");
+	//json data = json::parse(archivo);
+
+	ofstream resultados;
+	resultados.open("datos.json");
+	//resultados << "{\"hola\": 123}\n";
+	//resultados.close();
+
+	//para parlamento de estados unidos
+	//int n = data["rollcalls"][0]["votes"].size();
+	
+	//para camara de diputados chile
+	int n = data["diputados"].size();
 
 	float** matDis = (float**)malloc(n * sizeof(float*));
 	for (size_t i = 0; i < n; i++)
@@ -427,8 +413,8 @@ void main(int argc, char *argv[])
 		matDis[i] = (float*)malloc(n * sizeof(float));
 	}
 
-
-	for (size_t i = 0; i <= (n - 2); i++)
+	//para parlamento de estados unidos
+	/*for (size_t i = 0; i <= (n - 2); i++)
 	{
 
 		//cout << i << endl;
@@ -436,10 +422,21 @@ void main(int argc, char *argv[])
 		{
 			matDis[i][j] = dis_euc(data["rollcalls"][0]["votes"][i]["x"], data["rollcalls"][0]["votes"][i]["y"], data["rollcalls"][0]["votes"][j]["x"], data["rollcalls"][0]["votes"][j]["y"]);
 		}
+	}*/
+	//para camara de diputados chile
+	for (size_t i = 0; i <= (n - 2); i++)
+	{
+
+		//cout << i << endl;
+		for (size_t j = i + 1; j <= (n - 1); j++)
+		{
+			matDis[i][j] = dis_euc(data["diputados"][i]["coordX"], data["diputados"][i]["coordY"], data["diputados"][j]["coordX"], data["diputados"][j]["coordY"]);
+		}
 	}
 	auto tInicial = chrono::high_resolution_clock::now();
 	//srand(seed);
-	int quorum = trunc(n/2)+1;
+	//int quorum = trunc(n/2)+1;
+	int quorum = 74;
 	if (argc > 1)
 	{
 		m = stoi(argv[0]);
@@ -858,4 +855,19 @@ void main(int argc, char *argv[])
 	{
 		cout << cromosoma[0][j] << " ";
 	}
+	resultados << "{\n\"m\": "<<m<<",\n";
+	resultados << "\"pmutacion_threshold\": " << pmutacion_threshold << ",\n";
+	resultados << "\"pr\": " << pr << ",\n";
+	resultados << "\"seed\": " << seed << ",\n";
+	resultados << "\"numero de iteraciones\": " << it << ",\n";
+	resultados << "\"fitness\": " << fitnessPob[0] << ",\n";
+	resultados << "\"tiempo\": " << fixed << tTomado << setprecision(9) << ",\n";
+	resultados << "\"coalicion\": [";
+	for (size_t j = 0; j < quorum; j++)
+	{
+		if(j<quorum-1)resultados << cromosoma[0][j] <<",";
+		else resultados << cromosoma[0][j];
+	}
+	resultados << "]\n"<<"}";
+	resultados.close();
 }
