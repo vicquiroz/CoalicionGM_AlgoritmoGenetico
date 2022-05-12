@@ -15,9 +15,12 @@ file(GLOB all_SRCS
 )
 
 # Agregue un origen al ejecutable de este proyecto.
-add_executable (algoritmoc++ ${all_SRCS} ejemplo2.json)
+add_executable (algoritmoc++ ${all_SRCS} ejemplo2.json ingles.json)
 set_target_properties(algoritmoc++ PROPERTIES LINKER_LANGUAGE CXX)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/data/ejemplo2.json
+	${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
+
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/data/ingles.json
 	${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
 # TODO: Agregue pruebas y destinos de instalación si es necesario.
 

@@ -12,7 +12,7 @@
 using namespace std;
 using json = nlohmann::json;
 
-int m = 40;
+int m = 50;
 float pmutacion_threshold = 0.2;
 float pr = 0.1;
 int seed = time(NULL);
@@ -415,9 +415,11 @@ void sample_arreglo(int* arreglo, int cant, int* valores, int largo)
 
 void main(int argc, char *argv[])
 {
-	ifstream archivo("ejemplo2.json");
+	//ifstream archivo("ejemplo2.json");
+	//json data = json::parse(archivo);
+	ifstream archivo("ingles.json");
 	json data = json::parse(archivo);
-	int n = data["diputados"].size();
+	int n = data["rollcalls"][0]["votes"].size();
 
 	float** matDis = (float**)malloc(n * sizeof(float*));
 	for (size_t i = 0; i < n; i++)
@@ -432,12 +434,12 @@ void main(int argc, char *argv[])
 		//cout << i << endl;
 		for (size_t j = i + 1; j <= (n - 1); j++)
 		{
-			matDis[i][j] = dis_euc(data["diputados"][i]["coordX"], data["diputados"][i]["coordY"], data["diputados"][j]["coordX"], data["diputados"][j]["coordY"]);
+			matDis[i][j] = dis_euc(data["rollcalls"][0]["votes"][i]["x"], data["rollcalls"][0]["votes"][i]["y"], data["rollcalls"][0]["votes"][j]["x"], data["rollcalls"][0]["votes"][j]["y"]);
 		}
 	}
 	auto tInicial = chrono::high_resolution_clock::now();
 	//srand(seed);
-	int quorum = 74;
+	int quorum = trunc(n/2)+1;
 	if (argc > 1)
 	{
 		m = stoi(argv[0]);
