@@ -421,5 +421,5 @@ FodyWeavers.xsd
 
 #CMake
 build/
-
+_deps/
 save/
