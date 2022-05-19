@@ -3,7 +3,7 @@
 #
 cmake_minimum_required (VERSION 3.8)
 
-project ("algoritmoc++")
+project ("algortimoc++")
 
 include_directories(
 	${PROJECT_SOURCE_DIR}/include
@@ -15,8 +15,8 @@ file(GLOB all_SRCS
 )
 
 # Agregue un origen al ejecutable de este proyecto.
-add_executable (algoritmoc++ ${all_SRCS} ejemplo2.json ingles.json)
-set_target_properties(algoritmoc++ PROPERTIES LINKER_LANGUAGE CXX)
+add_executable (algortimoc++ ${all_SRCS} ejemplo2.json ingles.json)
+set_target_properties(algortimoc++ PROPERTIES LINKER_LANGUAGE CXX)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/data/ejemplo2.json
 	${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
 
@@ -29,4 +29,4 @@ include(FetchContent)
 FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.10.5/json.tar.xz)
 FetchContent_MakeAvailable(json)
 
-target_link_libraries(algoritmoc++ PRIVATE nlohmann_json::nlohmann_json)
+target_link_libraries(algortimoc++ PRIVATE nlohmann_json::nlohmann_json)

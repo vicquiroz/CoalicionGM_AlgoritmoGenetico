@@ -12,7 +12,7 @@
 using namespace std;
 using json = nlohmann::json;
 
-int m = 40;
+int m = 50;
 float pmutacion_threshold = 0.2;
 float pr = 0.1;
 int seed = 12345;
@@ -169,7 +169,7 @@ void order(float* fitness, int**cromosoma, int quorum, int m)
 			break;
 		
 	}
-	//free(arrTemp);
+	free(arrTemp);
 }
 
 int **notin(int *array1, int *array2, int largo1,int largo2)
@@ -389,23 +389,29 @@ void sample_arreglo(int* arreglo, int cant, int* valores, int largo)
 void main(int argc, char *argv[])
 {
 	//para camara de diputados chile
-	ifstream archivo("ejemplo2.json");
-	json data = json::parse(archivo);
-
-	//para parlamento de estados unidos
-	//ifstream archivo("ingles.json");
+	//ifstream archivo("ejemplo2.json");
 	//json data = json::parse(archivo);
 
+	//para parlamento de estados unidos
+	ifstream archivo("ingles.json");
+	json data = json::parse(archivo);
+
 	ofstream resultados;
-	resultados.open("datos.json");
+	resultados.open("resultados.json");
+
+	ofstream histo;
+	histo.open("hist.json");
+	string itera ="[";
+	string fitnessEvol ="[";
+	string ks = "[";
 	//resultados << "{\"hola\": 123}\n";
 	//resultados.close();
 
 	//para parlamento de estados unidos
-	//int n = data["rollcalls"][0]["votes"].size();
+	int n = data["rollcalls"][0]["votes"].size();
 	
 	//para camara de diputados chile
-	int n = data["diputados"].size();
+	//int n = data["diputados"].size();
 
 	float** matDis = (float**)malloc(n * sizeof(float*));
 	for (size_t i = 0; i < n; i++)
@@ -414,7 +420,7 @@ void main(int argc, char *argv[])
 	}
 
 	//para parlamento de estados unidos
-	/*for (size_t i = 0; i <= (n - 2); i++)
+	for (size_t i = 0; i <= (n - 2); i++)
 	{
 
 		//cout << i << endl;
@@ -422,9 +428,9 @@ void main(int argc, char *argv[])
 		{
 			matDis[i][j] = dis_euc(data["rollcalls"][0]["votes"][i]["x"], data["rollcalls"][0]["votes"][i]["y"], data["rollcalls"][0]["votes"][j]["x"], data["rollcalls"][0]["votes"][j]["y"]);
 		}
-	}*/
+	}
 	//para camara de diputados chile
-	for (size_t i = 0; i <= (n - 2); i++)
+	/*for (size_t i = 0; i <= (n - 2); i++)
 	{
 
 		//cout << i << endl;
@@ -432,17 +438,17 @@ void main(int argc, char *argv[])
 		{
 			matDis[i][j] = dis_euc(data["diputados"][i]["coordX"], data["diputados"][i]["coordY"], data["diputados"][j]["coordX"], data["diputados"][j]["coordY"]);
 		}
-	}
+	}*/
 	auto tInicial = chrono::high_resolution_clock::now();
 	//srand(seed);
-	//int quorum = trunc(n/2)+1;
-	int quorum = 74;
+	int quorum = trunc(n/2)+1;
+	//int quorum = 74;
 	if (argc > 1)
 	{
-		m = stoi(argv[0]);
-		pmutacion_threshold = stod(argv[1]);
-		pr = stod(argv[2]);
-		seed = stoi(argv[3]);
+		m = stoi(argv[1]);
+		pmutacion_threshold = stod(argv[2]);
+		pr = stod(argv[3]);
+		seed = stoi(argv[4]);
 	}
 	mt.seed(seed);
 	
@@ -503,12 +509,15 @@ void main(int argc, char *argv[])
 
 	int** cromosomaNuevo = (int**)malloc(m * sizeof(int*));
 	float* fitnessPobNuevo = (float*)malloc(m * sizeof(float));
+
+	int fitnessAnt;
 	while (k<max_k)
 	{
 
 		//cout << "iteracion: " << it+1 << endl;
 		//cout << rand() / static_cast<float>(RAND_MAX) << endl;
 		it++;
+		fitnessAnt = fitnessPob[0];
 		//cout << mt << endl;
 		cual1 = smallest_greater(cump, m, (float)uni2(mt));
 		cual2 = smallest_greater(cump, m, (float)uni2(mt));
@@ -843,9 +852,24 @@ void main(int argc, char *argv[])
 			}
 			cump[m - 1] = 1;
 			i = 0;
+
+			//aqui
+			if (fitnessPob[0] < fitnessAnt) {
+				itera = itera + to_string(it) + ",";
+				fitnessEvol = fitnessEvol + to_string(fitnessPob[0]) + ",";
+				ks = ks + to_string(k) + ",";
+				//k = 0;
+			}
+			fitnessAnt = fitnessPob[0];
 		}
 
 	}
+	itera = itera + to_string(it) + ",";
+	fitnessEvol = fitnessEvol + to_string(fitnessPob[0]) + ",";
+	replace(ks.end() - 1, ks.end(), ',', ']');
+	replace(itera.end()-1, itera.end(), ',', ']');
+	replace(fitnessEvol.end() - 1, fitnessEvol.end(), ',', ']');
+
 	auto tFinal = chrono::high_resolution_clock::now();
 	double tTomado = chrono::duration_cast<chrono::nanoseconds>(tFinal-tInicial).count();
 	tTomado *= 1e-9;
@@ -865,9 +889,19 @@ void main(int argc, char *argv[])
 	resultados << "\"coalicion\": [";
 	for (size_t j = 0; j < quorum; j++)
 	{
-		if(j<quorum-1)resultados << cromosoma[0][j] <<",";
+		//para el parlamento Chileno
+		//if(j<quorum-1)resultados << data["diputados"][cromosoma[0][j]]["ID"] << ",";
+		//else resultados << data["diputados"][cromosoma[0][j]]["ID"];
+
+		//para el parlamento de estados unidos
+		if (j < quorum - 1)resultados << cromosoma[0][j] << ",";
 		else resultados << cromosoma[0][j];
 	}
 	resultados << "]\n"<<"}";
 	resultados.close();
+
+	histo << "{\n\"iteraciones\": " << itera << ",\n";
+	histo << "\"fitness\": " << fitnessEvol << ",\n";
+	histo << "\"k\": " << ks << ",\n";
+	histo << "\"k_max\": " << max_k << "\n}";
 }
