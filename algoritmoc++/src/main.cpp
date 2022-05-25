@@ -289,17 +289,21 @@ int** which(bool* array, int largo)
 			cont++;
 	}
 	result = (int*)malloc(sizeof(int) * cont);
-	cont = 0;
+	int cont2 = 0;
 	for (size_t i = 0; i < largo; i++)
 	{
 		if (array[i])
 		{
-			result[cont] = i;
-			cont++;
+			result[cont2] = i;
+			cont2++;
 		}
 	}
-	int* pointerCont = (int*)malloc(sizeof(int) * 1);
-	pointerCont[0] = cont;
+	int* pointerCont = (int*)malloc(sizeof(int));
+	//ret[0] = (int*)malloc(sizeof(int) * cont);
+	//ret[1] = (int*)malloc(sizeof(int));
+	pointerCont[0] = cont2;
+	//memcpy(ret[0], result, sizeof(int) * cont);
+	//memcpy(ret[1], pointerCont, sizeof(int));
 	ret[0] = result;
 	ret[1] = pointerCont;
 	//free(result);
@@ -389,12 +393,12 @@ void sample_arreglo(int* arreglo, int cant, int* valores, int largo)
 void main(int argc, char* argv[])
 {
 	//para camara de diputados chile
-	//ifstream archivo("ejemplo2.json");
-	//json data = json::parse(archivo);
+	ifstream archivo("ejemplo2.json");
+	json data = json::parse(archivo);
 
 	//para parlamento de estados unidos
-	ifstream archivo("ingles.json");
-	json data = json::parse(archivo);
+	//ifstream archivo("ingles.json");
+	//json data = json::parse(archivo);
 
 	ofstream resultados;
 	resultados.open("resultados.json");
@@ -403,15 +407,14 @@ void main(int argc, char* argv[])
 	histo.open("hist.json");
 	string itera = "[";
 	string fitnessEvol = "[";
-	string ks = "[";
 	//resultados << "{\"hola\": 123}\n";
 	//resultados.close();
 
 	//para parlamento de estados unidos
-	int n = data["rollcalls"][0]["votes"].size();
+	//int n = data["rollcalls"][0]["votes"].size();
 
 	//para camara de diputados chile
-	//int n = data["diputados"].size();
+	int n = data["diputados"].size();
 
 	float** matDis = (float**)malloc(n * sizeof(float*));
 	for (size_t i = 0; i < n; i++)
@@ -420,7 +423,7 @@ void main(int argc, char* argv[])
 	}
 
 	//para parlamento de estados unidos
-	for (size_t i = 0; i <= (n - 2); i++)
+	/*for (size_t i = 0; i <= (n - 2); i++)
 	{
 
 		//cout << i << endl;
@@ -428,9 +431,9 @@ void main(int argc, char* argv[])
 		{
 			matDis[i][j] = dis_euc(data["rollcalls"][0]["votes"][i]["x"], data["rollcalls"][0]["votes"][i]["y"], data["rollcalls"][0]["votes"][j]["x"], data["rollcalls"][0]["votes"][j]["y"]);
 		}
-	}
+	}*/
 	//para camara de diputados chile
-	/*for (size_t i = 0; i <= (n - 2); i++)
+	for (size_t i = 0; i <= (n - 2); i++)
 	{
 
 		//cout << i << endl;
@@ -438,11 +441,13 @@ void main(int argc, char* argv[])
 		{
 			matDis[i][j] = dis_euc(data["diputados"][i]["coordX"], data["diputados"][i]["coordY"], data["diputados"][j]["coordX"], data["diputados"][j]["coordY"]);
 		}
-	}*/
+	}
 	auto tInicial = chrono::high_resolution_clock::now();
-	//srand(seed);
-	int quorum = trunc(n / 2) + 1;
-	//int quorum = 74;
+
+	//para parlamento de estados unidos
+	//int quorum = trunc(n / 2) + 1;
+	//para camara de diputados chile
+	int quorum = 74;
 	if (argc > 1)
 	{
 		m = stoi(argv[1]);
@@ -485,7 +490,8 @@ void main(int argc, char* argv[])
 		cump[i] = suma(p, i);
 	}
 	cump[m - 1] = 1;
-	int max_k = 10 * (m - 21);
+	//int max_k = 10 * (m - 21);
+	int max_k = 10*trunc((n+quorum)/m);
 	int i = 0;
 	int k = 0;
 	int it = 0;
@@ -572,8 +578,15 @@ void main(int argc, char* argv[])
 		int** mCual12 = (int**)malloc(2 * sizeof(int*));
 		int** mCual21 = (int**)malloc(2 * sizeof(int*));
 		//revisar which y in_boolean.
-		mCual12 = which(in_boolean(cromosoma1, crossover12, quorum, crossovern[0]), quorum);
-		mCual21 = which(in_boolean(cromosoma2, crossover21, quorum, crossovern[0]), quorum);
+
+		bool* aBoolean1 = (bool*)malloc(sizeof(bool) * quorum);
+		aBoolean1 = in_boolean(cromosoma1, crossover12, quorum, crossovern[0]);
+
+		bool* aBoolean2 = (bool*)malloc(sizeof(bool) * quorum);
+		aBoolean2 = in_boolean(cromosoma2, crossover21, quorum, crossovern[0]);
+
+		mCual12 = which(aBoolean1, quorum);
+		mCual21 = which(aBoolean2, quorum);
 
 		int* cual12 = (int*)malloc(mCual12[1][0] * sizeof(int));
 		int* cual21 = (int*)malloc(mCual21[1][0] * sizeof(int));
@@ -860,7 +873,6 @@ void main(int argc, char* argv[])
 			if (fitnessPob[0] < fitnessAnt) {
 				itera = itera + to_string(it) + ",";
 				fitnessEvol = fitnessEvol + to_string(fitnessPob[0]) + ",";
-				ks = ks + to_string(k) + ",";
 				k = 0;
 			}
 			fitnessAnt = fitnessPob[0];
@@ -869,7 +881,6 @@ void main(int argc, char* argv[])
 	}
 	itera = itera + to_string(it) + ",";
 	fitnessEvol = fitnessEvol + to_string(fitnessPob[0]) + ",";
-	replace(ks.end() - 1, ks.end(), ',', ']');
 	replace(itera.end() - 1, itera.end(), ',', ']');
 	replace(fitnessEvol.end() - 1, fitnessEvol.end(), ',', ']');
 
@@ -893,18 +904,16 @@ void main(int argc, char* argv[])
 	for (size_t j = 0; j < quorum; j++)
 	{
 		//para el parlamento Chileno
-		//if(j<quorum-1)resultados << data["diputados"][cromosoma[0][j]]["ID"] << ",";
-		//else resultados << data["diputados"][cromosoma[0][j]]["ID"];
+		if(j<quorum-1)resultados << data["diputados"][cromosoma[0][j]]["ID"] << ",";
+		else resultados << data["diputados"][cromosoma[0][j]]["ID"];
 
 		//para el parlamento de estados unidos
-		if (j < quorum - 1)resultados << cromosoma[0][j] << ",";
-		else resultados << cromosoma[0][j];
+		//if (j < quorum - 1)resultados << cromosoma[0][j] << ",";
+		//else resultados << cromosoma[0][j];
 	}
 	resultados << "]\n" << "}";
 	resultados.close();
 
 	histo << "{\n\"iteraciones\": " << itera << ",\n";
-	histo << "\"fitness\": " << fitnessEvol << ",\n";
-	histo << "\"k\": " << ks << ",\n";
-	histo << "\"k_max\": " << max_k << "\n}";
+	histo << "\"fitness\": " << fitnessEvol << "\n}";
 }
