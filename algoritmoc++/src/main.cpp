@@ -12,10 +12,10 @@
 using namespace std;
 using json = nlohmann::json;
 
-int m = 40;
+int m = 50;
 float pmutacion_threshold = 0.2;
 float pr = 0.1;
-int seed = time(NULL);
+int seed = 12345;
 
 random_device rng;
 default_random_engine generator(seed);
@@ -30,36 +30,33 @@ float dis_euc(float x1, float y1, float x2, float y2)
 	return calculo;
 }
 
-float eval_sol(int* pos,float** mat,int largo) {
+float eval_sol(int* pos, float** mat, int largo) {
 	float suma = 0;
 	//cout << largo << endl << endl;
 	for (size_t i = 0; i <= (largo - 2); i++)
 	{
-		
-		//cout << i << endl;
-		for (size_t j = i + 1; j <= (largo-1); j++)
+
+		for (size_t j = i + 1; j <= (largo - 1); j++)
 		{
 			suma = suma + mat[pos[i]][pos[j]];
 		}
 	}
 	return suma;
 }
-
+/*
 float eval_sol2(int* pos, json data, int largo) {
 	float suma = 0;
-	//cout << largo << endl << endl;
 	for (size_t i = 0; i <= (largo - 2); i++)
 	{
 		for (size_t j = i + 1; j <= largo-1; j++)
-		{	
-			//cout << "i: " << i << "j: " << j << endl;
+		{
 			suma = suma + dis_euc(data["diputados"][pos[i]]["coordX"], data["diputados"][pos[i]]["coordY"], data["diputados"][pos[j]]["coordX"], data["diputados"][pos[j]]["coordY"]);
 		}
 	}
 	return suma;
-}
+}*/
 
-float suma(float *array, int largo)
+float suma(float* array, int largo)
 {
 	float suma = 0;
 	for (size_t i = 0; i <= largo; i++)
@@ -69,7 +66,7 @@ float suma(float *array, int largo)
 	return suma;
 }
 
-int suma_bool(bool *array, int largo)
+int suma_bool(bool* array, int largo)
 {
 	int suma = 0;
 	for (size_t i = 0; i < largo; i++)
@@ -82,7 +79,7 @@ int suma_bool(bool *array, int largo)
 	return suma;
 }
 // ver return null (posible return -1)
-int smallest_greater(float *seq, int largo, float value)
+int smallest_greater(float* seq, int largo, float value)
 {
 	int i = 0;
 	bool flag = true;
@@ -95,7 +92,7 @@ int smallest_greater(float *seq, int largo, float value)
 		}
 		else
 		{
-			if(i==largo)
+			if (i == largo)
 			{
 				EXIT_FAILURE;
 			}
@@ -103,24 +100,15 @@ int smallest_greater(float *seq, int largo, float value)
 	}
 }
 
-void sample(int *arreglo, int limite, int largo)
+void sample(int* arreglo, int limite, int largo)
 {
 	int i = 0;
 	bool repetido = false;
 	int valor = 0;
-	uni = uniform_int_distribution<int> (0, limite - 1);
+	uni = uniform_int_distribution<int>(0, limite - 1);
 	while (i < largo)
 	{
-		//cout << uni(mt)<<endl;
-		//valor = rand() % limite;
 		valor = uni(mt);
-		/*if (limite - 1 == 0) {
-			valor = 0;
-		}
-		else {
-			valor = rand() % (limite - 1);
-		}
-		*/
 		for (size_t j = 0; j < i; j++)
 		{
 			if (valor == arreglo[j])
@@ -135,13 +123,13 @@ void sample(int *arreglo, int limite, int largo)
 	}
 }
 
-void sort(int *array, int largo)
+void sort(int* array, int largo)
 {
 	int temp = 0;
 	for (size_t i = 0; i < largo; i++)
 	{
 		bool already_sorted = true;
-		for (size_t j = 0; j < largo -i- 1; j++)
+		for (size_t j = 0; j < largo - i - 1; j++)
 		{
 			if (array[j] > array[j + 1])
 			{
@@ -156,14 +144,14 @@ void sort(int *array, int largo)
 	}
 }
 
-void order(float* fitness, int**cromosoma, int quorum, int m)
+void order(float* fitness, int** cromosoma, int quorum, int m)
 {
 	int temp = 0;
 	int* arrTemp = (int*)malloc(quorum * sizeof(int));
 	for (size_t i = 0; i < m; i++)
 	{
 		bool already_sorted = true;
-		for (size_t j = 0; j < m -i- 1; j++)
+		for (size_t j = 0; j < m - i - 1; j++)
 		{
 			if (fitness[j] > fitness[j + 1])
 			{
@@ -171,30 +159,28 @@ void order(float* fitness, int**cromosoma, int quorum, int m)
 				fitness[j] = fitness[j + 1];
 				fitness[j + 1] = temp;
 
-				memcpy(arrTemp, cromosoma[j], sizeof(int)*quorum);
-				memcpy(cromosoma[j], cromosoma[j+1], sizeof(int)*quorum);
-				memcpy(cromosoma[j+1], arrTemp, sizeof(int)*quorum);
+				memcpy(arrTemp, cromosoma[j], sizeof(int) * quorum);
+				memcpy(cromosoma[j], cromosoma[j + 1], sizeof(int) * quorum);
+				memcpy(cromosoma[j + 1], arrTemp, sizeof(int) * quorum);
 				already_sorted = false;
 			}
 		}
 		if (already_sorted)
 			break;
-		
+
 	}
-	//free(arrTemp);
+	free(arrTemp);
 }
 
-int **notin(int *array1, int *array2, int largo1,int largo2)
+int** notin(int* array1, int* array2, int largo1, int largo2)
 {
-	int *temp = (int *)malloc(sizeof(int) * largo1);
+	int* temp = (int*)malloc(sizeof(int) * largo1);
 	int cont = 0;
 	bool flag = false;
 	for (int i = 0; i < largo1; i++)
 	{
 		for (int j = 0; j < largo2; j++)
 		{
-			/*cout << "Arreglo 1=" << array1[i] << endl;
-			cout << "Arreglo 2=" << array2[j] << endl;*/
 			if (array1[i] == array2[j])
 			{
 				flag = true;
@@ -207,24 +193,22 @@ int **notin(int *array1, int *array2, int largo1,int largo2)
 		}
 		flag = false;
 	}
-	//cout << cont << endl;
-	int *result = (int *)malloc(sizeof(int) * cont);
+	int* result = (int*)malloc(sizeof(int) * cont);
 	for (size_t i = 0; i < cont; i++)
 	{
 		result[i] = temp[i];
 	}
-	//delete[] temp; // revisar si esta bien
-	int **ret = (int **)malloc(sizeof(int *) * 2);
-	int *pointCont = (int *)malloc(sizeof(int) * 1);
+	int** ret = (int**)malloc(sizeof(int*) * 2);
+	int* pointCont = (int*)malloc(sizeof(int) * 1);
 	pointCont[0] = cont;
 	ret[0] = result;
 	ret[1] = pointCont;
 	return ret;
 }
 
-bool *in_boolean(int *array1, int *array2, int largo1, int largo2)
+bool* in_boolean(int* array1, int* array2, int largo1, int largo2)
 {
-	bool *result = (bool *)malloc(sizeof(bool) * largo1);
+	bool* result = (bool*)malloc(sizeof(bool) * largo1);
 	int result_len = 0;
 	bool flag = false;
 	for (size_t i = 0; i < largo1; i++)
@@ -247,7 +231,7 @@ bool *in_boolean(int *array1, int *array2, int largo1, int largo2)
 	}
 	return result;
 }
-int minimo(int *array, int largo)
+int minimo(int* array, int largo)
 {
 	int mini = 0;
 	for (size_t i = 0; i < largo - 1; i++)
@@ -260,7 +244,7 @@ int minimo(int *array, int largo)
 	return mini;
 }
 
-int maximo(int *array, int largo)
+int maximo(int* array, int largo)
 {
 	int maxi = 0;
 	for (size_t i = 0; i < largo - 1; i++)
@@ -273,10 +257,9 @@ int maximo(int *array, int largo)
 	return maxi;
 }
 
-int which_max(float *array, int largo)
+int which_max(float* array, int largo)
 {
 	int maxi = array[0];
-	//cout << largo << endl;
 	for (size_t i = 0; i < largo - 1; i++)
 	{
 		if (array[i] > array[i + 1])
@@ -290,39 +273,37 @@ int which_max(float *array, int largo)
 	}
 	for (int i = 0; i < largo; i++)
 	{
-		//cout << i << " ";
 		if (array[i] == maxi)
 			return i;
 	}
-	//cout << endl;
 }
 
-int **which(bool *array, int largo)
+int** which(bool* array, int largo)
 {
 	int* result = nullptr;
-	int **ret = (int **)malloc(sizeof(int *) * 2);
+	int** ret = (int**)malloc(sizeof(int*) * 2);
 	int cont = 0;
-	//cout << "arreglo:";
-	for (size_t i = 0; i < largo-1; i++)
+	for (size_t i = 0; i < largo - 1; i++)
 	{
-		//cout << array[i] << " ";
 		if (array[i])
 			cont++;
 	}
-	//cout << endl;
-	result = (int *)malloc(sizeof(int) * cont);
-	cont = 0;
+	result = (int*)malloc(sizeof(int) * cont);
+	int cont2 = 0;
 	for (size_t i = 0; i < largo; i++)
 	{
-		//cout << "a"<<endl;
 		if (array[i])
 		{
-			result[cont] = i;
-			cont++;
+			result[cont2] = i;
+			cont2++;
 		}
 	}
-	int *pointerCont = (int *)malloc(sizeof(int) * 1);
-	pointerCont[0] = cont;
+	int* pointerCont = (int*)malloc(sizeof(int));
+	//ret[0] = (int*)malloc(sizeof(int) * cont);
+	//ret[1] = (int*)malloc(sizeof(int));
+	pointerCont[0] = cont2;
+	//memcpy(ret[0], result, sizeof(int) * cont);
+	//memcpy(ret[1], pointerCont, sizeof(int));
 	ret[0] = result;
 	ret[1] = pointerCont;
 	//free(result);
@@ -369,7 +350,6 @@ int** repetidos(int* arreglo, int largo)
 			cont = 0;
 		}
 	}
-	//cout << newlargo << endl;
 	int* finalarr = (int*)malloc(sizeof(int) * newlargo);
 	for (size_t i = 0; i < newlargo; i++)
 	{
@@ -390,13 +370,10 @@ void sample_arreglo(int* arreglo, int cant, int* valores, int largo)
 	int valor = 0;
 	int i = 0;
 	bool repetido = false;
-	uni = uniform_int_distribution<int> (0, largo - 1);
+	uni = uniform_int_distribution<int>(0, largo - 1);
 	while (i < cant)
 	{
-		//cout << uni(mt) << endl;
 		indice = uni(mt);
-		//cout << largo << endl;
-		//indice = rand() % (largo - 1);
 		valor = valores[indice];
 		for (size_t j = 0; j < i; j++)
 		{
@@ -413,10 +390,30 @@ void sample_arreglo(int* arreglo, int cant, int* valores, int largo)
 }
 
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
-	ifstream archivo("./ejemplo2.json");
+	//para camara de diputados chile
+	ifstream archivo("ejemplo2.json");
 	json data = json::parse(archivo);
+
+	//para parlamento de estados unidos
+	//ifstream archivo("ingles.json");
+	//json data = json::parse(archivo);
+
+	ofstream resultados;
+	resultados.open("resultados.json");
+
+	ofstream histo;
+	histo.open("hist.json");
+	string itera = "[";
+	string fitnessEvol = "[";
+	//resultados << "{\"hola\": 123}\n";
+	//resultados.close();
+
+	//para parlamento de estados unidos
+	//int n = data["rollcalls"][0]["votes"].size();
+
+	//para camara de diputados chile
 	int n = data["diputados"].size();
 
 	float** matDis = (float**)malloc(n * sizeof(float*));
@@ -425,7 +422,17 @@ int main(int argc, char *argv[])
 		matDis[i] = (float*)malloc(n * sizeof(float));
 	}
 
+	//para parlamento de estados unidos
+	/*for (size_t i = 0; i <= (n - 2); i++)
+	{
 
+		//cout << i << endl;
+		for (size_t j = i + 1; j <= (n - 1); j++)
+		{
+			matDis[i][j] = dis_euc(data["rollcalls"][0]["votes"][i]["x"], data["rollcalls"][0]["votes"][i]["y"], data["rollcalls"][0]["votes"][j]["x"], data["rollcalls"][0]["votes"][j]["y"]);
+		}
+	}*/
+	//para camara de diputados chile
 	for (size_t i = 0; i <= (n - 2); i++)
 	{
 
@@ -436,39 +443,42 @@ int main(int argc, char *argv[])
 		}
 	}
 	auto tInicial = chrono::high_resolution_clock::now();
-	//srand(seed);
+
+	//para parlamento de estados unidos
+	//int quorum = trunc(n / 2) + 1;
+	//para camara de diputados chile
 	int quorum = 74;
 	if (argc > 1)
 	{
-		m = stoi(argv[0]);
-		pmutacion_threshold = stod(argv[1]);
-		pr = stod(argv[2]);
-		seed = stoi(argv[3]);
+		m = stoi(argv[1]);
+		pmutacion_threshold = stod(argv[2]);
+		pr = stod(argv[3]);
+		seed = stoi(argv[4]);
 	}
 	mt.seed(seed);
-	
+
 	uni2 = uniform_real_distribution<double>(0, 1);
 
-	int **cromosoma = (int **)malloc(m * sizeof(int *));
+	int** cromosoma = (int**)malloc(m * sizeof(int*));
 	float* fitnessPob = (float*)malloc(m * sizeof(float));
 
 	for (size_t i = 0; i < m; i++)
 	{
-		cromosoma[i] = (int *)malloc(quorum * sizeof(int));
+		cromosoma[i] = (int*)malloc(quorum * sizeof(int));
 	}
 
-	 //cout << "primero --------------------" << endl;
+	//cout << "primero --------------------" << endl;
 
 	for (size_t i = 0; i < m; i++)
 	{
-		sample(cromosoma[i],n, quorum);
+		sample(cromosoma[i], n, quorum);
 		sort(cromosoma[i], quorum);
-		fitnessPob[i] = eval_sol(cromosoma[i],matDis,quorum);
+		fitnessPob[i] = eval_sol(cromosoma[i], matDis, quorum);
 	}
-	
+
 	order(fitnessPob, cromosoma, quorum, m);
 
-	float* p = (float *)malloc(m * sizeof(float));
+	float* p = (float*)malloc(m * sizeof(float));
 	float* cump = (float*)malloc(m * sizeof(float));
 
 	p[0] = 0.1;
@@ -476,11 +486,12 @@ int main(int argc, char *argv[])
 
 	for (size_t i = 1; i < m; i++)
 	{
-		p[i] = pr*pow(1 - pr, i);
-		cump[i] = suma(p,i);
+		p[i] = pr * pow(1 - pr, i);
+		cump[i] = suma(p, i);
 	}
 	cump[m - 1] = 1;
-	int max_k = 10 * (m - 21);
+	//int max_k = 10 * (m - 21);
+	int max_k = 10*trunc((n+quorum)/m);
 	int i = 0;
 	int k = 0;
 	int it = 0;
@@ -492,9 +503,9 @@ int main(int argc, char *argv[])
 	float pmutacion;
 	bool flag2;
 	bool flag3;
-	
+
 	int idxpop;
-	int contCromNuevo =0;
+	int contCromNuevo = 0;
 
 	int peor;
 
@@ -502,14 +513,19 @@ int main(int argc, char *argv[])
 
 	int min;
 
+	int cual121;
+
 	int** cromosomaNuevo = (int**)malloc(m * sizeof(int*));
 	float* fitnessPobNuevo = (float*)malloc(m * sizeof(float));
-	while (k<max_k)
+
+	int fitnessAnt;
+	while (k < max_k)
 	{
 
 		//cout << "iteracion: " << it+1 << endl;
 		//cout << rand() / static_cast<float>(RAND_MAX) << endl;
 		it++;
+		fitnessAnt = fitnessPob[0];
 		//cout << mt << endl;
 		cual1 = smallest_greater(cump, m, (float)uni2(mt));
 		cual2 = smallest_greater(cump, m, (float)uni2(mt));
@@ -518,7 +534,7 @@ int main(int argc, char *argv[])
 		while (cual1 == cual2)cual2 = smallest_greater(cump, m, (float)uni2(mt));
 		//while (cual1 == cual2)cual2 = smallest_greater(cump, m, rand() / static_cast<float>(RAND_MAX));
 
-		int* cromosoma1=(int*)malloc(quorum*sizeof(int));
+		int* cromosoma1 = (int*)malloc(quorum * sizeof(int));
 		int* cromosoma2 = (int*)malloc(quorum * sizeof(int));
 		memcpy(cromosoma1, cromosoma[cual1], quorum * sizeof(int));
 		memcpy(cromosoma2, cromosoma[cual2], quorum * sizeof(int));
@@ -526,8 +542,8 @@ int main(int argc, char *argv[])
 		int** mDis12 = (int**)malloc(2 * sizeof(int*));
 		int** mDis21 = (int**)malloc(2 * sizeof(int*));
 
-		mDis12 = notin(cromosoma1, cromosoma2, quorum,quorum);
-		mDis21 = notin(cromosoma2, cromosoma1, quorum,quorum);
+		mDis12 = notin(cromosoma1, cromosoma2, quorum, quorum);
+		mDis21 = notin(cromosoma2, cromosoma1, quorum, quorum);
 
 		int* disimilar12 = (int*)malloc(mDis12[1][0] * sizeof(int));
 		int* disimilar21 = (int*)malloc(mDis21[1][0] * sizeof(int));
@@ -564,10 +580,17 @@ int main(int argc, char *argv[])
 		int** mCual12 = (int**)malloc(2 * sizeof(int*));
 		int** mCual21 = (int**)malloc(2 * sizeof(int*));
 		//revisar which y in_boolean.
-		mCual12 = which(in_boolean(cromosoma1, crossover12, quorum, crossovern[0]), quorum);
-		mCual21 = which(in_boolean(cromosoma2, crossover21, quorum, crossovern[0]), quorum);
-		
-		int* cual12 = (int*)malloc(mCual12[1][0] * sizeof(int));
+
+		bool* aBoolean1 = (bool*)malloc(sizeof(bool) * quorum);
+		aBoolean1 = in_boolean(cromosoma1, crossover12, quorum, crossovern[0]);
+
+		bool* aBoolean2 = (bool*)malloc(sizeof(bool) * quorum);
+		aBoolean2 = in_boolean(cromosoma2, crossover21, quorum, crossovern[0]);
+
+		mCual12 = which(aBoolean1, quorum);
+		mCual21 = which(aBoolean2, quorum);
+		cual121 = mCual12[1][0];
+		int* cual12 = (int*)malloc(cual121 * sizeof(int));
 		int* cual21 = (int*)malloc(mCual21[1][0] * sizeof(int));
 
 		cual12 = mCual12[0];
@@ -583,19 +606,25 @@ int main(int argc, char *argv[])
 
 		sort(cromosoma1, quorum);
 		sort(cromosoma2, quorum);
-		
+
 		free(mDis12);
 		free(mDis21);
+		free(mCual12[0]);
+		free(mCual12[1]);
 		free(mCual12);
+		free(mCual21[0]);
+		free(mCual21[1]);
 		free(mCual21);
-		
+		free(cual12);
+		free(cual21);
+
 		pmutacion = (float)uni2(mt);
 		//pmutacion = rand() / static_cast<float>(RAND_MAX);
 		if (pmutacion < pmutacion_threshold) {
 			int* cualSacar = (int*)malloc(sizeof(int));
-			sample(cualSacar, quorum,1);
+			sample(cualSacar, quorum, 1);
 			int** mNotInCromosoma1 = (int**)malloc(2 * sizeof(int*));
-			mNotInCromosoma1 = notin(crear_arreglo(n), cromosoma1, n,quorum);
+			mNotInCromosoma1 = notin(crear_arreglo(n), cromosoma1, n, quorum);
 			//cout << mNotInCromosoma1[1][0] << endl;
 			int* notInCromosoma1 = (int*)malloc(mNotInCromosoma1[1][0] * sizeof(int));
 			notInCromosoma1 = mNotInCromosoma1[0];
@@ -603,12 +632,12 @@ int main(int argc, char *argv[])
 			sample_arreglo(cualIntroducir, 1, notInCromosoma1, mNotInCromosoma1[1][0]);
 			cromosoma1[cualSacar[0]] = cualIntroducir[0];
 			sort(cromosoma1, quorum);
-			
+
 			free(cualSacar);
 			free(mNotInCromosoma1);
 			free(notInCromosoma1);
 			free(cualIntroducir);
-			
+
 		}
 
 		pmutacion = (float)uni2(mt);
@@ -617,23 +646,23 @@ int main(int argc, char *argv[])
 			int* cualSacar = (int*)malloc(sizeof(int));
 			sample(cualSacar, quorum, 1);
 			int** mNotInCromosoma2 = (int**)malloc(2 * sizeof(int*));
-			mNotInCromosoma2 = notin(crear_arreglo(n), cromosoma2, n,quorum);
+			mNotInCromosoma2 = notin(crear_arreglo(n), cromosoma2, n, quorum);
 			int* notInCromosoma2 = (int*)malloc(mNotInCromosoma2[1][0] * sizeof(int));
 			notInCromosoma2 = mNotInCromosoma2[0];
 			int* cualIntroducir = (int*)malloc(sizeof(int));
 			sample_arreglo(cualIntroducir, 1, notInCromosoma2, mNotInCromosoma2[1][0]);
 			cromosoma2[cualSacar[0]] = cualIntroducir[0];
 			sort(cromosoma2, quorum);
-			
+
 			free(cualSacar);
 			free(mNotInCromosoma2);
 			free(notInCromosoma2);
 			free(cualIntroducir);
-			
+
 		}
 
 		if (i == 0) {
-			
+
 			for (size_t a = 0; a < m; a++)
 			{
 				cromosomaNuevo[a] = (int*)malloc(quorum * sizeof(int));
@@ -644,7 +673,7 @@ int main(int argc, char *argv[])
 			fitnessPobNuevo[contCromNuevo] = eval_sol(cromosoma1, matDis, quorum);
 			contCromNuevo++;
 			memcpy(cromosomaNuevo[contCromNuevo], cromosoma2, quorum * sizeof(int));
-			
+
 			//cromosomaNuevo[contCromNuevo] = cromosoma2;
 			fitnessPobNuevo[contCromNuevo] = eval_sol(cromosoma2, matDis, quorum);
 			contCromNuevo++;
@@ -653,28 +682,28 @@ int main(int argc, char *argv[])
 			flag2 = true;
 			idxpop = 0;
 			while (flag2) {
-				if (suma_bool(in_boolean(cromosoma1, cromosomaNuevo[idxpop], quorum,quorum), quorum) == quorum) {
+				if (suma_bool(in_boolean(cromosoma1, cromosomaNuevo[idxpop], quorum, quorum), quorum) == quorum) {
 					int* cualSacar = (int*)malloc(sizeof(int));
 					sample(cualSacar, quorum, 1);
 					int** mNotInCromosoma1 = (int**)malloc(2 * sizeof(int*));
-					mNotInCromosoma1 = notin(crear_arreglo(n), cromosoma1, n,quorum);
+					mNotInCromosoma1 = notin(crear_arreglo(n), cromosoma1, n, quorum);
 					int* notInCromosoma1 = (int*)malloc(mNotInCromosoma1[1][0] * sizeof(int));
 					notInCromosoma1 = mNotInCromosoma1[0];
 					int* cualIntroducir = (int*)malloc(sizeof(int));
 					sample_arreglo(cualIntroducir, 1, notInCromosoma1, mNotInCromosoma1[1][0]);
 					cromosoma1[cualSacar[0]] = cualIntroducir[0];
 					sort(cromosoma1, quorum);
-					
+
 					free(cualSacar);
 					free(mNotInCromosoma1);
 					free(notInCromosoma1);
 					free(cualIntroducir);
-					
+
 					idxpop = 0;
 				}
 				else
 				{
-					if (idxpop>=contCromNuevo-1)
+					if (idxpop >= contCromNuevo - 1)
 					{
 						flag2 = false;
 					}
@@ -688,8 +717,8 @@ int main(int argc, char *argv[])
 			flag2 = true;
 			idxpop = 0;
 			while (flag2) {
-				
-				if (suma_bool(in_boolean(cromosoma2, cromosomaNuevo[idxpop], quorum,quorum), quorum) == quorum) {
+
+				if (suma_bool(in_boolean(cromosoma2, cromosomaNuevo[idxpop], quorum, quorum), quorum) == quorum) {
 					/*if (it >= 249) {
 						cout << "cromosoma nuevo" << endl;
 						for (size_t j = 0; j < quorum; j++)
@@ -707,19 +736,19 @@ int main(int argc, char *argv[])
 					int* cualSacar = (int*)malloc(sizeof(int));
 					sample(cualSacar, quorum, 1);
 					int** mNotInCromosoma2 = (int**)malloc(2 * sizeof(int*));
-					mNotInCromosoma2 = notin(crear_arreglo(n), cromosoma2, n,quorum);
+					mNotInCromosoma2 = notin(crear_arreglo(n), cromosoma2, n, quorum);
 					int* notInCromosoma2 = (int*)malloc(mNotInCromosoma2[1][0] * sizeof(int));
 					notInCromosoma2 = mNotInCromosoma2[0];
 					int* cualIntroducir = (int*)malloc(sizeof(int));
 					sample_arreglo(cualIntroducir, 1, notInCromosoma2, mNotInCromosoma2[1][0]);
 					cromosoma2[cualSacar[0]] = cualIntroducir[0];
 					sort(cromosoma2, quorum);
-					
+
 					free(cualSacar);
 					free(mNotInCromosoma2);
 					free(notInCromosoma2);
 					free(cualIntroducir);
-					
+
 					idxpop = 0;
 				}
 				else
@@ -743,7 +772,7 @@ int main(int argc, char *argv[])
 
 		}
 		i++;
-		if (i==m/2)
+		if (i == m / 2)
 		{
 			i = 0;
 			contCromNuevo = 0;
@@ -755,7 +784,7 @@ int main(int argc, char *argv[])
 
 			while (flag2)
 			{
-				if (suma_bool(in_boolean(cromosoma[0], cromosomaNuevo[idxpop], quorum,quorum), quorum) == quorum)
+				if (suma_bool(in_boolean(cromosoma[0], cromosomaNuevo[idxpop], quorum, quorum), quorum) == quorum)
 				{
 					flag2 = false;
 					flag3 = true;
@@ -764,7 +793,7 @@ int main(int argc, char *argv[])
 				{
 					idxpop++;
 				}
-				if (idxpop>m-1)
+				if (idxpop > m - 1)
 				{
 					flag2 = false;
 				}
@@ -780,7 +809,7 @@ int main(int argc, char *argv[])
 				cout << endl;*/
 				//peor = which_max(fitnessPobNuevo, m);
 				//cout << peor << endl;
-				peor = m-1;
+				peor = m - 1;
 				memcpy(cromosomaNuevo[peor], cromosoma[0], quorum * sizeof(int));
 				fitnessPobNuevo[peor] = fitnessPob[0];
 				order(fitnessPobNuevo, cromosomaNuevo, quorum, m);
@@ -788,22 +817,24 @@ int main(int argc, char *argv[])
 				//aqui va lo que no se deberia tener que hacer
 				memcpy(pNuevo, p, m * sizeof(float));
 				memcpy(cumpNuevo, cump, m * sizeof(float));
-
+				/*
 				if (fitnessPobNuevo[0] == fitnessPob[0])
 				{
 					k++;
 				}
+				*/
 
 			}
 			else
 			{
 				memcpy(pNuevo, p, m * sizeof(float));
 				memcpy(cumpNuevo, cump, m * sizeof(float));
-
+				/*
 				if (fitnessPobNuevo[0] == fitnessPob[0])
 				{
 					k++;
 				}
+				*/
 			}
 			for (size_t a = 0; a < m; a++)
 			{
@@ -821,10 +852,10 @@ int main(int argc, char *argv[])
 			free(fitnessPobNuevo);
 			free(pNuevo);
 			free(cumpNuevo);*/
-			
+
 
 			int* cromosomaCambio = (int*)malloc(quorum * sizeof(int));
-			for (size_t j = round(m/2); j < m; j++)
+			for (size_t j = round(m / 2); j < m; j++)
 			{
 				sample(cromosomaCambio, n, quorum);
 				sort(cromosomaCambio, quorum);
@@ -833,7 +864,7 @@ int main(int argc, char *argv[])
 				fitnessPob[j] = fitnessCambio;
 			}
 			order(fitnessPob, cromosoma, quorum, m);
-			
+
 			p[0] = pr;
 			cump[0] = pr;
 
@@ -844,17 +875,54 @@ int main(int argc, char *argv[])
 			}
 			cump[m - 1] = 1;
 			i = 0;
+
+			//aqui
+			k++;
+			if (fitnessPob[0] < fitnessAnt) {
+				itera = itera + to_string(it) + ",";
+				fitnessEvol = fitnessEvol + to_string(fitnessPob[0]) + ",";
+				k = 0;
+			}
+			fitnessAnt = fitnessPob[0];
 		}
 
 	}
+	itera = itera + to_string(it) + ",";
+	fitnessEvol = fitnessEvol + to_string(fitnessPob[0]) + ",";
+	replace(itera.end() - 1, itera.end(), ',', ']');
+	replace(fitnessEvol.end() - 1, fitnessEvol.end(), ',', ']');
+
 	auto tFinal = chrono::high_resolution_clock::now();
-	double tTomado = chrono::duration_cast<chrono::nanoseconds>(tFinal-tInicial).count();
+	double tTomado = chrono::duration_cast<chrono::nanoseconds>(tFinal - tInicial).count();
 	tTomado *= 1e-9;
 	cout << fitnessPob[0] << "it: " << it << endl;
-	cout << "T=" << fixed<<tTomado<<setprecision(9) << endl;
+	cout << "T=" << fixed << tTomado << setprecision(9) << endl;
 	for (size_t j = 0; j < quorum; j++)
 	{
 		cout << cromosoma[0][j] << " ";
 	}
-	return 0;
+	resultados << "{\n\"m\": " << m << ",\n";
+	resultados << "\"pmutacion_threshold\": " << pmutacion_threshold << ",\n";
+	resultados << "\"pr\": " << pr << ",\n";
+	resultados << "\"seed\": " << seed << ",\n";
+	resultados << "\"numero de iteraciones\": " << it << ",\n";
+	resultados << "\"fitness\": " << fitnessPob[0] << ",\n";
+	resultados << "\"tiempo\": " << fixed << tTomado << setprecision(9) << ",\n";
+	resultados << "\"coalicion\": [";
+	for (size_t j = 0; j < quorum; j++)
+	{
+		//para el parlamento Chileno
+		if(j<quorum-1)resultados << data["diputados"][cromosoma[0][j]]["ID"] << ",";
+		else resultados << data["diputados"][cromosoma[0][j]]["ID"];
+
+		//para el parlamento de estados unidos
+		//if (j < quorum - 1)resultados << cromosoma[0][j] << ",";
+		//else resultados << cromosoma[0][j];
+	}
+	resultados << "]\n" << "}";
+	resultados.close();
+
+	histo << "{\n\"iteraciones\": " << itera << ",\n";
+	histo << "\"fitness\": " << fitnessEvol << "\n}";
+	return EXIT_SUCCESS;
 }
