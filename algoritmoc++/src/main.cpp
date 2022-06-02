@@ -94,10 +94,11 @@ int smallest_greater(float* seq, int largo, float value)
 		{
 			if (i == largo)
 			{
-				EXIT_FAILURE;
+				break;
 			}
 		}
 	}
+	return(int)EXIT_FAILURE;
 }
 
 void sample(int* arreglo, int limite, int largo)
@@ -193,16 +194,16 @@ int** notin(int* array1, int* array2, int largo1, int largo2)
 		}
 		flag = false;
 	}
-	int* result = (int*)malloc(sizeof(int) * cont);
+	int** ret = (int**)malloc(sizeof(int*) * 2);
+	ret[0] = (int*)malloc(sizeof(int) * cont);
+	ret[1] = (int*)malloc(sizeof(int) * 1);
+	ret[1][0] = cont;
 	for (size_t i = 0; i < cont; i++)
 	{
-		result[i] = temp[i];
+		ret[0][i] = temp[i];
 	}
-	int** ret = (int**)malloc(sizeof(int*) * 2);
-	int* pointCont = (int*)malloc(sizeof(int) * 1);
-	pointCont[0] = cont;
-	ret[0] = result;
-	ret[1] = pointCont;
+	
+	free(temp);
 	return ret;
 }
 
@@ -276,39 +277,31 @@ int which_max(float* array, int largo)
 		if (array[i] == maxi)
 			return i;
 	}
+	return -1;
 }
 
 int** which(bool* array, int largo)
 {
-	int* result = nullptr;
-	int** ret = (int**)malloc(sizeof(int*) * 2);
 	int cont = 0;
 	for (size_t i = 0; i < largo; i++)
 	{
 		if (array[i])
 			cont++;
 	}
-	result = (int*)malloc(sizeof(int) * cont);
+	int** ret = nullptr;
+	ret = (int**)malloc(sizeof(int*) * 2);
+	ret[0] = (int*)malloc(sizeof(int) * cont);
+	ret[1] = (int*)malloc(sizeof(int));
 	int cont2 = 0;
 	for (size_t i = 0; i < largo; i++)
 	{
 		if (array[i])
 		{
-			result[cont2] = i;
+			ret[0][cont2] = i;
 			cont2++;
 		}
 	}
-	int* pointerCont = (int*)malloc(sizeof(int));
-	//ret[0] = (int*)malloc(sizeof(int) * cont);
-	//ret[1] = (int*)malloc(sizeof(int));
-	pointerCont[0] = cont2;
-	//memcpy(ret[0], result, sizeof(int) * cont);
-	//memcpy(ret[1], pointerCont, sizeof(int));
-	ret[0] = result;
-	ret[1] = pointerCont;
-	//free(result);
-	//free(pointerCont);
-
+	ret[1][0] = cont2;
 	return ret;
 }
 
@@ -390,15 +383,15 @@ void sample_arreglo(int* arreglo, int cant, int* valores, int largo)
 }
 
 
-void main(int argc, char* argv[])
+int main(int argc, char* argv[])
 {
 	//para camara de diputados chile
-	ifstream archivo("ejemplo2.json");
-	json data = json::parse(archivo);
+	//ifstream archivo("ejemplo2.json");
+	//json data = json::parse(archivo);
 
 	//para parlamento de estados unidos
-	//ifstream archivo("ingles.json");
-	//json data = json::parse(archivo);
+	ifstream archivo("ingles.json");
+	json data = json::parse(archivo);
 
 	ofstream resultados;
 	resultados.open("resultados.json");
@@ -411,10 +404,10 @@ void main(int argc, char* argv[])
 	//resultados.close();
 
 	//para parlamento de estados unidos
-	//int n = data["rollcalls"][0]["votes"].size();
+	int n = data["rollcalls"][0]["votes"].size();
 
 	//para camara de diputados chile
-	int n = data["diputados"].size();
+	//int n = data["diputados"].size();
 
 	float** matDis = (float**)malloc(n * sizeof(float*));
 	for (size_t i = 0; i < n; i++)
@@ -423,7 +416,7 @@ void main(int argc, char* argv[])
 	}
 
 	//para parlamento de estados unidos
-	/*for (size_t i = 0; i <= (n - 2); i++)
+	for (size_t i = 0; i <= (n - 2); i++)
 	{
 
 		//cout << i << endl;
@@ -431,9 +424,9 @@ void main(int argc, char* argv[])
 		{
 			matDis[i][j] = dis_euc(data["rollcalls"][0]["votes"][i]["x"], data["rollcalls"][0]["votes"][i]["y"], data["rollcalls"][0]["votes"][j]["x"], data["rollcalls"][0]["votes"][j]["y"]);
 		}
-	}*/
+	}
 	//para camara de diputados chile
-	for (size_t i = 0; i <= (n - 2); i++)
+	/*for (size_t i = 0; i <= (n - 2); i++)
 	{
 
 		//cout << i << endl;
@@ -441,13 +434,13 @@ void main(int argc, char* argv[])
 		{
 			matDis[i][j] = dis_euc(data["diputados"][i]["coordX"], data["diputados"][i]["coordY"], data["diputados"][j]["coordX"], data["diputados"][j]["coordY"]);
 		}
-	}
+	}*/
 	auto tInicial = chrono::high_resolution_clock::now();
 
 	//para parlamento de estados unidos
-	//int quorum = trunc(n / 2) + 1;
+	int quorum = trunc(n / 2) + 1;
 	//para camara de diputados chile
-	int quorum = 74;
+	//int quorum = 74;
 	if (argc > 1)
 	{
 		m = stoi(argv[1]);
@@ -460,7 +453,8 @@ void main(int argc, char* argv[])
 	uni2 = uniform_real_distribution<double>(0, 1);
 
 	int** cromosoma = (int**)malloc(m * sizeof(int*));
-	float* fitnessPob = (float*)malloc(m * sizeof(float));
+	float* fitnessPob = nullptr;
+	fitnessPob = (float*)malloc(m * sizeof(float));
 
 	for (size_t i = 0; i < m; i++)
 	{
@@ -514,9 +508,32 @@ void main(int argc, char* argv[])
 	int min;
 
 	int** cromosomaNuevo = (int**)malloc(m * sizeof(int*));
+	for (size_t a = 0; a < m; a++)
+	{
+		cromosomaNuevo[a] = (int*)malloc(quorum * sizeof(int));
+	}
 	float* fitnessPobNuevo = (float*)malloc(m * sizeof(float));
 
 	int fitnessAnt;
+
+	// Reservas extras 
+
+	bool* aBoolean1 = nullptr;
+	bool* aBoolean2 = nullptr;
+	int** mDis12 = nullptr;
+	int** mDis21 = nullptr;
+	int* disimilar12 = nullptr;
+	int* disimilar21 = nullptr;
+	int* arrMin = nullptr;
+	int* crossovern = nullptr;
+	int* selecCrossover12 = nullptr;
+	int* selecCrossover21 = nullptr;
+	int* crossover12 = nullptr;
+	int* crossover21 = nullptr;
+	int** mCual12 = nullptr;
+	int** mCual21 = nullptr;
+	int* cromosoma1 = nullptr;
+	int* cromosoma2 = nullptr;
 	while (k < max_k)
 	{
 		it++;
@@ -532,9 +549,6 @@ void main(int argc, char* argv[])
 		int* cromosoma2 = (int*)malloc(quorum * sizeof(int));
 		memcpy(cromosoma1, cromosoma[cual1], quorum * sizeof(int));
 		memcpy(cromosoma2, cromosoma[cual2], quorum * sizeof(int));
-
-		int** mDis12 = (int**)malloc(2 * sizeof(int*));
-		int** mDis21 = (int**)malloc(2 * sizeof(int*));
 
 		mDis12 = notin(cromosoma1, cromosoma2, quorum, quorum);
 		mDis21 = notin(cromosoma2, cromosoma1, quorum, quorum);
@@ -571,21 +585,20 @@ void main(int argc, char* argv[])
 		sort(crossover12, crossovern[0]);
 		sort(crossover21, crossovern[0]);
 
-		int** mCual12 = (int**)malloc(2 * sizeof(int*));
-		int** mCual21 = (int**)malloc(2 * sizeof(int*));
 		//revisar which y in_boolean.
 
-		bool* aBoolean1 = (bool*)malloc(sizeof(bool) * quorum);
 		aBoolean1 = in_boolean(cromosoma1, crossover12, quorum, crossovern[0]);
 
-		bool* aBoolean2 = (bool*)malloc(sizeof(bool) * quorum);
 		aBoolean2 = in_boolean(cromosoma2, crossover21, quorum, crossovern[0]);
 
-		mCual12 = which(aBoolean1, quorum);
-		mCual21 = which(aBoolean2, quorum);
+		int** mCual12 = which(aBoolean1, quorum);
+		int** mCual21 = which(aBoolean2, quorum);
 
-		int* cual12 = (int*)malloc(mCual12[1][0] * sizeof(int));
-		int* cual21 = (int*)malloc(mCual21[1][0] * sizeof(int));
+		free(aBoolean1);
+		free(aBoolean2);
+
+		int* cual12 = nullptr;
+		int* cual21 = nullptr;
 
 		cual12 = mCual12[0];
 		cual21 = mCual21[0];
@@ -601,28 +614,46 @@ void main(int argc, char* argv[])
 		sort(cromosoma1, quorum);
 		sort(cromosoma2, quorum);
 
+		free(arrMin);
+		free(mDis12[0]);
+		free(mDis12[1]);
 		free(mDis12);
+		free(mDis21[0]);
+		free(mDis21[1]);
 		free(mDis21);
+		free(mCual12[0]);
+		free(mCual12[1]);
 		free(mCual12);
+		free(mCual21[0]);
+		free(mCual21[1]);
 		free(mCual21);
+		free(disimilar12);
+		free(disimilar21);
+		free(crossover12);
+		free(crossover21);
+		free(selecCrossover12);
+		free(selecCrossover21);
 
 		pmutacion = (float)uni2(mt);
 		//pmutacion = rand() / static_cast<float>(RAND_MAX);
 		if (pmutacion < pmutacion_threshold) {
 			int* cualSacar = (int*)malloc(sizeof(int));
 			sample(cualSacar, quorum, 1);
-			int** mNotInCromosoma1 = (int**)malloc(2 * sizeof(int*));
-			mNotInCromosoma1 = notin(crear_arreglo(n), cromosoma1, n, quorum);
-			int* notInCromosoma1 = (int*)malloc(mNotInCromosoma1[1][0] * sizeof(int));
+			int** mNotInCromosoma1 = nullptr;
+			int* ar = crear_arreglo(n);
+			mNotInCromosoma1 = notin(ar, cromosoma1, n, quorum);
+			int* notInCromosoma1 = nullptr;
 			notInCromosoma1 = mNotInCromosoma1[0];
 			int* cualIntroducir = (int*)malloc(sizeof(int));
 			sample_arreglo(cualIntroducir, 1, notInCromosoma1, mNotInCromosoma1[1][0]);
 			cromosoma1[cualSacar[0]] = cualIntroducir[0];
 			sort(cromosoma1, quorum);
 
+			free(ar);
 			free(cualSacar);
+			free(mNotInCromosoma1[0]);
+			free(mNotInCromosoma1[1]);
 			free(mNotInCromosoma1);
-			free(notInCromosoma1);
 			free(cualIntroducir);
 
 		}
@@ -632,28 +663,26 @@ void main(int argc, char* argv[])
 		if (pmutacion < pmutacion_threshold) {
 			int* cualSacar = (int*)malloc(sizeof(int));
 			sample(cualSacar, quorum, 1);
-			int** mNotInCromosoma2 = (int**)malloc(2 * sizeof(int*));
-			mNotInCromosoma2 = notin(crear_arreglo(n), cromosoma2, n, quorum);
-			int* notInCromosoma2 = (int*)malloc(mNotInCromosoma2[1][0] * sizeof(int));
+			int** mNotInCromosoma2 = nullptr;
+			int* ar = crear_arreglo(n);
+			mNotInCromosoma2 = notin(ar, cromosoma2, n, quorum);
+			int* notInCromosoma2 = nullptr;
 			notInCromosoma2 = mNotInCromosoma2[0];
 			int* cualIntroducir = (int*)malloc(sizeof(int));
 			sample_arreglo(cualIntroducir, 1, notInCromosoma2, mNotInCromosoma2[1][0]);
 			cromosoma2[cualSacar[0]] = cualIntroducir[0];
 			sort(cromosoma2, quorum);
 
+			free(ar);
 			free(cualSacar);
+			free(mNotInCromosoma2[0]);
+			free(mNotInCromosoma2[1]);
 			free(mNotInCromosoma2);
-			free(notInCromosoma2);
 			free(cualIntroducir);
 
 		}
 
 		if (i == 0) {
-
-			for (size_t a = 0; a < m; a++)
-			{
-				cromosomaNuevo[a] = (int*)malloc(quorum * sizeof(int));
-			}
 
 			memcpy(cromosomaNuevo[contCromNuevo], cromosoma1, quorum * sizeof(int));
 			//cromosomaNuevo[contCromNuevo] = cromosoma1;
@@ -669,21 +698,26 @@ void main(int argc, char* argv[])
 			flag2 = true;
 			idxpop = 0;
 			while (flag2) {
-				if (suma_bool(in_boolean(cromosoma1, cromosomaNuevo[idxpop], quorum, quorum), quorum) == quorum) {
+				aBoolean1 = nullptr;
+				aBoolean1 = in_boolean(cromosoma1, cromosomaNuevo[idxpop], quorum, quorum);
+				if (suma_bool(aBoolean1, quorum) == quorum) {
 					int* cualSacar = (int*)malloc(sizeof(int));
 					sample(cualSacar, quorum, 1);
-					int** mNotInCromosoma1 = (int**)malloc(2 * sizeof(int*));
-					mNotInCromosoma1 = notin(crear_arreglo(n), cromosoma1, n, quorum);
-					int* notInCromosoma1 = (int*)malloc(mNotInCromosoma1[1][0] * sizeof(int));
+					int** mNotInCromosoma1 = nullptr;
+					int* ar = crear_arreglo(n);
+					mNotInCromosoma1 = notin(ar, cromosoma1, n, quorum);
+					int* notInCromosoma1 = nullptr;
 					notInCromosoma1 = mNotInCromosoma1[0];
 					int* cualIntroducir = (int*)malloc(sizeof(int));
 					sample_arreglo(cualIntroducir, 1, notInCromosoma1, mNotInCromosoma1[1][0]);
 					cromosoma1[cualSacar[0]] = cualIntroducir[0];
 					sort(cromosoma1, quorum);
 
+					free(ar);
 					free(cualSacar);
+					free(mNotInCromosoma1[0]);
+					free(mNotInCromosoma1[1]);
 					free(mNotInCromosoma1);
-					free(notInCromosoma1);
 					free(cualIntroducir);
 
 					idxpop = 0;
@@ -699,27 +733,32 @@ void main(int argc, char* argv[])
 						idxpop++;
 					}
 				}
+				free(aBoolean1);
 			}
 
 			flag2 = true;
 			idxpop = 0;
 			while (flag2) {
-
-				if (suma_bool(in_boolean(cromosoma2, cromosomaNuevo[idxpop], quorum, quorum), quorum) == quorum) {
+				aBoolean2 = nullptr;
+				aBoolean2 = in_boolean(cromosoma2, cromosomaNuevo[idxpop], quorum, quorum);
+				if (suma_bool(aBoolean2, quorum) == quorum) {
 					int* cualSacar = (int*)malloc(sizeof(int));
 					sample(cualSacar, quorum, 1);
-					int** mNotInCromosoma2 = (int**)malloc(2 * sizeof(int*));
-					mNotInCromosoma2 = notin(crear_arreglo(n), cromosoma2, n, quorum);
-					int* notInCromosoma2 = (int*)malloc(mNotInCromosoma2[1][0] * sizeof(int));
+					int** mNotInCromosoma2 = nullptr;
+					int* ar = crear_arreglo(n);
+					mNotInCromosoma2 = notin(ar, cromosoma2, n, quorum);
+					int* notInCromosoma2 = nullptr;
 					notInCromosoma2 = mNotInCromosoma2[0];
 					int* cualIntroducir = (int*)malloc(sizeof(int));
 					sample_arreglo(cualIntroducir, 1, notInCromosoma2, mNotInCromosoma2[1][0]);
 					cromosoma2[cualSacar[0]] = cualIntroducir[0];
 					sort(cromosoma2, quorum);
 
+					free(ar);
 					free(cualSacar);
+					free(mNotInCromosoma2[0]);
+					free(mNotInCromosoma2[1]);
 					free(mNotInCromosoma2);
-					free(notInCromosoma2);
 					free(cualIntroducir);
 
 					idxpop = 0;
@@ -735,6 +774,7 @@ void main(int argc, char* argv[])
 						idxpop++;
 					}
 				}
+				free(aBoolean2);
 			}
 			memcpy(cromosomaNuevo[contCromNuevo], cromosoma1, quorum * sizeof(int));
 			fitnessPobNuevo[contCromNuevo] = eval_sol(cromosoma1, matDis, quorum);
@@ -757,7 +797,9 @@ void main(int argc, char* argv[])
 
 			while (flag2)
 			{
-				if (suma_bool(in_boolean(cromosoma[0], cromosomaNuevo[idxpop], quorum, quorum), quorum) == quorum)
+				aBoolean1 = nullptr;
+				aBoolean1 = in_boolean(cromosoma[0], cromosomaNuevo[idxpop], quorum, quorum);
+				if (suma_bool(aBoolean1, quorum) == quorum)
 				{
 					flag2 = false;
 					flag3 = true;
@@ -770,6 +812,7 @@ void main(int argc, char* argv[])
 				{
 					flag2 = false;
 				}
+				free(aBoolean1);
 			}
 			float* pNuevo = (float*)malloc(m * sizeof(float));
 			float* cumpNuevo = (float*)malloc(m * sizeof(float));
@@ -857,8 +900,13 @@ void main(int argc, char* argv[])
 				k = 0;
 			}
 			fitnessAnt = fitnessPob[0];
+			free(pNuevo);
+			free(cumpNuevo);
+			free(cromosomaCambio);
 		}
-
+		free(cromosoma1);
+		free(cromosoma2);
+		free(crossovern);
 	}
 	itera = itera + to_string(it) + ",";
 	fitnessEvol = fitnessEvol + to_string(fitnessPob[0]) + ",";
@@ -885,16 +933,34 @@ void main(int argc, char* argv[])
 	for (size_t j = 0; j < quorum; j++)
 	{
 		//para el parlamento Chileno
-		if(j<quorum-1)resultados << data["diputados"][cromosoma[0][j]]["ID"] << ",";
-		else resultados << data["diputados"][cromosoma[0][j]]["ID"];
+		//if(j<quorum-1)resultados << data["diputados"][cromosoma[0][j]]["ID"] << ",";
+		//else resultados << data["diputados"][cromosoma[0][j]]["ID"];
 
 		//para el parlamento de estados unidos
-		//if (j < quorum - 1)resultados << cromosoma[0][j] << ",";
-		//else resultados << cromosoma[0][j];
+		if (j < quorum - 1)resultados << cromosoma[0][j] << ",";
+		else resultados << cromosoma[0][j];
 	}
 	resultados << "]\n" << "}";
 	resultados.close();
 
 	histo << "{\n\"iteraciones\": " << itera << ",\n";
 	histo << "\"fitness\": " << fitnessEvol << "\n}";
+
+	free(fitnessPob);
+	free(fitnessPobNuevo);
+	free(p);
+	free(cump);
+	for (size_t j = 0; j < m; j++)
+	{
+		free(cromosomaNuevo[j]);
+		free(cromosoma[j]);
+	}
+	for (size_t i = 0; i < n; i++)
+	{
+		free(matDis[i]);
+	}
+	free(cromosomaNuevo);
+	free(cromosoma);
+	free(matDis);
+	return EXIT_SUCCESS;
 }
