@@ -283,7 +283,7 @@ int** which(bool* array, int largo)
 	int* result = nullptr;
 	int** ret = (int**)malloc(sizeof(int*) * 2);
 	int cont = 0;
-	for (size_t i = 0; i < largo - 1; i++)
+	for (size_t i = 0; i < largo; i++)
 	{
 		if (array[i])
 			cont++;
@@ -519,12 +519,8 @@ void main(int argc, char* argv[])
 	int fitnessAnt;
 	while (k < max_k)
 	{
-
-		//cout << "iteracion: " << it+1 << endl;
-		//cout << rand() / static_cast<float>(RAND_MAX) << endl;
 		it++;
 		fitnessAnt = fitnessPob[0];
-		//cout << mt << endl;
 		cual1 = smallest_greater(cump, m, (float)uni2(mt));
 		cual2 = smallest_greater(cump, m, (float)uni2(mt));
 		//cual1 = smallest_greater(cump, m, rand() / static_cast<float>(RAND_MAX));
@@ -617,7 +613,6 @@ void main(int argc, char* argv[])
 			sample(cualSacar, quorum, 1);
 			int** mNotInCromosoma1 = (int**)malloc(2 * sizeof(int*));
 			mNotInCromosoma1 = notin(crear_arreglo(n), cromosoma1, n, quorum);
-			//cout << mNotInCromosoma1[1][0] << endl;
 			int* notInCromosoma1 = (int*)malloc(mNotInCromosoma1[1][0] * sizeof(int));
 			notInCromosoma1 = mNotInCromosoma1[0];
 			int* cualIntroducir = (int*)malloc(sizeof(int));
@@ -711,20 +706,6 @@ void main(int argc, char* argv[])
 			while (flag2) {
 
 				if (suma_bool(in_boolean(cromosoma2, cromosomaNuevo[idxpop], quorum, quorum), quorum) == quorum) {
-					/*if (it >= 249) {
-						cout << "cromosoma nuevo" << endl;
-						for (size_t j = 0; j < quorum; j++)
-						{
-							cout << cromosomaNuevo[idxpop][j] << " ";
-						}
-						cout << endl;
-						cout << "cromosoma2" << endl;
-						for (size_t j = 0; j < quorum; j++)
-						{
-							cout << cromosoma2[j] << " ";
-						}
-						cout << endl;
-					}*/
 					int* cualSacar = (int*)malloc(sizeof(int));
 					sample(cualSacar, quorum, 1);
 					int** mNotInCromosoma2 = (int**)malloc(2 * sizeof(int*));
