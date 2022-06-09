@@ -14,8 +14,8 @@ using json = nlohmann::json;
 
 int m = 50;
 float pmutacion_threshold = 0.2;
-float pr = 0.1;
-int seed = 12345;
+float pr = 0.2;
+int seed = 1512;
 
 random_device rng;
 default_random_engine generator(seed);
@@ -106,7 +106,12 @@ void sample(int* arreglo, int limite, int largo)
 	int i = 0;
 	bool repetido = false;
 	int valor = 0;
-	uni = uniform_int_distribution<int>(0, limite - 1);
+	if (limite == 0) {
+		uni = uniform_int_distribution<int>(0, limite);
+	}
+	else {
+		uni = uniform_int_distribution<int>(0, limite - 1);
+	}
 	while (i < largo)
 	{
 		valor = uni(mt);
@@ -871,7 +876,7 @@ int main(int argc, char* argv[])
 
 
 			int* cromosomaCambio = (int*)malloc(quorum * sizeof(int));
-			for (size_t j = round(m / 2); j < m; j++)
+			for (size_t j = m / 2; j < m; j++)
 			{
 				sample(cromosomaCambio, n, quorum);
 				sort(cromosomaCambio, quorum);
@@ -916,20 +921,21 @@ int main(int argc, char* argv[])
 	auto tFinal = chrono::high_resolution_clock::now();
 	double tTomado = chrono::duration_cast<chrono::nanoseconds>(tFinal - tInicial).count();
 	tTomado *= 1e-9;
-	cout << fitnessPob[0] << "it: " << it << endl;
+	/*cout << fitnessPob[0] << "it: " << it << endl;
 	cout << "T=" << fixed << tTomado << setprecision(9) << endl;
 	for (size_t j = 0; j < quorum; j++)
 	{
 		cout << cromosoma[0][j] << " ";
-	}
+	}*/
 	resultados << "{\n\"m\": " << m << ",\n";
 	resultados << "\"pmutacion_threshold\": " << pmutacion_threshold << ",\n";
 	resultados << "\"pr\": " << pr << ",\n";
 	resultados << "\"seed\": " << seed << ",\n";
-	resultados << "\"numero de iteraciones\": " << it << ",\n";
+	resultados << "\"numero_de_iteraciones\": " << it << ",\n";
 	resultados << "\"fitness\": " << fitnessPob[0] << ",\n";
 	resultados << "\"tiempo\": " << fixed << tTomado << setprecision(9) << ",\n";
 	resultados << "\"coalicion\": [";
+
 	for (size_t j = 0; j < quorum; j++)
 	{
 		//para el parlamento Chileno
