@@ -12,10 +12,10 @@
 using namespace std;
 using json = nlohmann::json;
 
-int m = 50;
+int m = 30;
 float pmutacion_threshold = 0.2;
-float pr = 0.2;
-int seed = 1512;
+float pr = 0.15;
+int seed = time(NULL);
 
 random_device rng;
 default_random_engine generator(seed);

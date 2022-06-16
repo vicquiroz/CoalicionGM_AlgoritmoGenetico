@@ -5,10 +5,10 @@ datos=as.data.frame(data)
 names(datos) = c("m","p_tresh","pr","seed","iteraciones","fitness")
 #print(datos)
 
-
+#usar graficos de violin
 #fitness
 print(
-  ggplot(data=datos)+geom_line(aes(x=1:nrow(datos),y=fitness))
+  ggplot(data=datos)+geom_point(aes(x=1:nrow(datos),y=fitness))
 )
 
 print(
@@ -16,16 +16,16 @@ print(
 )
 
 print(
-  ggplot(data=datos)+geom_line(aes(x=m,y=fitness))
+  ggplot(data=datos)+geom_point(aes(x=m,y=fitness))
 )
 
 
 print(
-  ggplot(data=datos)+geom_line(aes(x=p_tresh,y=fitness))
+  ggplot(data=datos)+geom_point(aes(x=p_tresh,y=fitness))
 )
 
 print(
-  ggplot(data=datos)+geom_line(aes(x=pr,y=fitness))
+  ggplot(data=datos)+geom_point(aes(x=pr,y=fitness))
 )
 
 
@@ -33,7 +33,7 @@ print(
 
 
 print(
-  ggplot(data=datos)+geom_line(aes(x=1:nrow(datos),y=iteraciones))
+  ggplot(data=datos)+geom_point(aes(x=1:nrow(datos),y=iteraciones))
 )
 
 print(
@@ -41,14 +41,14 @@ print(
 )
 
 print(
-  ggplot(data=datos)+geom_line(aes(x=m,y=iteraciones))
+  ggplot(data=datos)+geom_point(aes(x=m,y=iteraciones))
 )
 
 
 print(
-  ggplot(data=datos)+geom_line(aes(x=p_tresh,y=iteraciones))
+  ggplot(data=datos)+geom_point(aes(x=p_tresh,y=iteraciones))
 )
 
 print(
-  ggplot(data=datos)+geom_line(aes(x=pr,y=iteraciones))
+  ggplot(data=datos)+geom_point(aes(x=pr,y=iteraciones))
 )
