@@ -1,3 +1,4 @@
+//llamada de librerias
 #include <iostream>
 #include <cstdlib>
 #include <fstream>
@@ -8,31 +9,37 @@
 #include <stdlib.h>
 #include <nlohmann/json.hpp>
 #include <chrono>
-// srand() para usar la semilla
+
+//acortadores
 using namespace std;
 using json = nlohmann::json;
 
+//parametros iniciales
 int m = 30;
 float pmutacion_threshold = 0.2;
 float pr = 0.15;
 int seed = time(NULL);
 
+//inicializador de generador de random
 random_device rng;
 default_random_engine generator(seed);
 mt19937 mt{ rng() };
 
+//inicializador de random, tanto para int's como para float's
 uniform_int_distribution<int> uni;
 uniform_real_distribution<double> uni2;
 
+//***********funciones***********
+//funcion para calcular la distancia entre dos puntos
 float dis_euc(float x1, float y1, float x2, float y2)
 {
 	float calculo = pow(pow((x2 - x1), 2) + pow((y2 - y1), 2), 1 / (float)2);
 	return calculo;
 }
 
+//evaluar los cromosomas y calcular su fitness
 float eval_sol(int* pos, float** mat, int largo) {
 	float suma = 0;
-	//cout << largo << endl << endl;
 	for (size_t i = 0; i <= (largo - 2); i++)
 	{
 
@@ -43,19 +50,8 @@ float eval_sol(int* pos, float** mat, int largo) {
 	}
 	return suma;
 }
-/*
-float eval_sol2(int* pos, json data, int largo) {
-	float suma = 0;
-	for (size_t i = 0; i <= (largo - 2); i++)
-	{
-		for (size_t j = i + 1; j <= largo-1; j++)
-		{
-			suma = suma + dis_euc(data["diputados"][pos[i]]["coordX"], data["diputados"][pos[i]]["coordY"], data["diputados"][pos[j]]["coordX"], data["diputados"][pos[j]]["coordY"]);
-		}
-	}
-	return suma;
-}*/
 
+//funcion para suamar los valores de un arreglo
 float suma(float* array, int largo)
 {
 	float suma = 0;
@@ -66,6 +62,7 @@ float suma(float* array, int largo)
 	return suma;
 }
 
+//funcion para obtener el numero de booleanos "TRUE" en un arreglo
 int suma_bool(bool* array, int largo)
 {
 	int suma = 0;
@@ -78,7 +75,8 @@ int suma_bool(bool* array, int largo)
 	}
 	return suma;
 }
-// ver return null (posible return -1)
+
+//funcion para obtener la posicion de el primer valor en un arreglo que sea más pequeño que un valor dado
 int smallest_greater(float* seq, int largo, float value)
 {
 	int i = 0;
@@ -101,6 +99,7 @@ int smallest_greater(float* seq, int largo, float value)
 	return(int)EXIT_FAILURE;
 }
 
+//funcion para llenar un arreglo con numeros aleatorios entre un rango dado
 void sample(int* arreglo, int limite, int largo)
 {
 	int i = 0;
@@ -129,6 +128,7 @@ void sample(int* arreglo, int limite, int largo)
 	}
 }
 
+//funcion para ordenar un arreglo de menor a mayor
 void sort(int* array, int largo)
 {
 	int temp = 0;
@@ -150,6 +150,7 @@ void sort(int* array, int largo)
 	}
 }
 
+//funcion para ordenar un arreglo de menor a mayor y aplica esos cambios a una matriz
 void order(float* fitness, int** cromosoma, int quorum, int m)
 {
 	int temp = 0;
@@ -178,6 +179,7 @@ void order(float* fitness, int** cromosoma, int quorum, int m)
 	free(arrTemp);
 }
 
+//funcion para retornar los valores que estan en el arreglo1 pero no en el arreglo2 (valores)
 int** notin(int* array1, int* array2, int largo1, int largo2)
 {
 	int* temp = (int*)malloc(sizeof(int) * largo1);
@@ -212,6 +214,7 @@ int** notin(int* array1, int* array2, int largo1, int largo2)
 	return ret;
 }
 
+//funcion para retornar un arreglo de booleanos, donde TRUE significa que estan en ambos arreglos y FALSE significa que esta en el arreglo1 pero no en el arreglo2
 bool* in_boolean(int* array1, int* array2, int largo1, int largo2)
 {
 	bool* result = (bool*)malloc(sizeof(bool) * largo1);
@@ -237,6 +240,8 @@ bool* in_boolean(int* array1, int* array2, int largo1, int largo2)
 	}
 	return result;
 }
+
+//funcion que retorna el menor valor de un arreglo
 int minimo(int* array, int largo)
 {
 	int mini = 0;
@@ -250,6 +255,7 @@ int minimo(int* array, int largo)
 	return mini;
 }
 
+//funcion que retorna el mayor valor de un arreglo
 int maximo(int* array, int largo)
 {
 	int maxi = 0;
@@ -263,6 +269,7 @@ int maximo(int* array, int largo)
 	return maxi;
 }
 
+//funcion que retorna la posicion de los valores que sean los mayores de un arreglo
 int which_max(float* array, int largo)
 {
 	int maxi = array[0];
@@ -285,6 +292,7 @@ int which_max(float* array, int largo)
 	return -1;
 }
 
+//funcion que dado un arreglo de booleanos retorna la posicion de los valores que sean TRUE
 int** which(bool* array, int largo)
 {
 	int cont = 0;
@@ -310,6 +318,7 @@ int** which(bool* array, int largo)
 	return ret;
 }
 
+//funcion que crea y retorna un arreglo de enteros
 int* crear_arreglo(int largo)
 {
 	int* arreglo = (int*)malloc(sizeof(int) * largo);
@@ -321,47 +330,7 @@ int* crear_arreglo(int largo)
 	return arreglo;
 }
 
-int** repetidos(int* arreglo, int largo)
-{
-	int cont = 0;
-	int aux = 0;
-	int newlargo = largo;
-	int* newarr = (int*)malloc(sizeof(int) * largo);
-	for (size_t i = 0; i < newlargo; i++)
-	{
-		newarr[i] = arreglo[i];
-	}
-	for (size_t i = 0; i < newlargo; i++)
-	{
-		for (size_t j = 0; j < newlargo; j++)
-		{
-			if (newarr[i] == newarr[j]) cont++;
-		}
-		if (cont > 1) {
-			aux = i + 1;
-			for (size_t j = i + 1; j < newlargo; j++)
-			{
-				if (newarr[j] != newarr[i]) newarr[aux] = newarr[j];
-			}
-			newlargo = newlargo - cont + 1;
-			aux = 0;
-			cont = 0;
-		}
-	}
-	int* finalarr = (int*)malloc(sizeof(int) * newlargo);
-	for (size_t i = 0; i < newlargo; i++)
-	{
-		finalarr[i] = newarr[i];
-	}
-	delete[] newarr;
-	int** ret = (int**)malloc(sizeof(int*) * 2);
-	int* pointCont = (int*)malloc(sizeof(int) * 1);
-	pointCont[0] = newlargo;
-	ret[0] = finalarr;
-	ret[1] = pointCont;
-	return ret;
-}
-
+//funcion que dado un arreglo este es rellenado con valores aleatorios
 void sample_arreglo(int* arreglo, int cant, int* valores, int largo)
 {
 	int indice = 0;
@@ -387,9 +356,11 @@ void sample_arreglo(int* arreglo, int cant, int* valores, int largo)
 	}
 }
 
-
+//funcion principal
 int main(int argc, char* argv[])
 {
+	//llamada de JSON
+
 	//para camara de diputados chile
 	//ifstream archivo("ejemplo2.json");
 	//json data = json::parse(archivo);
@@ -398,6 +369,8 @@ int main(int argc, char* argv[])
 	ifstream archivo("ingles.json");
 	json data = json::parse(archivo);
 
+
+	//se crea y abre el archivo de salida
 	ofstream resultados;
 	resultados.open("resultados.json");
 
@@ -405,21 +378,22 @@ int main(int argc, char* argv[])
 	histo.open("hist.json");
 	string itera = "[";
 	string fitnessEvol = "[";
-	//resultados << "{\"hola\": 123}\n";
-	//resultados.close();
 
+	//de los JSON se obtiene la cantidad de diputados
 	//para parlamento de estados unidos
 	int n = data["rollcalls"][0]["votes"].size();
 
 	//para camara de diputados chile
 	//int n = data["diputados"].size();
 
+	//creacion de la matriz de distancia
 	float** matDis = (float**)malloc(n * sizeof(float*));
 	for (size_t i = 0; i < n; i++)
 	{
 		matDis[i] = (float*)malloc(n * sizeof(float));
 	}
 
+	//rellenado de la matriz de distancia
 	//para parlamento de estados unidos
 	for (size_t i = 0; i <= (n - 2); i++)
 	{
@@ -440,12 +414,17 @@ int main(int argc, char* argv[])
 			matDis[i][j] = dis_euc(data["diputados"][i]["coordX"], data["diputados"][i]["coordY"], data["diputados"][j]["coordX"], data["diputados"][j]["coordY"]);
 		}
 	}*/
+
+	//inicializacion de tiempo para calculo de ejecucion
 	auto tInicial = chrono::high_resolution_clock::now();
 
+	//inicializacion de quorum
 	//para parlamento de estados unidos
 	int quorum = trunc(n / 2) + 1;
 	//para camara de diputados chile
 	//int quorum = 74;
+
+	//revision de parametros de entrada
 	if (argc > 1)
 	{
 		m = stoi(argv[1]);
@@ -453,42 +432,50 @@ int main(int argc, char* argv[])
 		pr = stod(argv[3]);
 		seed = stoi(argv[4]);
 	}
+	//inicializacion de semilla
 	mt.seed(seed);
 
+	//generador de float's random entre 0 y 1
 	uni2 = uniform_real_distribution<double>(0, 1);
 
+	//inicializador de Poblacion y fitness
 	int** cromosoma = (int**)malloc(m * sizeof(int*));
 	float* fitnessPob = nullptr;
 	fitnessPob = (float*)malloc(m * sizeof(float));
 
+	//inicializacion de cromosomas
 	for (size_t i = 0; i < m; i++)
 	{
 		cromosoma[i] = (int*)malloc(quorum * sizeof(int));
 	}
 
-	//cout << "primero --------------------" << endl;
-
+	//rellenado de cromosomas y evaluacion de fitness
 	for (size_t i = 0; i < m; i++)
 	{
 		sample(cromosoma[i], n, quorum);
 		sort(cromosoma[i], quorum);
 		fitnessPob[i] = eval_sol(cromosoma[i], matDis, quorum);
 	}
-
+	
+	//ordenamiento de fitness y cromosomas
 	order(fitnessPob, cromosoma, quorum, m);
 
+	//inicializacion de variables de probabilidad
 	float* p = (float*)malloc(m * sizeof(float));
 	float* cump = (float*)malloc(m * sizeof(float));
 
 	p[0] = 0.1;
 	cump[0] = 0.1;
 
+	//calculo de probabilidad
 	for (size_t i = 1; i < m; i++)
 	{
 		p[i] = pr * pow(1 - pr, i);
 		cump[i] = suma(p, i);
 	}
 	cump[m - 1] = 1;
+	
+	//inicializador de variables
 	//int max_k = 10 * (m - 21);
 	int max_k = 10*trunc((n+quorum)/m);
 	int i = 0;
@@ -512,6 +499,7 @@ int main(int argc, char* argv[])
 
 	int min;
 
+	//inicializador de variables de las nuevas poblaciones y sus respectivos fitness
 	int** cromosomaNuevo = (int**)malloc(m * sizeof(int*));
 	for (size_t a = 0; a < m; a++)
 	{
@@ -520,6 +508,7 @@ int main(int argc, char* argv[])
 	float* fitnessPobNuevo = (float*)malloc(m * sizeof(float));
 
 	int fitnessAnt;
+
 
 	// Reservas extras 
 
@@ -539,22 +528,27 @@ int main(int argc, char* argv[])
 	int** mCual21 = nullptr;
 	int* cromosoma1 = nullptr;
 	int* cromosoma2 = nullptr;
+
+	//incio de algoritmo
 	while (k < max_k)
 	{
+		//guardamos fitness e iteraciones
 		it++;
 		fitnessAnt = fitnessPob[0];
+
+		//se seleciona cromosomas a cruzar
 		cual1 = smallest_greater(cump, m, (float)uni2(mt));
 		cual2 = smallest_greater(cump, m, (float)uni2(mt));
-		//cual1 = smallest_greater(cump, m, rand() / static_cast<float>(RAND_MAX));
-		//cual2 = smallest_greater(cump, m, rand() / static_cast<float>(RAND_MAX));
+		//estos no pueden ser iguales
 		while (cual1 == cual2)cual2 = smallest_greater(cump, m, (float)uni2(mt));
-		//while (cual1 == cual2)cual2 = smallest_greater(cump, m, rand() / static_cast<float>(RAND_MAX));
 
+		//se guardan los cromosomas a cruzar
 		int* cromosoma1 = (int*)malloc(quorum * sizeof(int));
 		int* cromosoma2 = (int*)malloc(quorum * sizeof(int));
 		memcpy(cromosoma1, cromosoma[cual1], quorum * sizeof(int));
 		memcpy(cromosoma2, cromosoma[cual2], quorum * sizeof(int));
 
+		//extraccion de los genes a cruzar
 		mDis12 = notin(cromosoma1, cromosoma2, quorum, quorum);
 		mDis21 = notin(cromosoma2, cromosoma1, quorum, quorum);
 
@@ -564,21 +558,25 @@ int main(int argc, char* argv[])
 		memcpy(disimilar12, mDis12[0], mDis12[1][0] * sizeof(int));
 		memcpy(disimilar21, mDis21[0], mDis21[1][0] * sizeof(int));
 
+		//guardamos la cantidad de genes a cruzar
 		int* arrMin = (int*)malloc(2 * sizeof(int));
 		arrMin[0] = mDis12[1][0];
 		arrMin[1] = mDis21[1][0];
 
+		//seleccion de cantidad de genes a cruzar
 		int* crossovern = (int*)malloc(sizeof(int));
 
 		min = minimo(arrMin, 2);
 		sample(crossovern, min, 1);
 
+		//creamos y rellenamos los arrays de seleccion de genes a cruzar
 		int* selecCrossover12 = (int*)malloc(crossovern[0] * sizeof(int));
 		int* selecCrossover21 = (int*)malloc(crossovern[0] * sizeof(int));
 
 		sample(selecCrossover12, mDis12[1][0], crossovern[0]);
 		sample(selecCrossover21, mDis21[1][0], crossovern[0]);
 
+		//guardamos los genes a cruzar
 		int* crossover12 = (int*)malloc(crossovern[0] * sizeof(int));
 		int* crossover21 = (int*)malloc(crossovern[0] * sizeof(int));
 
@@ -587,11 +585,12 @@ int main(int argc, char* argv[])
 			crossover12[a] = disimilar12[selecCrossover12[a]];
 			crossover21[a] = disimilar21[selecCrossover21[a]];
 		}
+
+		//ordenamos los arreglos de los genes a cruzar
 		sort(crossover12, crossovern[0]);
 		sort(crossover21, crossovern[0]);
 
-		//revisar which y in_boolean.
-
+		//revisamos si los genes seleccionados se encuentran en el cromosoma aislado
 		aBoolean1 = in_boolean(cromosoma1, crossover12, quorum, crossovern[0]);
 
 		aBoolean2 = in_boolean(cromosoma2, crossover21, quorum, crossovern[0]);
@@ -604,7 +603,7 @@ int main(int argc, char* argv[])
 
 		int* cual12 = nullptr;
 		int* cual21 = nullptr;
-
+		//en base a la posicion de genes sacada anteriormente ahora si realizamos los cruces a los cromosomas aislados
 		cual12 = mCual12[0];
 		cual21 = mCual21[0];
 		for (size_t a = 0; a < mCual12[1][0]; a++)
@@ -615,10 +614,11 @@ int main(int argc, char* argv[])
 		{
 			cromosoma2[cual21[a]] = crossover12[a];
 		}
-
+		//se ordenan
 		sort(cromosoma1, quorum);
 		sort(cromosoma2, quorum);
 
+		//liberacion de memoria
 		free(arrMin);
 		free(mDis12[0]);
 		free(mDis12[1]);
@@ -638,10 +638,11 @@ int main(int argc, char* argv[])
 		free(crossover21);
 		free(selecCrossover12);
 		free(selecCrossover21);
-
+		//creamos la probabilidad de mutacion
 		pmutacion = (float)uni2(mt);
-		//pmutacion = rand() / static_cast<float>(RAND_MAX);
+		//comprobamos si se muta el cromosoma1
 		if (pmutacion < pmutacion_threshold) {
+			//seleccion de genes a mutar
 			int* cualSacar = (int*)malloc(sizeof(int));
 			sample(cualSacar, quorum, 1);
 			int** mNotInCromosoma1 = nullptr;
@@ -651,9 +652,10 @@ int main(int argc, char* argv[])
 			notInCromosoma1 = mNotInCromosoma1[0];
 			int* cualIntroducir = (int*)malloc(sizeof(int));
 			sample_arreglo(cualIntroducir, 1, notInCromosoma1, mNotInCromosoma1[1][0]);
+			//se realiza la mutacion y se ordena
 			cromosoma1[cualSacar[0]] = cualIntroducir[0];
 			sort(cromosoma1, quorum);
-
+			//liberacion de memoria
 			free(ar);
 			free(cualSacar);
 			free(mNotInCromosoma1[0]);
@@ -662,10 +664,11 @@ int main(int argc, char* argv[])
 			free(cualIntroducir);
 
 		}
-
+		//creamos la probabilidad de mutacion
 		pmutacion = (float)uni2(mt);
-		//pmutacion = rand() / static_cast<float>(RAND_MAX);
+		//comprobamos si se muta el cromosoma2
 		if (pmutacion < pmutacion_threshold) {
+			//seleccion de genes a mutar
 			int* cualSacar = (int*)malloc(sizeof(int));
 			sample(cualSacar, quorum, 1);
 			int** mNotInCromosoma2 = nullptr;
@@ -675,9 +678,10 @@ int main(int argc, char* argv[])
 			notInCromosoma2 = mNotInCromosoma2[0];
 			int* cualIntroducir = (int*)malloc(sizeof(int));
 			sample_arreglo(cualIntroducir, 1, notInCromosoma2, mNotInCromosoma2[1][0]);
+			//se realiza la mutacion y se ordena
 			cromosoma2[cualSacar[0]] = cualIntroducir[0];
 			sort(cromosoma2, quorum);
-
+			//liberacion de memoria
 			free(ar);
 			free(cualSacar);
 			free(mNotInCromosoma2[0]);
@@ -686,23 +690,24 @@ int main(int argc, char* argv[])
 			free(cualIntroducir);
 
 		}
-
+		//comprobacion si es la primera iteracion
 		if (i == 0) {
-
+			//inicializamos la nueva poblacion con los cromosomas aislados y recalculamos su fitness
 			memcpy(cromosomaNuevo[contCromNuevo], cromosoma1, quorum * sizeof(int));
-			//cromosomaNuevo[contCromNuevo] = cromosoma1;
 			fitnessPobNuevo[contCromNuevo] = eval_sol(cromosoma1, matDis, quorum);
 			contCromNuevo++;
 			memcpy(cromosomaNuevo[contCromNuevo], cromosoma2, quorum * sizeof(int));
 
-			//cromosomaNuevo[contCromNuevo] = cromosoma2;
 			fitnessPobNuevo[contCromNuevo] = eval_sol(cromosoma2, matDis, quorum);
 			contCromNuevo++;
 		}
+		//comprobacion si no es la primera iteracion
 		else {
+			//inicializador de bandera y contador
 			flag2 = true;
 			idxpop = 0;
 			while (flag2) {
+				
 				aBoolean1 = nullptr;
 				aBoolean1 = in_boolean(cromosoma1, cromosomaNuevo[idxpop], quorum, quorum);
 				if (suma_bool(aBoolean1, quorum) == quorum) {
