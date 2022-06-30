@@ -707,45 +707,56 @@ int main(int argc, char* argv[])
 			flag2 = true;
 			idxpop = 0;
 			while (flag2) {
-				
 				aBoolean1 = nullptr;
+				//guardamos un arreglo de los booleanos si encuentra genes del cromosoma1 en el arreglo de cromosomas en la posición idxpop
 				aBoolean1 = in_boolean(cromosoma1, cromosomaNuevo[idxpop], quorum, quorum);
+				//si la suma de estos es igual al quorum
 				if (suma_bool(aBoolean1, quorum) == quorum) {
 					int* cualSacar = (int*)malloc(sizeof(int));
+					// elegimos un gen aleatorio del para sacarlo
 					sample(cualSacar, quorum, 1);
 					int** mNotInCromosoma1 = nullptr;
+					//creamos un arreglo
 					int* ar = crear_arreglo(n);
+					//selecciona los elementos que no estan en cromosoma1
 					mNotInCromosoma1 = notin(ar, cromosoma1, n, quorum);
 					int* notInCromosoma1 = nullptr;
 					notInCromosoma1 = mNotInCromosoma1[0];
 					int* cualIntroducir = (int*)malloc(sizeof(int));
+					//selecciona un arreglo de largo 1 de elementos que no estan en cromosoma1 de manera aleatoria
 					sample_arreglo(cualIntroducir, 1, notInCromosoma1, mNotInCromosoma1[1][0]);
+					//se realiza la mutacion y se ordena
 					cromosoma1[cualSacar[0]] = cualIntroducir[0];
 					sort(cromosoma1, quorum);
 
+					//limpiar memoria
 					free(ar);
 					free(cualSacar);
 					free(mNotInCromosoma1[0]);
 					free(mNotInCromosoma1[1]);
 					free(mNotInCromosoma1);
 					free(cualIntroducir);
-
+					//resetear contador
 					idxpop = 0;
 				}
 				else
 				{
+					//si ya recorrimos toda la poblacion nueva
 					if (idxpop >= contCromNuevo - 1)
 					{
+						//salimos del ciclo
 						flag2 = false;
 					}
 					else
 					{
+						//de lo contrario incrementamos el contador
 						idxpop++;
 					}
 				}
+				//liberacion de memoria
 				free(aBoolean1);
 			}
-
+			//lo mismo explicado anteriormente pero para el cromosoma2
 			flag2 = true;
 			idxpop = 0;
 			while (flag2) {
@@ -786,6 +797,8 @@ int main(int argc, char* argv[])
 				}
 				free(aBoolean2);
 			}
+
+			//guardamos los cambios en el arreglo de cromosomas nuevos
 			memcpy(cromosomaNuevo[contCromNuevo], cromosoma1, quorum * sizeof(int));
 			fitnessPobNuevo[contCromNuevo] = eval_sol(cromosoma1, matDis, quorum);
 			contCromNuevo++;
@@ -794,13 +807,18 @@ int main(int argc, char* argv[])
 			contCromNuevo++;
 
 		}
+		//aumentamos contador de iteraciones
 		i++;
+		//si llegamos a la mitad de la poblacion
 		if (i == m / 2)
 		{
+			//reseteamos contador
 			i = 0;
 			contCromNuevo = 0;
+			//ordenamos la poblacion nueva
 			order(fitnessPobNuevo, cromosomaNuevo, quorum, m);
-
+			
+			//creacion de bandera
 			flag2 = true;
 			flag3 = false;
 			idxpop = 0;
@@ -808,78 +826,58 @@ int main(int argc, char* argv[])
 			while (flag2)
 			{
 				aBoolean1 = nullptr;
+				//guardamos un arreglo de los booleanos si encuentra genes del cromosoma1 en el arreglo de cromosomas en la posición idxpop
 				aBoolean1 = in_boolean(cromosoma[0], cromosomaNuevo[idxpop], quorum, quorum);
+				//si la suma de estos es igual al quorum
 				if (suma_bool(aBoolean1, quorum) == quorum)
 				{
+					//cambiamos las banderas
 					flag2 = false;
 					flag3 = true;
 				}
 				else
 				{
+					//de lo contrario incrementamos el contador
 					idxpop++;
 				}
+				//si el contador indexpop llega al tamaño de la poplacion
 				if (idxpop > m - 1)
 				{
+					//detenemos el ciclo
 					flag2 = false;
 				}
+				//liberamos memoria
 				free(aBoolean1);
 			}
 			float* pNuevo = (float*)malloc(m * sizeof(float));
 			float* cumpNuevo = (float*)malloc(m * sizeof(float));
+			//si despues de terminar el while anterior la bandera flag3 es false
 			if (flag3 == false)
 			{
-				/*for (size_t j = 0; j < m; j++)
-				{
-					cout << "j: " << j << " " << fitnessPobNuevo[j] << " ";
-				}
-				cout << endl;*/
-				//peor = which_max(fitnessPobNuevo, m);
-				//cout << peor << endl;
+				//cambiamos el peor cromosoma de la poblacion actual por el mejor cromosoma de la poblacion nueva
 				peor = m - 1;
 				memcpy(cromosomaNuevo[peor], cromosoma[0], quorum * sizeof(int));
 				fitnessPobNuevo[peor] = fitnessPob[0];
 				order(fitnessPobNuevo, cromosomaNuevo, quorum, m);
-
-				//aqui va lo que no se deberia tener que hacer
 				memcpy(pNuevo, p, m * sizeof(float));
 				memcpy(cumpNuevo, cump, m * sizeof(float));
-				/*
-				if (fitnessPobNuevo[0] == fitnessPob[0])
-				{
-					k++;
-				}
-				*/
 
 			}
 			else
 			{
+				//de lo contrario mantenemos la probabilidad y la probabilidad acumulada
 				memcpy(pNuevo, p, m * sizeof(float));
 				memcpy(cumpNuevo, cump, m * sizeof(float));
-				/*
-				if (fitnessPobNuevo[0] == fitnessPob[0])
-				{
-					k++;
-				}
-				*/
 			}
+			//cambiamos la poblacion actual por la poblacion nueva
 			for (size_t a = 0; a < m; a++)
 			{
 				memcpy(cromosoma[a], cromosomaNuevo[a], quorum * sizeof(int));
-				//revisar
 				fitnessPob[a] = fitnessPobNuevo[a];
 				p[a] = pNuevo[a];
 				cump[a] = cumpNuevo[a];
 			}
-			/*for (size_t j = 0; j < m; j++)
-			{
-				free(cromosomaNuevo[j]);
-			}
-			free(cromosomaNuevo);
-			free(fitnessPobNuevo);
-			free(pNuevo);
-			free(cumpNuevo);*/
-
-
+			//reemplazamos la mitad de la poblacion por nuevos cromosomas
 			int* cromosomaCambio = (int*)malloc(quorum * sizeof(int));
 			for (size_t j = m / 2; j < m; j++)
 			{
@@ -889,49 +887,53 @@ int main(int argc, char* argv[])
 				memcpy(cromosoma[j], cromosomaCambio, quorum * sizeof(int));
 				fitnessPob[j] = fitnessCambio;
 			}
+			//ordenamos la poblacion
 			order(fitnessPob, cromosoma, quorum, m);
-
+			//inicializamos la probabilidad y la probabilidad acumulada
 			p[0] = pr;
 			cump[0] = pr;
-
+			//terminamos de rellenar la probabilidad y la probabilidad acumulada
 			for (size_t j = 1; j < m; j++)
 			{
 				p[j] = pr * pow(1 - pr, j);
 				cump[j] = suma(p, j);
 			}
+			//dejamos la ultima probabilidad acumulada en 1
 			cump[m - 1] = 1;
+			//reinicializamos el contador de iteraciones
 			i = 0;
 
-			//aqui
+			
 			k++;
+			//si el fitness del mejor cromosoma es igual al fitness del mejor cromosoma anterior guardamos el numero de iteraciones y el fitness
 			if (fitnessPob[0] < fitnessAnt) {
 				itera = itera + to_string(it) + ",";
 				fitnessEvol = fitnessEvol + to_string(fitnessPob[0]) + ",";
 				k = 0;
 			}
+			//guardamos el fitness del mejor cromosoma
 			fitnessAnt = fitnessPob[0];
+			//liberamos memoria
 			free(pNuevo);
 			free(cumpNuevo);
 			free(cromosomaCambio);
 		}
+		//liberamos memoria
 		free(cromosoma1);
 		free(cromosoma2);
 		free(crossovern);
 	}
 	itera = itera + to_string(it) + ",";
 	fitnessEvol = fitnessEvol + to_string(fitnessPob[0]) + ",";
+	//cerramos el arreglo dentro del archivo json
 	replace(itera.end() - 1, itera.end(), ',', ']');
 	replace(fitnessEvol.end() - 1, fitnessEvol.end(), ',', ']');
-
+	//calculo de tiempo
 	auto tFinal = chrono::high_resolution_clock::now();
 	double tTomado = chrono::duration_cast<chrono::nanoseconds>(tFinal - tInicial).count();
 	tTomado *= 1e-9;
-	/*cout << fitnessPob[0] << "it: " << it << endl;
-	cout << "T=" << fixed << tTomado << setprecision(9) << endl;
-	for (size_t j = 0; j < quorum; j++)
-	{
-		cout << cromosoma[0][j] << " ";
-	}*/
+
+	//guardamos la informacion recopilada en un json
 	resultados << "{\n\"m\": " << m << ",\n";
 	resultados << "\"pmutacion_threshold\": " << pmutacion_threshold << ",\n";
 	resultados << "\"pr\": " << pr << ",\n";
@@ -953,10 +955,12 @@ int main(int argc, char* argv[])
 	}
 	resultados << "]\n" << "}";
 	resultados.close();
-
+	
+	//guardamos datos para el histograma
 	histo << "{\n\"iteraciones\": " << itera << ",\n";
 	histo << "\"fitness\": " << fitnessEvol << "\n}";
-
+	
+	//liberamos memoria
 	free(fitnessPob);
 	free(fitnessPobNuevo);
 	free(p);
