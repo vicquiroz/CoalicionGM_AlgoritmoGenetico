@@ -3,9 +3,9 @@ shopt -s expand_aliases
 source ~/.bashrc
 #alias jq=./jq-win64.exe
 
-m=(20 30 40 50 60)
-pTresh=(0.1 0.15 0.2 0.25 0.3)
-pr=(0.1 0.11 0.125 0.14 0.15)
+m=(40)
+pTresh=(0.40)
+pr=(0.14)
 
 vot=votacion22105
 

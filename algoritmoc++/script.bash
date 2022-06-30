@@ -1,7 +1,7 @@
 #!/bin/bash
-m=(20 30 40 50 60)
-pTresh=(0.1 0.15 0.2 0.25 0.3)
-pr=(0.01 0.05 0.1 0.15 0.2)
+m=(40)
+pTresh=(0.40)
+pr=(0.14)
 
 vot=votacion22105
 cd out/
@@ -13,7 +13,7 @@ cd build/x64-release
 #cd build/linux-debug/
 let seed=1234
 let iter=1
-for repeat in {1..5}
+for repeat in {1..50}
 do 
     for m_val in "${m[@]}"
     do
