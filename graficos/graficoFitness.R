@@ -1,6 +1,6 @@
 library(ggplot2)
 library(vioplot)
-data<-read.csv(file = 'prueba.csv')
+data<-read.csv(file = 'pruebaCompleta.csv')
 datos<-as.data.frame(data)
 names(datos) = c("m","p_tresh","pr","seed","iteraciones","fitness")
 # Graficos Violin Fitness vs Iteraciones
@@ -25,9 +25,11 @@ GrafViolin<-function(val2,title){
 TablaComb<-function(mval,ptreshval,prval){
   datostemp<-datos[which(datos$m==mval & datos$p_tresh==ptreshval & datos$pr==prval),]
   combtemp<-table(datostemp$fitness)/50
-  print(paste("Combinacion:  m=",as.character(mval),"  pTresh=",as.character(ptreshval)," pr=",as.character(prval)))
-  print(combtemp)
-  print("")
+  if(combtemp[1]>0.85){
+    print(paste("Combinacion:  m=",as.character(mval),"  pTresh=",as.character(ptreshval)," pr=",as.character(prval)))
+    print(combtemp)
+    print("")
+  }
 }
 
 mV=c(20,30,40,50,60)
