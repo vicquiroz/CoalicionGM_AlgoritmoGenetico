@@ -1,0 +1,68 @@
+FILE: exp/CoalicionGM/main.cpp
+
+kernel
+^^^^^^
+- bool optimize_noise = false [default value, from src/limbo/kernel/kernel.hpp][]
+- double noise = 1e-10 [defined in exp/CoalicionGM/main.cpp][]
+
+opt_cmaes
+^^^^^^^^^
+- bool stagnation = true [default value, from src/limbo/opt/cmaes.hpp]['#ifdef USE_LIBCMAES']
+- double xrel_tolerance = -1 [default value, from src/limbo/opt/cmaes.hpp]['#ifdef USE_LIBCMAES']
+- bool verbose = false [default value, from src/limbo/opt/cmaes.hpp]['#ifdef USE_LIBCMAES']
+- int max_fun_evals = -1 [default value, from src/limbo/opt/cmaes.hpp]['#ifdef USE_LIBCMAES']
+- double lbound = 0.0 [default value, from src/limbo/opt/cmaes.hpp]['#ifdef USE_LIBCMAES']
+- bool auto_max_iters = true [default value, from src/limbo/opt/cmaes.hpp]['#ifdef USE_LIBCMAES']
+- int elitism = 0 [default value, from src/limbo/opt/cmaes.hpp]['#ifdef USE_LIBCMAES']
+- bool fun_compute_initial = false [default value, from src/limbo/opt/cmaes.hpp]['#ifdef USE_LIBCMAES']
+- int restarts = 1 [default value, from src/limbo/opt/cmaes.hpp]['#ifdef USE_LIBCMAES']
+- int variant = aIPOP_CMAES [default value, from src/limbo/opt/cmaes.hpp]['#ifdef USE_LIBCMAES']
+- int max_iters = -1 [default value, from src/limbo/opt/cmaes.hpp]['#ifdef USE_LIBCMAES']
+- bool handle_uncertainty = false [default value, from src/limbo/opt/cmaes.hpp]['#ifdef USE_LIBCMAES']
+- double ubound = 1.0 [default value, from src/limbo/opt/cmaes.hpp]['#ifdef USE_LIBCMAES']
+- bool stochastic = false [default value, from src/limbo/opt/cmaes.hpp]['#ifdef USE_LIBCMAES']
+- double fun_tolerance = -1 [default value, from src/limbo/opt/cmaes.hpp]['#ifdef USE_LIBCMAES']
+- double fun_target = -1 [default value, from src/limbo/opt/cmaes.hpp]['#ifdef USE_LIBCMAES']
+- bool equal_fun_evals = true [default value, from src/limbo/opt/cmaes.hpp]['#ifdef USE_LIBCMAES']
+- int lambda = -1 [default value, from src/limbo/opt/cmaes.hpp]['#ifdef USE_LIBCMAES']
+
+acqui_ucb
+^^^^^^^^^
+- double alpha = 0.5 [default value, from src/limbo/acqui/ucb.hpp][]
+
+stop_maxiterations
+^^^^^^^^^^^^^^^^^^
+- int iterations = 30 [defined in exp/CoalicionGM/main.cpp][]
+
+eval_func
+^^^^^^^^^
+
+bayes_opt_boptimizer
+^^^^^^^^^^^^^^^^^^^^
+- int hp_period = -1 [default value, from src/limbo/bayes_opt/boptimizer.hpp][]
+
+bayes_opt_bobase
+^^^^^^^^^^^^^^^^
+- int stats_enabled = true [defined in exp/CoalicionGM/main.cpp][]
+- bool bounded = true [default value, from src/limbo/bayes_opt/bo_base.hpp][]
+
+opt_gridsearch
+^^^^^^^^^^^^^^
+- int bins = 5 [default value, from src/limbo/opt/grid_search.hpp][]
+
+kernel_maternfivehalves
+^^^^^^^^^^^^^^^^^^^^^^^
+- double sigma_sq = 1 [default value, from src/limbo/kernel/matern_five_halves.hpp][]
+- double l = 1 [default value, from src/limbo/kernel/matern_five_halves.hpp][]
+
+init_randomsampling
+^^^^^^^^^^^^^^^^^^^
+- int samples = 5 [defined in exp/CoalicionGM/main.cpp][]
+
+opt_nloptnograd
+^^^^^^^^^^^^^^^
+- double fun_tolerance = -1 [default value, from src/limbo/opt/nlopt_no_grad.hpp]['#ifdef USE_NLOPT']
+- double xrel_tolerance = -1 [default value, from src/limbo/opt/nlopt_no_grad.hpp]['#ifdef USE_NLOPT']
+- int iterations = 500 [default value, from src/limbo/opt/nlopt_no_grad.hpp]['#ifdef USE_NLOPT']
+
+=========================================
