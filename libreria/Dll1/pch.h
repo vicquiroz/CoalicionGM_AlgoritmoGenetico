@@ -11,8 +11,7 @@
 #define PROJECTLIBRARY __declspec(dllimport)
 #endif
 
-#include <iostream>
-#include <tuple>
+#include <Python.h>
 
 // agregue aquí los encabezados que desea precompilar
-extern "C++" PROJECTLIBRARY std::tuple<float, int> CoalicionGM(char* nombre, int m, float pmutacion_treshold, float pr, int seed);
+extern "C" PROJECTLIBRARY PyObject* CoalicionGM(char* nombre, int m, float pmutacion_treshold, float pr, int seed);

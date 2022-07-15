@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <nlohmann/json.hpp>
 #include <chrono>
+#include <Python.h>
 
 //acortadores
 using namespace std;
@@ -360,7 +361,7 @@ void sample_arreglo(int* arreglo, int cant, int* valores, int largo)
 }
 
 //funcion principal
-tuple<float, int> CoalicionGM(char* nombre, int m, float pmutacion_treshold, float pr, int seed)
+PyObject* CoalicionGM(char* nombre, int m, float pmutacion_treshold, float pr, int seed)
 {
 	//llamada de JSON
 
@@ -930,5 +931,10 @@ tuple<float, int> CoalicionGM(char* nombre, int m, float pmutacion_treshold, flo
 	free(cromosomaNuevo);
 	free(cromosoma);
 	free(matDis);
-	return make_tuple(resultado, it);
+
+	PyObject* tupleOne = Py_BuildValue("(f)", resultado);
+	PyObject* tupleTwo = Py_BuildValue("(i)",it);
+	PyObject* datos = Py_BuildValue("(OO)", tupleOne, tupleTwo);
+
+	return datos;
 }
