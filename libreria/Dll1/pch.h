@@ -11,7 +11,8 @@
 #define PROJECTLIBRARY __declspec(dllimport)
 #endif
 
-
+#include <iostream>
+#include <tuple>
 
 // agregue aquí los encabezados que desea precompilar
-extern "C" PROJECTLIBRARY float CoalicionGM(char* nombre, int m, float pmutacion_treshold, float pr, int seed);
+extern "C++" PROJECTLIBRARY std::tuple<float, int> CoalicionGM(char* nombre, int m, float pmutacion_treshold, float pr, int seed);

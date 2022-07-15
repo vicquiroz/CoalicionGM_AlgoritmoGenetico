@@ -360,7 +360,7 @@ void sample_arreglo(int* arreglo, int cant, int* valores, int largo)
 }
 
 //funcion principal
-float CoalicionGM(char* nombre, int m, float pmutacion_treshold, float pr, int seed)
+tuple<float, int> CoalicionGM(char* nombre, int m, float pmutacion_treshold, float pr, int seed)
 {
 	//llamada de JSON
 
@@ -930,5 +930,5 @@ float CoalicionGM(char* nombre, int m, float pmutacion_treshold, float pr, int s
 	free(cromosomaNuevo);
 	free(cromosoma);
 	free(matDis);
-	return resultado;
+	return make_tuple(resultado, it);
 }
