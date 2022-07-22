@@ -11,11 +11,13 @@
 #include <stdlib.h>
 #include <nlohmann/json.hpp>
 #include <chrono>
-#include <Python.h>
 
 //acortadores
 using namespace std;
 using json = nlohmann::json;
+
+float resultadoF;
+int resultadoI;
 
 //parametros iniciales
 int m = 32;
@@ -361,7 +363,7 @@ void sample_arreglo(int* arreglo, int cant, int* valores, int largo)
 }
 
 //funcion principal
-PyObject* CoalicionGM(char* nombre, int m, float pmutacion_treshold, float pr, int seed)
+void CoalicionGM(char* nombre, int m, float pmutacion_treshold, float pr, int seed)
 {
 	//llamada de JSON
 
@@ -484,7 +486,6 @@ PyObject* CoalicionGM(char* nombre, int m, float pmutacion_treshold, float pr, i
 	float fitnessCambio;
 
 	int min;
-	float resultado;
 
 	//inicializador de variables de las nuevas poblaciones y sus respectivos fitness
 	int** cromosomaNuevo = (int**)malloc(m * sizeof(int*));
@@ -913,7 +914,8 @@ PyObject* CoalicionGM(char* nombre, int m, float pmutacion_treshold, float pr, i
 	double tTomado = chrono::duration_cast<chrono::nanoseconds>(tFinal - tInicial).count();
 	tTomado *= 1e-9;
 
-	resultado = fitnessPob[0];
+	resultadoF = fitnessPob[0];
+	resultadoI = it;
 	//liberamos memoria
 	free(fitnessPob);
 	free(fitnessPobNuevo);
@@ -931,10 +933,5 @@ PyObject* CoalicionGM(char* nombre, int m, float pmutacion_treshold, float pr, i
 	free(cromosomaNuevo);
 	free(cromosoma);
 	free(matDis);
-
-	PyObject* tupleOne = Py_BuildValue("(f)", resultado);
-	PyObject* tupleTwo = Py_BuildValue("(i)",it);
-	PyObject* datos = Py_BuildValue("(OO)", tupleOne, tupleTwo);
-
-	return datos;
+	cout << "termine" << endl;
 }

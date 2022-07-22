@@ -11,7 +11,10 @@
 #define PROJECTLIBRARY __declspec(dllimport)
 #endif
 
-#include <Python.h>
+
 
 // agregue aquí los encabezados que desea precompilar
-extern "C" PROJECTLIBRARY PyObject* CoalicionGM(char* nombre, int m, float pmutacion_treshold, float pr, int seed);
+extern "C" PROJECTLIBRARY void CoalicionGM(char* nombre, int m, float pmutacion_treshold, float pr, int seed);
+
+extern "C" PROJECTLIBRARY float resultadoF;
+extern "C" PROJECTLIBRARY int resultadoI;
