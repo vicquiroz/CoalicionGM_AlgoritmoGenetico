@@ -9,15 +9,15 @@
 #include <stdlib.h>
 #include <nlohmann/json.hpp>
 #include <chrono>
-
+#include <bits/stdc++.h>
 //acortadores
 using namespace std;
 using json = nlohmann::json;
 
 //parametros iniciales
-int m = 30;
-float pmutacion_threshold = 0.2;
-float pr = 0.15;
+int m = 50;
+float pmutacion_threshold = 0.4;
+float pr = 0.14;
 int seed = time(NULL);
 
 //inicializador de generador de random
@@ -30,6 +30,110 @@ uniform_int_distribution<int> uni;
 uniform_real_distribution<double> uni2;
 
 //***********funciones***********
+// funcion spanning tree
+uniform_int_distribution<int> pop_select;
+void init_pop(int **cromosoma,float **matDis, int n,int m,int quorum){
+    vector<int> dip;
+    for (int i = 1; i <= n; i++){
+        dip.push_back(i);
+    }
+    for (int p = 0; p < m; p++){ // Para cada cromosoma
+        pop_select = uniform_int_distribution<int>(0,dip.size()-1);
+        vector<int> coalicion;
+        int indexDip = pop_select(mt);
+        int diputados = dip[indexDip];
+        dip.erase(dip.begin()+indexDip);
+
+        // Prepara los datos
+        int R = n+1;
+        int C = n+1;
+    
+        vector<vector<float> > disVec(R,vector<float>(C));
+        
+        for (int i = 0; i < R; i++)
+        {  
+            for (int j = 0; j < C; j++)
+            {
+                if(j==0)
+                {
+                    disVec[i][j] = i;
+                }
+                else{
+                    if(i ==0){
+                        disVec[i][j] = j;
+                    }
+                    else{
+                        disVec[i][j] = matDis[i-1][j-1];
+                    }
+                    
+                }
+            }
+        }
+
+        int first_random;
+        for(int i=1; i <= quorum; i++)
+        {
+            if(i == 1)
+            {
+                coalicion.push_back(diputados);
+                first_random = coalicion[0];
+                for(int j = 1; j < disVec.size(); j++)
+                {
+                    if(coalicion.back() == disVec[j][0]){
+                        disVec.erase(disVec.begin()+j);
+                    }
+                }  
+            }
+            else{
+                // Encuentra en minimo en dis con respecto a las columnas indicadas por coalicion
+                float min_value = disVec[0][coalicion.front()];
+                int min_row = 1;
+                //int min_col = coalicion.front();
+                for(int x = 0; x < coalicion.size(); x++){ // Que columna revisar
+                    for (int j = 1; j < disVec.size(); j++){ // FIla por revisar
+                        if(disVec[j][coalicion[x]] != 0.0 && disVec[j][coalicion[x]] < min_value){
+                            min_value = disVec[j][coalicion[x]];
+                            min_row = j;
+                            //min_col = coalicion[x];
+                        }
+                        
+                    }
+                }
+
+                coalicion.push_back(disVec[min_row][0]);
+                // Cuando encuentra al minimo elimina la fila de ese valor
+                for(int j = 1; j < disVec.size(); j++)
+                {
+                    if(disVec[min_row][0] == disVec[j][0]){
+                        disVec.erase(disVec.begin()+j);
+                    }
+                }  
+
+            }
+            sort(coalicion.begin(), coalicion.end());
+        }
+
+		/*
+        cout << "First Random: " << first_random << endl;
+        for (auto coal = coalicion.begin(); coal != coalicion.end(); coal++) {
+            std::cout << *coal << " ";
+        }
+        std::cout << std::endl;
+		*/
+        for (int i = 0; i < coalicion.size(); i++) {
+            // Debido a que agregue una fila y columna para los nombres
+            // Se resta menos uno para ajustar al indice original que son valores entre 0 y n-1
+            cromosoma[p][i] = coalicion[i]-1;
+        }
+		
+        
+    }
+}
+
+
+
+
+
 //funcion para calcular la distancia entre dos puntos
 float dis_euc(float x1, float y1, float x2, float y2)
 {
@@ -394,7 +498,18 @@ int main(int argc, char* argv[])
 	}
 
 	//rellenado de la matriz de distancia
+	// Matriz rellenando por completo
+	for (size_t i = 0; i <n; i++)
+	{
+
+		//cout << i << endl;
+		for (size_t j = 0; j <n; j++)
+		{
+			matDis[i][j] = dis_euc(data["rollcalls"][0]["votes"][i]["x"], data["rollcalls"][0]["votes"][i]["y"], data["rollcalls"][0]["votes"][j]["x"], data["rollcalls"][0]["votes"][j]["y"]);
+		}
+	}
 	//para parlamento de estados unidos
+	/*
 	for (size_t i = 0; i <= (n - 2); i++)
 	{
 
@@ -404,6 +519,7 @@ int main(int argc, char* argv[])
 			matDis[i][j] = dis_euc(data["rollcalls"][0]["votes"][i]["x"], data["rollcalls"][0]["votes"][i]["y"], data["rollcalls"][0]["votes"][j]["x"], data["rollcalls"][0]["votes"][j]["y"]);
 		}
 	}
+	*/
 	//para camara de diputados chile
 	/*for (size_t i = 0; i <= (n - 2); i++)
 	{
@@ -450,10 +566,12 @@ int main(int argc, char* argv[])
 	}
 
 	//rellenado de cromosomas y evaluacion de fitness
+
+	init_pop(cromosoma,matDis,n,m,quorum);
 	for (size_t i = 0; i < m; i++)
 	{
-		sample(cromosoma[i], n, quorum);
-		sort(cromosoma[i], quorum);
+		//sample(cromosoma[i], n, quorum);
+		//sort(cromosoma[i], quorum);
 		fitnessPob[i] = eval_sol(cromosoma[i], matDis, quorum);
 	}
 	
