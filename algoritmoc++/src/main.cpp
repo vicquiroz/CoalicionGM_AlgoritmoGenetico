@@ -29,7 +29,7 @@ mt19937 mt{ rng() };
 uniform_int_distribution<int> uni;
 uniform_real_distribution<double> uni2;
 
-//***********funciones***********
+//***********funciones***********//
 // funcion spanning tree
 uniform_int_distribution<int> pop_select;
 void init_pop(int **cromosoma,float **matDis, int n,int m,int quorum){

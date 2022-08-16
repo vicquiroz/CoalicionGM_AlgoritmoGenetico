@@ -6,7 +6,7 @@ source ~/.bashrc
 vot=votacion22105
 let seed=1234
 let iter=1
-cd "ResultadosParamLimbo"
+cd "Resultados"
 for repeat in {1..100}
 do 
     ((seed+=$repeat*2))
