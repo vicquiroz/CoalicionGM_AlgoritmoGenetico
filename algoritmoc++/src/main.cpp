@@ -505,6 +505,9 @@ int main(int argc, char* argv[])
 		//cout << i << endl;
 		for (size_t j = 0; j <n; j++)
 		{
+			//cout << "i: " << i << endl;
+			//cout << "j: " << j << endl;
+			//cout << dis_euc(data["rollcalls"][0]["votes"][i]["x"], data["rollcalls"][0]["votes"][i]["y"], data["rollcalls"][0]["votes"][j]["x"], data["rollcalls"][0]["votes"][j]["y"]) << endl;
 			matDis[i][j] = dis_euc(data["rollcalls"][0]["votes"][i]["x"], data["rollcalls"][0]["votes"][i]["y"], data["rollcalls"][0]["votes"][j]["x"], data["rollcalls"][0]["votes"][j]["y"]);
 		}
 	}
@@ -572,6 +575,7 @@ int main(int argc, char* argv[])
 	{
 		//sample(cromosoma[i], n, quorum);
 		//sort(cromosoma[i], quorum);
+		cout << eval_sol(cromosoma[i], matDis, quorum) << endl;
 		fitnessPob[i] = eval_sol(cromosoma[i], matDis, quorum);
 	}
 	
