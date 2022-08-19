@@ -1,7 +1,7 @@
  library(ggplot2)
 library(vioplot)
 library(corrplot)
-data<-read.csv(file = 'valores_verif.csv',header = FALSE)
+data<-read.csv(file = 'valores_verif_RH0750158.csv',header = FALSE)
 
 m<-as.numeric(data$V1[1])
 pTresh<-as.numeric(data$V2[1])

@@ -3,7 +3,7 @@ shopt -s expand_aliases
 source ~/.bashrc
 #alias jq=./jq-win64.exe
 
-vot=votacion22105
+vot=votacionRH0750158
 let seed=1234
 let iter=1
 cd "Resultados"
@@ -17,7 +17,7 @@ do
     seed=$(jq ".seed" "./$vot/resultados_rep_${repeat}_seed_${seed}.json") 
     ite=$(jq ".numero_de_iteraciones" "./$vot/resultados_rep_${repeat}_seed_${seed}.json") 
     fit=$(jq ".fitness" "./$vot/resultados_rep_${repeat}_seed_${seed}.json")
-    echo "$m, $pt, $p, $seed, $ite, $fit" >> valores_verif.csv
+    echo "$m, $pt, $p, $seed, $ite, $fit" >> valores_verif_RH1170867.csv
     #cp hist.json "../../Resultados/$vot/m_$m_val/pTresh_$pTresh_val/pr_$pr_val/histograma_rep_${repeat}_m_${m_val}_pTresh_${pTresh_val}_pr_${pr_val}.json" 
     
     ((iter+=1))
