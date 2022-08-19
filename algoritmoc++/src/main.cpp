@@ -575,7 +575,7 @@ int main(int argc, char* argv[])
 	{
 		//sample(cromosoma[i], n, quorum);
 		//sort(cromosoma[i], quorum);
-		cout << eval_sol(cromosoma[i], matDis, quorum) << endl;
+		//cout << eval_sol(cromosoma[i], matDis, quorum) << endl;
 		fitnessPob[i] = eval_sol(cromosoma[i], matDis, quorum);
 	}
 	
