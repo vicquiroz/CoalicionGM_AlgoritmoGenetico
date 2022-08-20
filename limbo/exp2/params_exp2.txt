@@ -1,0 +1,68 @@
+FILE: exp/exp2/main.cpp
+
+init_randomsampling
+^^^^^^^^^^^^^^^^^^^
+- int samples = 10 [defined in exp/exp2/main.cpp]<map object at 0x7f57b4e75bb0>
+
+kernel
+^^^^^^
+- double noise = 1e-10 [defined in exp/exp2/main.cpp]<map object at 0x7f57b4e75d00>
+- bool optimize_noise = false [default value, from src/limbo/kernel/kernel.hpp]<map object at 0x7f57b4e68e20>
+
+stop_maxiterations
+^^^^^^^^^^^^^^^^^^
+- int iterations = 150 [defined in exp/exp2/main.cpp]<map object at 0x7f57b4e75a60>
+
+eval_func
+^^^^^^^^^
+
+bayes_opt_boptimizer
+^^^^^^^^^^^^^^^^^^^^
+- int hp_period = -1 [default value, from src/limbo/bayes_opt/boptimizer.hpp]<map object at 0x7f57b4e71f40>
+
+opt_gridsearch
+^^^^^^^^^^^^^^
+- int bins = 5 [default value, from src/limbo/opt/grid_search.hpp]<map object at 0x7f57b4ea8730>
+
+acqui_ucb
+^^^^^^^^^
+- double alpha = 0.5 [default value, from src/limbo/acqui/ucb.hpp]<map object at 0x7f57b4e684c0>
+
+opt_cmaes
+^^^^^^^^^
+- int restarts = 1 [default value, from src/limbo/opt/cmaes.hpp]<map object at 0x7f57b4e68370>
+- int max_fun_evals = -1 [default value, from src/limbo/opt/cmaes.hpp]<map object at 0x7f57b4e68220>
+- int max_iters = -1 [default value, from src/limbo/opt/cmaes.hpp]<map object at 0x7f57b4e68100>
+- bool auto_max_iters = true [default value, from src/limbo/opt/cmaes.hpp]<map object at 0x7f57b4e64fd0>
+- bool equal_fun_evals = true [default value, from src/limbo/opt/cmaes.hpp]<map object at 0x7f57b4e64e50>
+- bool stagnation = true [default value, from src/limbo/opt/cmaes.hpp]<map object at 0x7f57b4e64d60>
+- double fun_tolerance = -1 [default value, from src/limbo/opt/cmaes.hpp]<map object at 0x7f57b4e64be0>
+- double xrel_tolerance = -1 [default value, from src/limbo/opt/cmaes.hpp]<map object at 0x7f57b4e64a60>
+- double fun_target = -1 [default value, from src/limbo/opt/cmaes.hpp]<map object at 0x7f57b4e64910>
+- bool fun_compute_initial = false [default value, from src/limbo/opt/cmaes.hpp]<map object at 0x7f57b4e647f0>
+- int variant = aIPOP_CMAES [default value, from src/limbo/opt/cmaes.hpp]<map object at 0x7f57b4e645e0>
+- int elitism = 0 [default value, from src/limbo/opt/cmaes.hpp]<map object at 0x7f57b4e64610>
+- bool handle_uncertainty = false [default value, from src/limbo/opt/cmaes.hpp]<map object at 0x7f57b4e643a0>
+- bool verbose = false [default value, from src/limbo/opt/cmaes.hpp]<map object at 0x7f57b4e64250>
+- double lbound = 0.0 [default value, from src/limbo/opt/cmaes.hpp]<map object at 0x7f57b4e64100>
+- double ubound = 1.0 [default value, from src/limbo/opt/cmaes.hpp]<map object at 0x7f57b4e5ec70>
+- bool stochastic = false [default value, from src/limbo/opt/cmaes.hpp]<map object at 0x7f57b4e5edc0>
+- int lambda = -1 [default value, from src/limbo/opt/cmaes.hpp]<map object at 0x7f57b4e5ed30>
+
+kernel_maternfivehalves
+^^^^^^^^^^^^^^^^^^^^^^^
+- double sigma_sq = 1 [default value, from src/limbo/kernel/matern_five_halves.hpp]<map object at 0x7f57b4e68a30>
+- double l = 1 [default value, from src/limbo/kernel/matern_five_halves.hpp]<map object at 0x7f57b4e688e0>
+
+opt_nloptnograd
+^^^^^^^^^^^^^^^
+- int iterations = 500 [default value, from src/limbo/opt/nlopt_no_grad.hpp]<map object at 0x7f57b4ea8a30>
+- double fun_tolerance = -1 [default value, from src/limbo/opt/nlopt_no_grad.hpp]<map object at 0x7f57b4ea8be0>
+- double xrel_tolerance = -1 [default value, from src/limbo/opt/nlopt_no_grad.hpp]<map object at 0x7f57b4ea8d90>
+
+bayes_opt_bobase
+^^^^^^^^^^^^^^^^
+- int stats_enabled = true [defined in exp/exp2/main.cpp]<map object at 0x7f57b4e75e50>
+- bool bounded = true [default value, from src/limbo/bayes_opt/bo_base.hpp]<map object at 0x7f57b4e71ca0>
+
+=========================================
