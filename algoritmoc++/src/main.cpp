@@ -29,108 +29,127 @@ mt19937 mt{ rng() };
 uniform_int_distribution<int> uni;
 uniform_real_distribution<double> uni2;
 
-//***********funciones***********//
-// funcion spanning tree
-uniform_int_distribution<int> pop_select;
-void init_pop(int **cromosoma,float **matDis, int n,int m,int quorum){
-    vector<int> dip;
-    for (int i = 1; i <= n; i++){
-        dip.push_back(i);
-    }
-    for (int p = 0; p < m; p++){ // Para cada cromosoma
-        pop_select = uniform_int_distribution<int>(0,dip.size()-1);
-        vector<int> coalicion;
-        int indexDip = pop_select(mt);
-        int diputados = dip[indexDip];
-        dip.erase(dip.begin()+indexDip);
 
-        // Prepara los datos
-        int R = n+1;
-        int C = n+1;
+//funcion para ordenar un arreglo de menor a mayor
+void sort_bubble(int* array, int largo)
+{
+	int temp = 0;
+	for (size_t i = 0; i < largo; i++)
+	{
+		bool already_sorted = true;
+		for (size_t j = 0; j < largo - i - 1; j++)
+		{
+			if (array[j] > array[j + 1])
+			{
+				temp = array[j];
+				array[j] = array[j + 1];
+				array[j + 1] = temp;
+				already_sorted = false;
+			}
+		}
+		if (already_sorted)
+			break;
+	}
+}
+
+void sort_BubbleIndex(int* arrayIndex, float *arrayDist, int n, int quorum){
+    int temp = 0;
+    int orderIndex[n];
+    for (size_t i = 0; i < n; i++)
+        orderIndex[i] = i;
     
-        vector<vector<float> > disVec(R,vector<float>(C));
-        
-        for (int i = 0; i < R; i++)
-        {  
-            for (int j = 0; j < C; j++)
-            {
-                if(j==0)
-                {
-                    disVec[i][j] = i;
-                }
-                else{
-                    if(i ==0){
-                        disVec[i][j] = j;
-                    }
-                    else{
-                        disVec[i][j] = matDis[i-1][j-1];
-                    }
-                    
-                }
-            }
-        }
-
-        int first_random;
-        for(int i=1; i <= quorum; i++)
-        {
-            if(i == 1)
-            {
-                coalicion.push_back(diputados);
-                first_random = coalicion[0];
-                for(int j = 1; j < disVec.size(); j++)
-                {
-                    if(coalicion.back() == disVec[j][0]){
-                        disVec.erase(disVec.begin()+j);
-                    }
-                }  
-            }
-            else{
-                // Encuentra en minimo en dis con respecto a las columnas indicadas por coalicion
-                float min_value = disVec[0][coalicion.front()];
-                int min_row = 1;
-                //int min_col = coalicion.front();
-                for(int x = 0; x < coalicion.size(); x++){ // Que columna revisar
-                    for (int j = 1; j < disVec.size(); j++){ // FIla por revisar
-                        if(disVec[j][coalicion[x]] != 0.0 && disVec[j][coalicion[x]] < min_value){
-                            min_value = disVec[j][coalicion[x]];
-                            min_row = j;
-                            //min_col = coalicion[x];
-                        }
-                        
-                    }
-                }
-
-                coalicion.push_back(disVec[min_row][0]);
-                // Cuando encuentra al minimo elimina la fila de ese valor
-                for(int j = 1; j < disVec.size(); j++)
-                {
-                    if(disVec[min_row][0] == disVec[j][0]){
-                        disVec.erase(disVec.begin()+j);
-                    }
-                }  
-
-            }
-            sort(coalicion.begin(), coalicion.end());
-        }
-
-		/*
-        cout << "First Random: " << first_random << endl;
-        for (auto coal = coalicion.begin(); coal != coalicion.end(); coal++) {
-            std::cout << *coal << " ";
-        }
-        std::cout << std::endl;
-		*/
-        for (int i = 0; i < coalicion.size(); i++) {
-            // Debido a que agregue una fila y columna para los nombres
-            // Se resta menos uno para ajustar al indice original que son valores entre 0 y n-1
-            cromosoma[p][i] = coalicion[i]-1;
-        }
-		
-        
-    }
+	for (size_t i = 0; i < n; i++)
+	{
+		bool already_sorted = true;
+		for (size_t j = 0; j < n - i - 1; j++)
+		{
+			if (arrayDist[orderIndex[j]] > arrayDist[orderIndex[j + 1]])
+			{
+				temp = orderIndex[j];
+				orderIndex[j] = orderIndex[j + 1];
+				orderIndex[j + 1] = temp;
+				already_sorted = false;
+			}
+		}
+		if (already_sorted)
+			break;
+	}
+    memcpy(arrayIndex, orderIndex,sizeof(int)*quorum);
 }
 
 
+//***********funciones***********//
+// funcion spanning tree
+uniform_int_distribution<int> pop_select;
+
+// Encuentra la minima distancia entre los vertices que no han sido guardados
+// dentro del minimum spanning tree
+float minDist(float d[], bool genSet[],int n) 
+{ 
+    float min = FLT_MAX, min_index; 
+    for (int v = 0; v < n; v++) 
+        if (genSet[v] == false && d[v] < min) 
+            min = d[v], min_index = v; 
+    return min_index; 
+} 
+
+// spanning tree
+void create_crom(int *cromosoma,float **matDis,int n,int quorum,int init_index) 
+{ 
+    // Array que almacena los nodos
+    // 
+    int dparent[n];
+    //  Almacena la distancia entre el punto (a,b) de los dparent seleccionados
+    float d[n]; 
+    // Vertices que son partes del mininmum spanning tree
+    bool genSet[n]; // vertices que se incluyen
+    // Inicializa todas las distancias con un numero muy alto
+    for (int i = 0; i < n; i++) 
+        d[i] = FLT_MAX, genSet[i] = false; 
+    // Aqui se define con que vertice inciar (El indice de d), donde tendra peso 0 
+    // Como es el primer indice seleccionado en dparent se le asigna cualquier valor 
+    // ya que no esta conectado con ningun vertice.
+    d[init_index] =0;
+    dparent[init_index] = -1;
+  
+    // El numero de vertices que se seleccionan para el minimum spanning tree es de tamaño quorum
+    for (int count = 0; count < quorum; count++)
+    { 
+        // Encuentra la minima distancia, como inician con una distancia alta
+        // selecciona el primer nodo
+        // para el resto de las iteraciones ya tienen 
+        int u = minDist(d, genSet, n); 
+        // Habilita la bandera de que el vertice esta dentro del minimum spanning tree
+        genSet[u] = true; 
+        // Almacena dentro del cromosoma el vertice
+        cromosoma[count] = u;
+        // Actualizo los bordes adjacente al vertice u
+        for (int v = 0; v < n; v++) {
+            // graph[u][v] is non zero only for adjacent vertices of m 
+            // genSet[v] is false for vertices not yet included in MST 
+            // Update the d only if graph[u][v] is smaller than d[v] 
+            if (matDis[u][v] && genSet[v] == false && matDis[u][v] < d[v]) 
+                dparent[v] = u, d[v] = matDis[u][v]; 
+        }
+    } 
+  
+    sort_bubble(cromosoma,quorum);
+} 
+
+
+// Selecciona los n/2+1 nodos mas cercano al nodo inicial
+void minDistEdge(int* arrayIndex, float *arrayDist, int n, int quorum) 
+{ 
+    bool genSet[n]; 
+    for (size_t i = 0; i < n; i++){
+        genSet[i] = false;
+    }
+    for (size_t i = 0; i < quorum; i++){
+        int u = minDist(arrayDist,genSet,n); 
+        genSet[u] = true;
+        arrayIndex[i] = u;
+    }
+} 
 
 
 
@@ -232,27 +251,6 @@ void sample(int* arreglo, int limite, int largo)
 	}
 }
 
-//funcion para ordenar un arreglo de menor a mayor
-void sort(int* array, int largo)
-{
-	int temp = 0;
-	for (size_t i = 0; i < largo; i++)
-	{
-		bool already_sorted = true;
-		for (size_t j = 0; j < largo - i - 1; j++)
-		{
-			if (array[j] > array[j + 1])
-			{
-				temp = array[j];
-				array[j] = array[j + 1];
-				array[j + 1] = temp;
-				already_sorted = false;
-			}
-		}
-		if (already_sorted)
-			break;
-	}
-}
 
 //funcion para ordenar un arreglo de menor a mayor y aplica esos cambios a una matriz
 void order(float* fitness, int** cromosoma, int quorum, int m)
@@ -568,19 +566,57 @@ int main(int argc, char* argv[])
 		cromosoma[i] = (int*)malloc(quorum * sizeof(int));
 	}
 
-	//rellenado de cromosomas y evaluacion de fitness
-
-	init_pop(cromosoma,matDis,n,m,quorum);
+	///////////////////////////////////////////
+	// spanning tree Inicio de población
+	///////////////////////////////////////////
+	/*
+	pop_select = uniform_int_distribution<int>(0,n-1);
+	for (int i = 0; i < m; i++){
+        create_crom(cromosoma[i],matDis,n,quorum,pop_select(mt));
+    }
 	for (size_t i = 0; i < m; i++)
 	{
 		//sample(cromosoma[i], n, quorum);
-		//sort(cromosoma[i], quorum);
+		//sort_bubble(cromosoma[i], quorum);
 		//cout << eval_sol(cromosoma[i], matDis, quorum) << endl;
 		fitnessPob[i] = eval_sol(cromosoma[i], matDis, quorum);
 	}
 	
 	//ordenamiento de fitness y cromosomas
 	order(fitnessPob, cromosoma, quorum, m);
+	*/
+
+
+
+	/////////////////////////////////////
+	////// Ordenamiento algoritmo B
+	/////////////////////////////////////
+    int** cromosoma_n = (int**)malloc(n * sizeof(int*));
+	for (size_t i = 0; i < n; i++)
+	{
+		cromosoma_n[i] = (int*)malloc(quorum * sizeof(int));
+	}
+   
+    float* fitnessPobInit = (float*)malloc(n * sizeof(float));
+    int* fitnessPobInitIndex = (int*)malloc(n * sizeof(int));
+
+    for(int j = 0; j < n; j++){
+        minDistEdge(cromosoma_n[j],matDis[j],n,quorum);
+        sort_bubble(cromosoma_n[j],quorum);
+        fitnessPobInit[j] = eval_sol(cromosoma_n[j],matDis,quorum);
+    }
+
+	/// Ordena los resultados
+    sort_BubbleIndex(fitnessPobInitIndex,fitnessPobInit,n,n);
+    // Traspasa los m mejores de toda la población inicial
+    for(int i = 0; i <m; i++){
+        memcpy(cromosoma[i],cromosoma_n[fitnessPobInitIndex[i]],sizeof(int)*quorum);
+        fitnessPob[i] = fitnessPobInit[fitnessPobInitIndex[i]];
+    }
+
+	/////////////////////////////////////////////////////////////
+	/////// Fin poblacion inicial
+	////////////////////////////////////////////////////////////
 
 	//inicializacion de variables de probabilidad
 	float* p = (float*)malloc(m * sizeof(float));
@@ -709,8 +745,8 @@ int main(int argc, char* argv[])
 		}
 
 		//ordenamos los arreglos de los genes a cruzar
-		sort(crossover12, crossovern[0]);
-		sort(crossover21, crossovern[0]);
+		sort_bubble(crossover12, crossovern[0]);
+		sort_bubble(crossover21, crossovern[0]);
 
 		//revisamos si los genes seleccionados se encuentran en el cromosoma aislado
 		aBoolean1 = in_boolean(cromosoma1, crossover12, quorum, crossovern[0]);
@@ -737,8 +773,8 @@ int main(int argc, char* argv[])
 			cromosoma2[cual21[a]] = crossover12[a];
 		}
 		//se ordenan
-		sort(cromosoma1, quorum);
-		sort(cromosoma2, quorum);
+		sort_bubble(cromosoma1, quorum);
+		sort_bubble(cromosoma2, quorum);
 
 		//liberacion de memoria
 		free(arrMin);
@@ -776,7 +812,7 @@ int main(int argc, char* argv[])
 			sample_arreglo(cualIntroducir, 1, notInCromosoma1, mNotInCromosoma1[1][0]);
 			//se realiza la mutacion y se ordena
 			cromosoma1[cualSacar[0]] = cualIntroducir[0];
-			sort(cromosoma1, quorum);
+			sort_bubble(cromosoma1, quorum);
 			//liberacion de memoria
 			free(ar);
 			free(cualSacar);
@@ -802,7 +838,7 @@ int main(int argc, char* argv[])
 			sample_arreglo(cualIntroducir, 1, notInCromosoma2, mNotInCromosoma2[1][0]);
 			//se realiza la mutacion y se ordena
 			cromosoma2[cualSacar[0]] = cualIntroducir[0];
-			sort(cromosoma2, quorum);
+			sort_bubble(cromosoma2, quorum);
 			//liberacion de memoria
 			free(ar);
 			free(cualSacar);
@@ -849,7 +885,7 @@ int main(int argc, char* argv[])
 					sample_arreglo(cualIntroducir, 1, notInCromosoma1, mNotInCromosoma1[1][0]);
 					//se realiza la mutacion y se ordena
 					cromosoma1[cualSacar[0]] = cualIntroducir[0];
-					sort(cromosoma1, quorum);
+					sort_bubble(cromosoma1, quorum);
 
 					//limpiar memoria
 					free(ar);
@@ -895,7 +931,7 @@ int main(int argc, char* argv[])
 					int* cualIntroducir = (int*)malloc(sizeof(int));
 					sample_arreglo(cualIntroducir, 1, notInCromosoma2, mNotInCromosoma2[1][0]);
 					cromosoma2[cualSacar[0]] = cualIntroducir[0];
-					sort(cromosoma2, quorum);
+					sort_bubble(cromosoma2, quorum);
 
 					free(ar);
 					free(cualSacar);
@@ -1004,7 +1040,7 @@ int main(int argc, char* argv[])
 			for (size_t j = m / 2; j < m; j++)
 			{
 				sample(cromosomaCambio, n, quorum);
-				sort(cromosomaCambio, quorum);
+				sort_bubble(cromosomaCambio, quorum);
 				fitnessCambio = eval_sol(cromosomaCambio, matDis, quorum);
 				memcpy(cromosoma[j], cromosomaCambio, quorum * sizeof(int));
 				fitnessPob[j] = fitnessCambio;
