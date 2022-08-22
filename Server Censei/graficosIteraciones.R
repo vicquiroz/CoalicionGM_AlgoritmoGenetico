@@ -30,7 +30,7 @@ vioplot(datos$iteraciones,horizontal=TRUE,xlab="Iteraciones",ylab="")
 
 TablaCombFit<-function(mval,ptreshval,prval){
   datostemp<-datos[which(datos$m==mval & datos$p_tresh==ptreshval & datos$pr==prval),]
-  combtemp<-table(datostemp$fitness)/1000
+  combtemp<-table(datostemp$fitness)/150
   #if(combtemp[1]>0.85){
     print(paste("Combinacion:  m=",as.character(mval),"  pTresh=",as.character(ptreshval)," pr=",as.character(prval)))
     print(combtemp)
