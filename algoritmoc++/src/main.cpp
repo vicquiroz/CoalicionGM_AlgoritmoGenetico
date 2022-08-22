@@ -614,7 +614,6 @@ int main(int argc, char* argv[])
         fitnessPob[i] = fitnessPobInit[fitnessPobInitIndex[i]];
 		
     }
-	cout << fitnessPob[0] << endl;
 	/////////////////////////////////////////////////////////////
 	/////// Fin poblacion inicial
 	////////////////////////////////////////////////////////////
