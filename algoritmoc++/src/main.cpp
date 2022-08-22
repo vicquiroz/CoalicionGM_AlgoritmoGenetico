@@ -9,7 +9,7 @@
 #include <stdlib.h>
 #include <nlohmann/json.hpp>
 #include <chrono>
-#include <bits/stdc++.h>
+#include <cmath>
 //acortadores
 using namespace std;
 using json = nlohmann::json;
@@ -54,7 +54,8 @@ void sort_bubble(int* array, int largo)
 
 void sort_BubbleIndex(int* arrayIndex, float *arrayDist, int n, int quorum){
     int temp = 0;
-    int orderIndex[n];
+	//int orderIndex[n];
+	int* orderIndex = new int[n];
     for (size_t i = 0; i < n; i++)
         orderIndex[i] = i;
     
@@ -98,11 +99,14 @@ void create_crom(int *cromosoma,float **matDis,int n,int quorum,int init_index)
 { 
     // Array que almacena los nodos
     // 
-    int dparent[n];
+    //int dparent[n];
+	int* dparent = new int[n];
     //  Almacena la distancia entre el punto (a,b) de los dparent seleccionados
-    float d[n]; 
+    //float d[n]; 
+	float* d = new float[n];
     // Vertices que son partes del mininmum spanning tree
-    bool genSet[n]; // vertices que se incluyen
+    //bool genSet[n]; // vertices que se incluyen
+	bool* genSet = new bool[n];
     // Inicializa todas las distancias con un numero muy alto
     for (int i = 0; i < n; i++) 
         d[i] = FLT_MAX, genSet[i] = false; 
@@ -140,7 +144,8 @@ void create_crom(int *cromosoma,float **matDis,int n,int quorum,int init_index)
 // Selecciona los n/2+1 nodos mas cercano al nodo inicial
 void minDistEdge(int* arrayIndex, float *arrayDist, int n, int quorum) 
 { 
-    bool genSet[n]; 
+    //bool genSet[n]; 
+	bool* genSet = new bool[n];
     for (size_t i = 0; i < n; i++){
         genSet[i] = false;
     }
