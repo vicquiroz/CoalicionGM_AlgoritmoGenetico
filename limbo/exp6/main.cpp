@@ -105,7 +105,7 @@ struct eval_func {
 
         int m_val =  ((( (int)(x(0)*25)  )*2)+10); // Valores entre 10 a 60
         float p_thres = ((x(1)*(0.59))+0.01);  // Valores entre 0.2 a 0.6
-        float p_r = ((x(2)*(0.399))+0.001); // Valores entre 0.001 a 0.4
+        float p_r = ((x(2)*(0.599))+0.001); // Valores entre 0.001 a 0.6
         std::cout << "Valores Orig - m="<<x(0) << " | p_Tresh=" << x(1) << " | pr=" << x(2) << std::endl;
         std::cout << "Valores Esca - m="<<m_val << " | p_Tresh=" << p_thres << " | pr=" << p_r << std::endl;
         std::vector<float> fitness_ga;
