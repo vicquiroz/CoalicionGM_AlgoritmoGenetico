@@ -1,0 +1,1 @@
+solution,minFitness,sdFitness,tmean,iter,alphas_1,alphas_2,alphas_3

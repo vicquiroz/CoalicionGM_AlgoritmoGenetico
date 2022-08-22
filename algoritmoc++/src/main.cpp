@@ -612,8 +612,9 @@ int main(int argc, char* argv[])
     for(int i = 0; i <m; i++){
         memcpy(cromosoma[i],cromosoma_n[fitnessPobInitIndex[i]],sizeof(int)*quorum);
         fitnessPob[i] = fitnessPobInit[fitnessPobInitIndex[i]];
+		
     }
-
+	cout << fitnessPob[0] << endl;
 	/////////////////////////////////////////////////////////////
 	/////// Fin poblacion inicial
 	////////////////////////////////////////////////////////////
