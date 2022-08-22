@@ -10,6 +10,7 @@
 #include <nlohmann/json.hpp>
 #include <chrono>
 #include <cmath>
+#include <cfloat>
 //acortadores
 using namespace std;
 using json = nlohmann::json;
