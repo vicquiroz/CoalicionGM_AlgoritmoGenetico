@@ -16,11 +16,10 @@ using namespace std;
 using json = nlohmann::json;
 
 //parametros iniciales
-int m = 50;
-float pmutacion_threshold = 0.4;
-float pr = 0.14;
+int m = 54;
+float pmutacion_threshold = 0.36;
+float pr = 0.1652927;
 int seed = time(NULL);
-
 //inicializador de generador de random
 random_device rng;
 default_random_engine generator(seed);
@@ -618,7 +617,6 @@ int main(int argc, char* argv[])
     for(int i = 0; i <m; i++){
         memcpy(cromosoma[i],cromosoma_n[fitnessPobInitIndex[i]],sizeof(int)*quorum);
         fitnessPob[i] = fitnessPobInit[fitnessPobInitIndex[i]];
-		
     }
 	/////////////////////////////////////////////////////////////
 	/////// Fin poblacion inicial
@@ -671,7 +669,7 @@ int main(int argc, char* argv[])
 	}
 	float* fitnessPobNuevo = (float*)malloc(m * sizeof(float));
 
-	int fitnessAnt;
+	float fitnessAnt;
 
 
 	// Reservas extras 
@@ -699,7 +697,6 @@ int main(int argc, char* argv[])
 		//guardamos fitness e iteraciones
 		it++;
 		fitnessAnt = fitnessPob[0];
-
 		//se seleciona cromosomas a cruzar
 		cual1 = smallest_greater(cump, m, (float)uni2(mt));
 		cual2 = smallest_greater(cump, m, (float)uni2(mt));
@@ -1042,15 +1039,15 @@ int main(int argc, char* argv[])
 				cump[a] = cumpNuevo[a];
 			}
 			//reemplazamos la mitad de la poblacion por nuevos cromosomas
-			int* cromosomaCambio = (int*)malloc(quorum * sizeof(int));
-			for (size_t j = m / 2; j < m; j++)
-			{
-				sample(cromosomaCambio, n, quorum);
-				sort_bubble(cromosomaCambio, quorum);
-				fitnessCambio = eval_sol(cromosomaCambio, matDis, quorum);
-				memcpy(cromosoma[j], cromosomaCambio, quorum * sizeof(int));
-				fitnessPob[j] = fitnessCambio;
-			}
+			//int* cromosomaCambio = (int*)malloc(quorum * sizeof(int));
+			//for (size_t j = m / 2; j < m; j++)
+			//{
+			//	sample(cromosomaCambio, n, quorum);
+			//	sort_bubble(cromosomaCambio, quorum);
+			//	fitnessCambio = eval_sol(cromosomaCambio, matDis, quorum);
+			//	memcpy(cromosoma[j], cromosomaCambio, quorum * sizeof(int));
+			//	fitnessPob[j] = fitnessCambio;
+			//}
 			//ordenamos la poblacion
 			order(fitnessPob, cromosoma, quorum, m);
 			//inicializamos la probabilidad y la probabilidad acumulada
@@ -1080,7 +1077,7 @@ int main(int argc, char* argv[])
 			//liberamos memoria
 			free(pNuevo);
 			free(cumpNuevo);
-			free(cromosomaCambio);
+			//free(cromosomaCambio);
 		}
 		//liberamos memoria
 		free(cromosoma1);
