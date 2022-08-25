@@ -7,10 +7,10 @@ vot=votacionRH0750158
 let seed=1234
 let iter=1
 cd "Resultados"
-for repeat in {1..150}
+for repeat in {1..1000}
 do 
     ((seed+=$repeat*2))
-    echo "---------######## $iter/150 ######----------"
+    echo "---------######## $iter/1000 ######----------"
     m=$(jq ".m" "./$vot/resultados_rep_${repeat}_seed_${seed}.json") 
     pt=$(jq ".pmutacion_threshold" "./$vot/resultados_rep_${repeat}_seed_${seed}.json") 
     p=$(jq ".pr" "./$vot/resultados_rep_${repeat}_seed_${seed}.json") 

@@ -1,7 +1,7 @@
  library(ggplot2)
 library(vioplot)
 library(corrplot)
-data<-read.csv(file = 'valores_verif_RH0750158.csv',header = FALSE)
+data<-read.csv(file = 'valores_verif_RH0750158ParamsR.csv',header = FALSE)
 
 m<-as.numeric(data$V1[1])
 pTresh<-as.numeric(data$V2[1])
@@ -30,7 +30,7 @@ vioplot(datos$iteraciones,horizontal=TRUE,xlab="Iteraciones",ylab="")
 
 TablaCombFit<-function(mval,ptreshval,prval){
   datostemp<-datos[which(datos$m==mval & datos$p_tresh==ptreshval & datos$pr==prval),]
-  combtemp<-table(datostemp$fitness)/150
+  combtemp<-table(datostemp$fitness)/1000
   #if(combtemp[1]>0.85){
     print(paste("Combinacion:  m=",as.character(mval),"  pTresh=",as.character(ptreshval)," pr=",as.character(prval)))
     print(combtemp)
