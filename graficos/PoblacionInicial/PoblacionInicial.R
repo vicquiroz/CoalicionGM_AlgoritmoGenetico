@@ -219,6 +219,48 @@ ggplot(datos2)+
   scale_color_gradientn(colours = rainbow(5))+
   xlim(c(-1,1))+ylim(c(-1,1))
 
+library(interp)
+  grid <- interp(x=datos2$X,y=datos2$Y,z=datos2$fitness,duplicate="strip",nx = 1000,ny=1000)
+  griddf <- subset(data.frame(x = rep(grid$x, nrow(grid$z)),
+                              y = rep(grid$y, each = ncol(grid$z)),
+                              z = as.numeric(grid$z)),
+                   !is.na(z))
+  ggplot(griddf, aes(x, y, z = z)) +
+    geom_contour_filled() +
+    labs(fill = "Fitness")
+
+  
+  grid <- interp(x=datos2$X,y=datos2$Y,z=datos2$freq,duplicate="strip",nx = 1000,ny=1000)
+  griddf <- subset(data.frame(x = rep(grid$x, nrow(grid$z)),
+                              y = rep(grid$y, each = ncol(grid$z)),
+                              z = as.numeric(grid$z)),
+                   !is.na(z))
+  ggplot(griddf, aes(x, y, z = z)) +
+    geom_contour_filled()+
+    labs(fill = "Frecuencia")
+  
+  library(viridis)
+  grid <- interp(x=datos2$X,y=datos2$Y,z=datos2$freq,duplicate="strip",nx = 500,ny=500)
+  griddf <- subset(data.frame(x = rep(grid$x, nrow(grid$z)),
+                              y = rep(grid$y, each = ncol(grid$z)),
+                              z = as.numeric(grid$z)),
+                   !is.na(z))
+  ggplot(griddf, aes(x, y, fill= z)) + 
+    geom_tile() +
+    scale_fill_viridis(discrete=FALSE) +
+    labs(fill = "Frecuencia")
+  
+  grid <- interp(x=datos2$X,y=datos2$Y,z=datos2$fitness,duplicate="strip",nx = 500,ny=500)
+  griddf <- subset(data.frame(x = rep(grid$x, nrow(grid$z)),
+                              y = rep(grid$y, each = ncol(grid$z)),
+                              z = as.numeric(grid$z)),
+                   !is.na(z))
+  ggplot(griddf, aes(x, y, fill= z)) + 
+    geom_tile() +
+    scale_fill_viridis(discrete=FALSE) +
+    labs(fill = "fitness")
+  
+
 datos4<-datos
 datos4<-datos4[order(datos4$id_dip),]
 datos4$ch<-0
