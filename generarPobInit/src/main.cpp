@@ -478,11 +478,13 @@ int main(int argc, char* argv[])
 
 	//Poblacion Inicial
 	ofstream poblacionInit;
-	poblacionInit.open("poblacionInit.csv");
+	//JSON
+	poblacionInit.open("poblacionInit.json");
+	//poblacionInit.open("poblacionInit.csv");
 	//se crea y abre el archivo de salida
 
-	//string pobInit = "{";
-	string pobInit = "";
+	string pobInit = "{";
+	//string pobInit = "";
 	//de los JSON se obtiene la cantidad de diputados
 	//para parlamento de estados unidos
 	int n = data["rollcalls"][0]["votes"].size();
@@ -608,7 +610,7 @@ int main(int argc, char* argv[])
 		memcpy(cromosoma[i], cromosoma_n[fitnessPobInitIndex[i]], sizeof(int) * quorum);
 		fitnessPob[i] = fitnessPobInit[fitnessPobInitIndex[i]];
 	}
-	
+	//CREAR JSON
 	for (int i = 0; i < n; i++) {
 		pobInit = pobInit +'"'+ to_string(i) +'"' + ":[";
 		for (int j = 0; j < quorum; j++) {
@@ -620,4 +622,26 @@ int main(int argc, char* argv[])
 	replace(pobInit.end() - 1, pobInit.end(), ',', ' ');
 	poblacionInit << pobInit << "}";
 	
+	//GENERAR CSV
+	/*pobInit = pobInit + "fitness,id_dip,nombre_dip,X,Y,";
+	for (int j = 0; j < quorum; j++) {
+		pobInit = pobInit +"V"+ to_string(j) + ",";
+	}
+	replace(pobInit.end() - 1, pobInit.end(), ',', '\n');
+	string temp;
+	string empty = "";
+	for (int i = 0; i < n; i++) {
+		pobInit = pobInit + to_string(fitnessPobInit[fitnessPobInitIndex[i]]) + ",";
+		pobInit = pobInit + to_string(fitnessPobInitIndex[i]) +",";
+		temp = to_string(data["rollcalls"][0]["votes"][fitnessPobInitIndex[i]]["name"]);
+		temp.erase(remove(temp.begin(), temp.end(), ','), temp.end());
+		pobInit=pobInit+temp + ",";
+		pobInit = pobInit + to_string(data["rollcalls"][0]["votes"][i]["x"])+"," + to_string(data["rollcalls"][0]["votes"][i]["y"]) + ",";
+		for (int j = 0; j < quorum; j++) {
+			pobInit = pobInit + to_string(cromosoma_n[fitnessPobInitIndex[i]][j]) + ",";
+		}
+		replace(pobInit.end() - 1, pobInit.end(), ',', '\n');
+	}*/
+	poblacionInit << pobInit;
+	return EXIT_SUCCESS;
 }

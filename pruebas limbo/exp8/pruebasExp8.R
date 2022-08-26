@@ -1,0 +1,12 @@
+library(ggplot2)
+library(vioplot)
+library(corrplot)
+data<-read.csv(file = '2022-08-25 T%3A01-07-info_data.txt',header = TRUE)
+cuales<-which(data$fitnes==min(data$fitnes))
+datos2<-data[cuales,]
+plot(density(datos2$m))
+plot(density(datos2$p_thresh))
+plot(density(datos2$p_r))
+plot(hist(datos2$p_r))
+plot(hist(datos2$p_thresh))
+plot(hist(datos2$m))
