@@ -210,7 +210,7 @@ library(ggplot2)
 library(hexbin)
 
 ggplot(data=datos3)+
-  geom_hex(aes(x=X,y=Y),bins=50)
+  geom_hex(aes(x=X,y=Y),bins=10)
 
 m<-which(datos2$freq==max(datos2$freq))
 ggplot(datos2)+
@@ -285,9 +285,15 @@ ggplot(datos)+
   geom_point(aes(fitness,freq))+
   geom_smooth(aes(fitness,freq))
 
-vwReg(freq~fitness,data=datos,
-      palette=colorRampPalette(c("black","grey30","white"),bias=4)(20),
-      shade.alpha = 0)
+datos2$fitnessx103<- datos2$fitness/1000
+
+vwReg(freq~fitnessx103,data=datos2,slices=400,
+      palette=heat.colors(20),
+      shade.alpha = .5,family="symmetric")+
+  xlab("Fitness (x10^3)")+
+  ylab("Frecuencia")+
+  theme(panel.background = element_rect(fill = 'black', colour = 'black'))
+
 
 datos5<-datos[order(datos$freq,decreasing = T),]
 
