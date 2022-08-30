@@ -14,19 +14,28 @@ resultados<- fromJSON("resultados.json")
 resultadosDf<-data.frame(coalicion=resultados$coalicion)
 
 datosO$CGM<-c(1:lData)*0
-
+datosO$party<-datosJson$party
 
 datosO$CGM[resultadosDf$coalicion+1]<-1
 datosO$CGM<-factor(datosO$CGM)
 
 print(ggplot(data=datosO)+
         theme(aspect.ratio = 4/3)+
-        geom_point(aes(x=x,y=y)))
-
+        geom_point(aes(x=x,y=y,color=factor(party))))+
+        scale_color_manual(
+          labels = c("Demócrata","Agrario-Laborista","Progresivo","Republicano"),
+          values = c("blue", "green","cyan","red")) +
+        labs(color="Partido")
 print(ggplot(data=datosO)+
-        geom_point(aes(x=x,y=y,col=CGM))+
-        scale_color_manual(labels = c("No pertenece", "Pertenece"),
-                           values = c("red", "blue"))+
-        theme(aspect.ratio = 4/3)+
-        geom_convexhull(data=datosO[which(datosO$CGM==1),1:2],aes(x=x,y=y),alpha = 0.2,col="cyan",fill="cyan"))
+          geom_point(aes(x=x,y=y,col=factor(party),shape=CGM))+ #Antiguo CGM
+          scale_color_manual(
+            labels = c("Demócrata","Agrario-Laborista","Progresivo","Republicano"),#c("No pertenece", "Pertenece")
+            values = c("blue", "green","cyan","red")) +
+          scale_shape_manual(
+            labels=c("No pertenece", "Pertenece"),
+            values = c(4,16)) +
+          theme(aspect.ratio = 4/3)+
+          labs(color="Partido")+
+          geom_convexhull(data=datosO[which(datosO$CGM==1),1:2],aes(x=x,y=y),alpha = 0.2,col="cyan",fill="cyan"))
+  
 
