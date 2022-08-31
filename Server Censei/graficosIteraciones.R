@@ -36,6 +36,7 @@ ggplot(datos, aes(x = fitness, y = -0.5)) +
   #stat_boxplot(geom = "vline", aes(xintercept = ..xupper..)) +
   
   #facet_grid(fitness ~ .) +
+  ylab("")+
   scale_colour_gradient(low="#fed976",high="#800026")+theme(
     panel.background = element_rect(fill = "gray",
                                     colour = "black",
