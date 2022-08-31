@@ -29,7 +29,7 @@ ggplot(datos, aes(x = fitness, y = -0.5)) +
   # horizontal boxplots & density plots
   geom_boxplot(aes(fill = fitness) ,alpha = 0.5) +
   geom_density(aes(x = fitness), inherit.aes = FALSE,fill="#feb24c",alpha=0.6,col="#800026") +
-  geom_jitter(aes(x=fitness,col=fitness),height=0.36,alpha=0.4)+
+  geom_jitter(aes(x=fitness,col=fitness),height=0.36,alpha=0.1,size=0.2)+
   # vertical lines at Q1 / Q2 / Q3
   #stat_boxplot(geom = "vline", aes(xintercept = ..xlower..)) +
   #stat_boxplot(geom = "vline", aes(xintercept = ..xmiddle..)) +
