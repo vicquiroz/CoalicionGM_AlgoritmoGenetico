@@ -21,6 +21,32 @@ GrafViolin<-function(val2,title){
 
 vioplot(datos$fitness,horizontal=TRUE,xlab="Fitness",ylab="")
 vioplot(datos$iteraciones,horizontal=TRUE,xlab="Iteraciones",ylab="")
+
+library(viridis)
+library(viridisLite)
+ggplot(datos, aes(x = fitness, y = -0.5)) +
+  
+  # horizontal boxplots & density plots
+  geom_boxplot(aes(fill = fitness) ,alpha = 0.5) +
+  geom_density(aes(x = fitness), inherit.aes = FALSE,fill="#feb24c",alpha=0.6,col="#800026") +
+  geom_jitter(aes(x=fitness,col=fitness),height=0.36,alpha=0.4)+
+  # vertical lines at Q1 / Q2 / Q3
+  #stat_boxplot(geom = "vline", aes(xintercept = ..xlower..)) +
+  #stat_boxplot(geom = "vline", aes(xintercept = ..xmiddle..)) +
+  #stat_boxplot(geom = "vline", aes(xintercept = ..xupper..)) +
+  
+  #facet_grid(fitness ~ .) +
+  scale_colour_gradient(low="#fed976",high="#800026")+theme(
+    panel.background = element_rect(fill = "gray",
+                                    colour = "black",
+                                    size = 0.5, linetype = "solid")
+  )
+
+ggplot(datos, aes(x = fitness, y = iteraciones)) +
+  #geom_boxplot(aes(fill = fitness), alpha = 0.5) +
+  #geom_density(aes(x = fitness), inherit.aes = FALSE) +
+  geom_point(aes(col=fitness))+
+  scale_colour_viridis_c()
 # Graficos M
 #GrafViolin(datos$m,"M")
 # Graficos P Tresh
