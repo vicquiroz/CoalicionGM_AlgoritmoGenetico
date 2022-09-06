@@ -1,5 +1,0 @@
-﻿cl : línea de comandos warning D9002: se omite la opción desconocida '/utf-16'
-  AlgoritmoC++.cpp
-C:\Users\skarm\Desktop\Trabajos\QueVotan\CoalicionGM_AlgoritmoGenetico\AlgoritmoC++\AlgoritmoC++.cpp(9,13): warning C4326: el tipo de valor devuelto de 'main' debe ser 'int' en lugar de 'void'
-C:\Users\skarm\Desktop\Trabajos\QueVotan\CoalicionGM_AlgoritmoGenetico\AlgoritmoC++\AlgoritmoC++.cpp(30,24): warning C4305: '=': truncamiento de 'double' a 'float'
-  AlgoritmoC++.vcxproj -> C:\Users\skarm\Desktop\Trabajos\QueVotan\CoalicionGM_AlgoritmoGenetico\AlgoritmoC++\x64\Debug\AlgoritmoC++.exe
