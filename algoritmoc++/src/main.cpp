@@ -16,10 +16,11 @@ using namespace std;
 using json = nlohmann::json;
 
 //parametros iniciales
-int m = 54;
-float pmutacion_threshold = 0.36;
-float pr = 0.1652927;
-int seed = time(NULL);
+int m = 38;
+float pmutacion_threshold = 0.170002;
+float pr = 0.141;
+//int seed = time(NULL);
+int seed = 18401044;
 //inicializador de generador de random
 random_device rng;
 default_random_engine generator(seed);
@@ -639,7 +640,8 @@ int main(int argc, char* argv[])
 	
 	//inicializador de variables
 	//int max_k = 10 * (m - 21);
-	int max_k = 10*trunc((n+quorum)/m);
+	//int max_k = 10*trunc((n+quorum)/m);
+	int max_k = 60 * trunc((n + quorum) / m);
 	int i = 0;
 	int k = 0;
 	int it = 0;
@@ -690,13 +692,15 @@ int main(int argc, char* argv[])
 	int** mCual21 = nullptr;
 	int* cromosoma1 = nullptr;
 	int* cromosoma2 = nullptr;
-
+	itera = itera + to_string(it+1) + ",";
+	fitnessEvol = fitnessEvol + to_string(fitnessPob[0]) + ",";
 	//incio de algoritmo
+	fitnessAnt = fitnessPob[0];
+	//cout << "FitnessPob0" << "   " << "FitnessAnt" << endl;
 	while (k < max_k)
 	{
 		//guardamos fitness e iteraciones
 		it++;
-		fitnessAnt = fitnessPob[0];
 		//se seleciona cromosomas a cruzar
 		cual1 = smallest_greater(cump, m, (float)uni2(mt));
 		cual2 = smallest_greater(cump, m, (float)uni2(mt));
@@ -1063,29 +1067,27 @@ int main(int argc, char* argv[])
 			cump[m - 1] = 1;
 			//reinicializamos el contador de iteraciones
 			i = 0;
-
-			
-			k++;
 			//si el fitness del mejor cromosoma es igual al fitness del mejor cromosoma anterior guardamos el numero de iteraciones y el fitness
 			if (fitnessPob[0] < fitnessAnt) {
 				itera = itera + to_string(it) + ",";
 				fitnessEvol = fitnessEvol + to_string(fitnessPob[0]) + ",";
 				k = 0;
+				//cout << fitnessPob[0] << "   " << fitnessAnt << endl;
+				//guardamos el fitness del mejor cromosoma
+				fitnessAnt = fitnessPob[0];
 			}
-			//guardamos el fitness del mejor cromosoma
-			fitnessAnt = fitnessPob[0];
 			//liberamos memoria
 			free(pNuevo);
 			free(cumpNuevo);
 			//free(cromosomaCambio);
+			
 		}
 		//liberamos memoria
 		free(cromosoma1);
 		free(cromosoma2);
 		free(crossovern);
+		k = k + 1;
 	}
-	itera = itera + to_string(it) + ",";
-	fitnessEvol = fitnessEvol + to_string(fitnessPob[0]) + ",";
 	//cerramos el arreglo dentro del archivo json
 	replace(itera.end() - 1, itera.end(), ',', ']');
 	replace(fitnessEvol.end() - 1, fitnessEvol.end(), ',', ']');

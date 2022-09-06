@@ -254,7 +254,11 @@ library(interp)
     scale_fill_viridis(discrete=FALSE) +
     xlab("Dimensión 1")+
     ylab("Dimensión 2")+
-    labs(fill = "Frecuencia")+ theme(aspect.ratio=4/3)
+    labs(fill = "Frecuencia")+theme(aspect.ratio = 4/3,
+                                   panel.background = element_rect(fill = "gray",
+                                                                   colour = "black",
+                                                                   size = 0.5, linetype = "solid")
+    )
   
   grid <- interp(x=datos2$X,y=datos2$Y,z=datos2$fitness,duplicate="strip",nx = 500,ny=500)
   griddf <- subset(data.frame(x = rep(grid$x, nrow(grid$z)),
@@ -266,7 +270,11 @@ library(interp)
     scale_fill_viridis(discrete=FALSE) +
     xlab("Dimensión 1")+
     ylab("Dimensión 2")+
-    labs(fill = "Fitness")+ theme(aspect.ratio=4/3)
+    labs(fill = "Fitness")+theme(aspect.ratio = 4/3,
+                                 panel.background = element_rect(fill = "gray",
+                                                                 colour = "black",
+                                                                 size = 0.5, linetype = "solid")
+    )
   
 
 datos4<-datos
