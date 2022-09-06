@@ -1,0 +1,22 @@
+FILE: exp/gaussian_CoalicionGM/gaussian_CoalicionGM.cpp
+
+kernel_exp
+^^^^^^^^^^
+- double sigma_sq = 1.0 [defined in exp/gaussian_CoalicionGM/gaussian_CoalicionGM.cpp][]
+- double l = 0.2 [defined in exp/gaussian_CoalicionGM/gaussian_CoalicionGM.cpp][]
+
+opt_rprop
+^^^^^^^^^
+- double eps_stop = 0.0 [default value, from src/limbo/opt/rprop.hpp][]
+- int iterations = 300 [default value, from src/limbo/opt/rprop.hpp][]
+
+kernel_squared_exp_ard
+^^^^^^^^^^^^^^^^^^^^^^
+- double sigma_sq = 1 [default value, from src/limbo/kernel/squared_exp_ard.hpp][]
+
+kernel
+^^^^^^
+- bool optimize_noise = false [default value, from src/limbo/kernel/kernel.hpp][]
+- double noise = 0.01 [default value, from src/limbo/kernel/kernel.hpp][]
+
+=========================================
