@@ -479,12 +479,12 @@ int main(int argc, char* argv[])
 	//Poblacion Inicial
 	ofstream poblacionInit;
 	//JSON
-	poblacionInit.open("poblacionInit.json");
-	//poblacionInit.open("poblacionInit.csv");
+	//poblacionInit.open("poblacionInit.json");
+	poblacionInit.open("RH0750158.csv");
 	//se crea y abre el archivo de salida
 
-	string pobInit = "{";
-	//string pobInit = "";
+	//string pobInit = "{";
+	string pobInit = "";
 	//de los JSON se obtiene la cantidad de diputados
 	//para parlamento de estados unidos
 	int n = data["rollcalls"][0]["votes"].size();
@@ -611,7 +611,7 @@ int main(int argc, char* argv[])
 		fitnessPob[i] = fitnessPobInit[fitnessPobInitIndex[i]];
 	}
 	//CREAR JSON
-	for (int i = 0; i < n; i++) {
+	/*for (int i = 0; i < n; i++) {
 		pobInit = pobInit +'"'+ to_string(i) +'"' + ":[";
 		for (int j = 0; j < quorum; j++) {
 			pobInit = pobInit + to_string(cromosoma_n[fitnessPobInitIndex[i]][j]) + ",";
@@ -621,9 +621,9 @@ int main(int argc, char* argv[])
 	}
 	replace(pobInit.end() - 1, pobInit.end(), ',', ' ');
 	poblacionInit << pobInit << "}";
-	
+	*/
 	//GENERAR CSV
-	/*pobInit = pobInit + "fitness,id_dip,nombre_dip,X,Y,";
+	pobInit = pobInit + "fitness,id_dip,nombre_dip,X,Y,";
 	for (int j = 0; j < quorum; j++) {
 		pobInit = pobInit +"V"+ to_string(j) + ",";
 	}
@@ -636,12 +636,12 @@ int main(int argc, char* argv[])
 		temp = to_string(data["rollcalls"][0]["votes"][fitnessPobInitIndex[i]]["name"]);
 		temp.erase(remove(temp.begin(), temp.end(), ','), temp.end());
 		pobInit=pobInit+temp + ",";
-		pobInit = pobInit + to_string(data["rollcalls"][0]["votes"][i]["x"])+"," + to_string(data["rollcalls"][0]["votes"][i]["y"]) + ",";
+		pobInit = pobInit + to_string(data["rollcalls"][0]["votes"][fitnessPobInitIndex[i]]["x"])+"," + to_string(data["rollcalls"][0]["votes"][fitnessPobInitIndex[i]]["y"]) + ",";
 		for (int j = 0; j < quorum; j++) {
 			pobInit = pobInit + to_string(cromosoma_n[fitnessPobInitIndex[i]][j]) + ",";
 		}
 		replace(pobInit.end() - 1, pobInit.end(), ',', '\n');
-	}*/
+	}
 	poblacionInit << pobInit;
 	return EXIT_SUCCESS;
 }

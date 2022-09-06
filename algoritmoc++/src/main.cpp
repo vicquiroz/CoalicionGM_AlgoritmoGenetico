@@ -475,8 +475,14 @@ int main(int argc, char* argv[])
 	//para parlamento de estados unidos
 	ifstream archivo("ingles.json");
 	json data = json::parse(archivo);
+	
+	//Carga de Cromosomas y Matriz de Distancia
+	ifstream archivo("matrizDistancia.txt");
 
 
+	ifstream archivo("poblacionInit.txt");
+
+	json data = json::parse(archivo);
 	//se crea y abre el archivo de salida
 	ofstream resultados;
 	resultados.open("resultados.json");
