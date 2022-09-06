@@ -159,7 +159,11 @@ vwReg <- function(formula, data, title="", B=1000, shade=TRUE, shade.alpha=.1, s
   }
   # plain linear regression line
   if (show.lm==TRUE) {gg.lm <- geom_smooth(method="lm", color="darkgreen", se=FALSE)}
-  gg.points <- geom_point(data=data, aes_string(x=IV, y=DV), size=1, shape=shape, fill="white", color="black")
+  gg.points <- geom_point(data=data, aes_string(x=IV, y=DV), size=1, shape=shape,
+                          fill="white",
+                          color="white",
+                          stroke=0
+                          )
   if (title != "") {
     gg.title <- theme(title=title)
   }
@@ -248,7 +252,9 @@ library(interp)
   ggplot(griddf, aes(x, y, fill= z)) + 
     geom_tile() +
     scale_fill_viridis(discrete=FALSE) +
-    labs(fill = "Frecuencia")
+    xlab("Dimensión 1")+
+    ylab("Dimensión 2")+
+    labs(fill = "Frecuencia")+ theme(aspect.ratio=4/3)
   
   grid <- interp(x=datos2$X,y=datos2$Y,z=datos2$fitness,duplicate="strip",nx = 500,ny=500)
   griddf <- subset(data.frame(x = rep(grid$x, nrow(grid$z)),
@@ -258,7 +264,9 @@ library(interp)
   ggplot(griddf, aes(x, y, fill= z)) + 
     geom_tile() +
     scale_fill_viridis(discrete=FALSE) +
-    labs(fill = "fitness")
+    xlab("Dimensión 1")+
+    ylab("Dimensión 2")+
+    labs(fill = "Fitness")+ theme(aspect.ratio=4/3)
   
 
 datos4<-datos
@@ -289,7 +297,8 @@ datos2$fitnessx103<- datos2$fitness/1000
 
 vwReg(freq~fitnessx103,data=datos2,slices=400,
       palette=heat.colors(20),
-      shade.alpha = .5,family="symmetric")+
+      shade.alpha = .5,
+      family="symmetric")+
   xlab("Fitness (x10^3)")+
   ylab("Frecuencia")+
   theme(panel.background = element_rect(fill = 'black', colour = 'black'))
