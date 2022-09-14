@@ -10,15 +10,15 @@
 #include <nlohmann/json.hpp>
 #include <chrono>
 #include <cmath>
-#include <cfloat>
+
 //acortadores
 using namespace std;
 using json = nlohmann::json;
 
 //parametros iniciales
 int m = 38;
-float pmutacion_threshold = 0.170002;
-float pr = 0.141;
+double pmutacion_threshold = 0.170002;
+double pr = 0.141;
 //int seed = time(NULL);
 int seed = 18401044;
 //inicializador de generador de random
@@ -26,7 +26,7 @@ random_device rng;
 default_random_engine generator(seed);
 mt19937 mt{ rng() };
 
-//inicializador de random, tanto para int's como para float's
+//inicializador de random, tanto para int's como para double's
 uniform_int_distribution<int> uni;
 uniform_real_distribution<double> uni2;
 
@@ -53,7 +53,7 @@ void sort_bubble(int* array, int largo)
 	}
 }
 
-void sort_BubbleIndex(int* arrayIndex, float *arrayDist, int n, int quorum){
+void sort_BubbleIndex(int* arrayIndex, double *arrayDist, int n, int quorum){
     int temp = 0;
 	//int orderIndex[n];
 	int* orderIndex = new int[n];
@@ -86,9 +86,9 @@ uniform_int_distribution<int> pop_select;
 
 // Encuentra la minima distancia entre los vertices que no han sido guardados
 // dentro del minimum spanning tree
-float minDist(float d[], bool genSet[],int n) 
+double minDist(double d[], bool genSet[],int n) 
 { 
-    float min = FLT_MAX, min_index; 
+    double min = FLT_MAX, min_index; 
     for (int v = 0; v < n; v++) 
         if (genSet[v] == false && d[v] < min) 
             min = d[v], min_index = v; 
@@ -96,15 +96,15 @@ float minDist(float d[], bool genSet[],int n)
 } 
 
 // spanning tree
-void create_crom(int *cromosoma,float **matDis,int n,int quorum,int init_index) 
+void create_crom(int *cromosoma,double **matDis,int n,int quorum,int init_index) 
 { 
     // Array que almacena los nodos
     // 
     //int dparent[n];
 	int* dparent = new int[n];
     //  Almacena la distancia entre el punto (a,b) de los dparent seleccionados
-    //float d[n]; 
-	float* d = new float[n];
+    //double d[n]; 
+	double* d = new double[n];
     // Vertices que son partes del mininmum spanning tree
     //bool genSet[n]; // vertices que se incluyen
 	bool* genSet = new bool[n];
@@ -143,7 +143,7 @@ void create_crom(int *cromosoma,float **matDis,int n,int quorum,int init_index)
 
 
 // Selecciona los n/2+1 nodos mas cercano al nodo inicial
-void minDistEdge(int* arrayIndex, float *arrayDist, int n, int quorum) 
+void minDistEdge(int* arrayIndex, double *arrayDist, int n, int quorum) 
 { 
     //bool genSet[n]; 
 	bool* genSet = new bool[n];
@@ -160,15 +160,15 @@ void minDistEdge(int* arrayIndex, float *arrayDist, int n, int quorum)
 
 
 //funcion para calcular la distancia entre dos puntos
-float dis_euc(float x1, float y1, float x2, float y2)
+double dis_euc(double x1, double y1, double x2, double y2)
 {
-	float calculo = pow(pow((x2 - x1), 2) + pow((y2 - y1), 2), 1 / (float)2);
+	double calculo = pow(pow((x2 - x1), 2) + pow((y2 - y1), 2), 1 / (double)2);
 	return calculo;
 }
 
 //evaluar los cromosomas y calcular su fitness
-float eval_sol(int* pos, float** mat, int largo) {
-	float suma = 0;
+double eval_sol(int* pos, double** mat, int largo) {
+	double suma = 0;
 	for (size_t i = 0; i <= (largo - 2); i++)
 	{
 
@@ -181,9 +181,9 @@ float eval_sol(int* pos, float** mat, int largo) {
 }
 
 //funcion para suamar los valores de un arreglo
-float suma(float* array, int largo)
+double suma(double* array, int largo)
 {
-	float suma = 0;
+	double suma = 0;
 	for (size_t i = 0; i <= largo; i++)
 	{
 		suma = suma + array[i];
@@ -206,7 +206,7 @@ int suma_bool(bool* array, int largo)
 }
 
 //funcion para obtener la posicion de el primer valor en un arreglo que sea más pequeño que un valor dado
-int smallest_greater(float* seq, int largo, float value)
+int smallest_greater(double* seq, int largo, double value)
 {
 	int i = 0;
 	bool flag = true;
@@ -259,9 +259,9 @@ void sample(int* arreglo, int limite, int largo)
 
 
 //funcion para ordenar un arreglo de menor a mayor y aplica esos cambios a una matriz
-void order(float* fitness, int** cromosoma, int quorum, int m)
+void order(double* fitness, int** cromosoma, int quorum, int m)
 {
-	int temp = 0;
+	double temp = 0;
 	int* arrTemp = (int*)malloc(quorum * sizeof(int));
 	for (size_t i = 0; i < m; i++)
 	{
@@ -378,7 +378,7 @@ int maximo(int* array, int largo)
 }
 
 //funcion que retorna la posicion de los valores que sean los mayores de un arreglo
-int which_max(float* array, int largo)
+int which_max(double* array, int largo)
 {
 	int maxi = array[0];
 	for (size_t i = 0; i < largo - 1; i++)
@@ -486,7 +486,7 @@ int main(int argc, char* argv[])
 	histo.open("hist.json");
 	string itera = "[";
 	string fitnessEvol = "[";
-
+	
 	//de los JSON se obtiene la cantidad de diputados
 	//para parlamento de estados unidos
 	int n = data["rollcalls"][0]["votes"].size();
@@ -495,10 +495,10 @@ int main(int argc, char* argv[])
 	//int n = data["diputados"].size();
 
 	//creacion de la matriz de distancia
-	float** matDis = (float**)malloc(n * sizeof(float*));
+	double** matDis = (double**)malloc(n * sizeof(double*));
 	for (size_t i = 0; i < n; i++)
 	{
-		matDis[i] = (float*)malloc(n * sizeof(float));
+		matDis[i] = (double*)malloc(n * sizeof(double));
 	}
 
 	//rellenado de la matriz de distancia
@@ -558,13 +558,13 @@ int main(int argc, char* argv[])
 	//inicializacion de semilla
 	mt.seed(seed);
 
-	//generador de float's random entre 0 y 1
+	//generador de double's random entre 0 y 1
 	uni2 = uniform_real_distribution<double>(0, 1);
 
 	//inicializador de Poblacion y fitness
 	int** cromosoma = (int**)malloc(m * sizeof(int*));
-	float* fitnessPob = nullptr;
-	fitnessPob = (float*)malloc(m * sizeof(float));
+	double* fitnessPob = nullptr;
+	fitnessPob = (double*)malloc(m * sizeof(double));
 
 	//inicializacion de cromosomas
 	for (size_t i = 0; i < m; i++)
@@ -575,35 +575,35 @@ int main(int argc, char* argv[])
 	///////////////////////////////////////////
 	// spanning tree Inicio de población
 	///////////////////////////////////////////
-	/*
-	pop_select = uniform_int_distribution<int>(0,n-1);
+	
+	/*pop_select = uniform_int_distribution<int>(0, n - 1);
 	for (int i = 0; i < m; i++){
         create_crom(cromosoma[i],matDis,n,quorum,pop_select(mt));
-    }
+    }*/
 	for (size_t i = 0; i < m; i++)
 	{
-		//sample(cromosoma[i], n, quorum);
-		//sort_bubble(cromosoma[i], quorum);
+		sample(cromosoma[i], n, quorum);
+		sort_bubble(cromosoma[i], quorum);
 		//cout << eval_sol(cromosoma[i], matDis, quorum) << endl;
 		fitnessPob[i] = eval_sol(cromosoma[i], matDis, quorum);
 	}
 	
 	//ordenamiento de fitness y cromosomas
 	order(fitnessPob, cromosoma, quorum, m);
-	*/
+	
 
 
 
 	/////////////////////////////////////
 	////// Ordenamiento algoritmo B
 	/////////////////////////////////////
-    int** cromosoma_n = (int**)malloc(n * sizeof(int*));
+    /*int** cromosoma_n = (int**)malloc(n * sizeof(int*));
 	for (size_t i = 0; i < n; i++)
 	{
 		cromosoma_n[i] = (int*)malloc(quorum * sizeof(int));
 	}
    
-    float* fitnessPobInit = (float*)malloc(n * sizeof(float));
+    double* fitnessPobInit = (double*)malloc(n * sizeof(double));
     int* fitnessPobInitIndex = (int*)malloc(n * sizeof(int));
 
     for(int j = 0; j < n; j++){
@@ -618,14 +618,14 @@ int main(int argc, char* argv[])
     for(int i = 0; i <m; i++){
         memcpy(cromosoma[i],cromosoma_n[fitnessPobInitIndex[i]],sizeof(int)*quorum);
         fitnessPob[i] = fitnessPobInit[fitnessPobInitIndex[i]];
-    }
+    }*/
 	/////////////////////////////////////////////////////////////
 	/////// Fin poblacion inicial
 	////////////////////////////////////////////////////////////
 
 	//inicializacion de variables de probabilidad
-	float* p = (float*)malloc(m * sizeof(float));
-	float* cump = (float*)malloc(m * sizeof(float));
+	double* p = (double*)malloc(m * sizeof(double));
+	double* cump = (double*)malloc(m * sizeof(double));
 
 	p[0] = 0.1;
 	cump[0] = 0.1;
@@ -641,7 +641,7 @@ int main(int argc, char* argv[])
 	//inicializador de variables
 	//int max_k = 10 * (m - 21);
 	//int max_k = 10*trunc((n+quorum)/m);
-	int max_k = 60 * trunc((n + quorum) / m);
+	int max_k = 200 * trunc((n + quorum) / m);
 	int i = 0;
 	int k = 0;
 	int it = 0;
@@ -650,7 +650,7 @@ int main(int argc, char* argv[])
 	int cual1;
 	int cual2;
 
-	float pmutacion;
+	double pmutacion;
 	bool flag2;
 	bool flag3;
 
@@ -659,7 +659,7 @@ int main(int argc, char* argv[])
 
 	int peor;
 
-	float fitnessCambio;
+	double fitnessCambio;
 
 	int min;
 
@@ -669,9 +669,9 @@ int main(int argc, char* argv[])
 	{
 		cromosomaNuevo[a] = (int*)malloc(quorum * sizeof(int));
 	}
-	float* fitnessPobNuevo = (float*)malloc(m * sizeof(float));
+	double* fitnessPobNuevo = (double*)malloc(m * sizeof(double));
 
-	float fitnessAnt;
+	double fitnessAnt;
 
 
 	// Reservas extras 
@@ -702,10 +702,10 @@ int main(int argc, char* argv[])
 		//guardamos fitness e iteraciones
 		it++;
 		//se seleciona cromosomas a cruzar
-		cual1 = smallest_greater(cump, m, (float)uni2(mt));
-		cual2 = smallest_greater(cump, m, (float)uni2(mt));
+		cual1 = smallest_greater(cump, m, (double)uni2(mt));
+		cual2 = smallest_greater(cump, m, (double)uni2(mt));
 		//estos no pueden ser iguales
-		while (cual1 == cual2)cual2 = smallest_greater(cump, m, (float)uni2(mt));
+		while (cual1 == cual2)cual2 = smallest_greater(cump, m, (double)uni2(mt));
 
 		//se guardan los cromosomas a cruzar
 		int* cromosoma1 = (int*)malloc(quorum * sizeof(int));
@@ -804,7 +804,7 @@ int main(int argc, char* argv[])
 		free(selecCrossover12);
 		free(selecCrossover21);
 		//creamos la probabilidad de mutacion
-		pmutacion = (float)uni2(mt);
+		pmutacion = (double)uni2(mt);
 		//comprobamos si se muta el cromosoma1
 		if (pmutacion < pmutacion_threshold) {
 			//seleccion de genes a mutar
@@ -830,7 +830,7 @@ int main(int argc, char* argv[])
 
 		}
 		//creamos la probabilidad de mutacion
-		pmutacion = (float)uni2(mt);
+		pmutacion = (double)uni2(mt);
 		//comprobamos si se muta el cromosoma2
 		if (pmutacion < pmutacion_threshold) {
 			//seleccion de genes a mutar
@@ -1014,8 +1014,8 @@ int main(int argc, char* argv[])
 				//liberamos memoria
 				free(aBoolean1);
 			}
-			float* pNuevo = (float*)malloc(m * sizeof(float));
-			float* cumpNuevo = (float*)malloc(m * sizeof(float));
+			double* pNuevo = (double*)malloc(m * sizeof(double));
+			double* cumpNuevo = (double*)malloc(m * sizeof(double));
 			//si despues de terminar el while anterior la bandera flag3 es false
 			if (flag3 == false)
 			{
@@ -1024,15 +1024,15 @@ int main(int argc, char* argv[])
 				memcpy(cromosomaNuevo[peor], cromosoma[0], quorum * sizeof(int));
 				fitnessPobNuevo[peor] = fitnessPob[0];
 				order(fitnessPobNuevo, cromosomaNuevo, quorum, m);
-				memcpy(pNuevo, p, m * sizeof(float));
-				memcpy(cumpNuevo, cump, m * sizeof(float));
+				memcpy(pNuevo, p, m * sizeof(double));
+				memcpy(cumpNuevo, cump, m * sizeof(double));
 
 			}
 			else
 			{
 				//de lo contrario mantenemos la probabilidad y la probabilidad acumulada
-				memcpy(pNuevo, p, m * sizeof(float));
-				memcpy(cumpNuevo, cump, m * sizeof(float));
+				memcpy(pNuevo, p, m * sizeof(double));
+				memcpy(cumpNuevo, cump, m * sizeof(double));
 			}
 			//cambiamos la poblacion actual por la poblacion nueva
 			for (size_t a = 0; a < m; a++)
@@ -1102,7 +1102,7 @@ int main(int argc, char* argv[])
 	resultados << "\"pr\": " << pr << ",\n";
 	resultados << "\"seed\": " << seed << ",\n";
 	resultados << "\"numero_de_iteraciones\": " << it << ",\n";
-	resultados << "\"fitness\": " << fitnessPob[0] << ",\n";
+	resultados << "\"fitness\": " << fixed<<fitnessPob[0]<<setprecision(9) << ",\n";
 	resultados << "\"tiempo\": " << fixed << tTomado << setprecision(9) << ",\n";
 	resultados << "\"coalicion\": [";
 
