@@ -15,12 +15,12 @@ file(GLOB all_SRCS
 )
 
 # Agregue un origen al ejecutable de este proyecto.
-add_executable (generarPobInit ${all_SRCS} ejemplo2.json ingles.json "src/main.cpp")
+add_executable (generarPobInit ${all_SRCS} ejemplo2.json inglesRH0941234.json "src/main.cpp")
 set_target_properties(generarPobInit PROPERTIES LINKER_LANGUAGE CXX)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/data/ejemplo2.json
 	${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
 
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/data/ingles.json
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/data/inglesRH0941234.json
 	${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
 # TODO: Agregue pruebas y destinos de instalación si es necesario.
 

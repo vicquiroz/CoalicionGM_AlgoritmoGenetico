@@ -17,8 +17,8 @@ using json = nlohmann::json;
 
 //parametros iniciales
 int m = 54;
-float pmutacion_threshold = 0.36;
-float pr = 0.1652927;
+double pmutacion_threshold = 0.36;
+double pr = 0.1652927;
 //int seed = time(NULL);
 int seed = 1234;
 //inicializador de generador de random
@@ -26,7 +26,7 @@ random_device rng;
 default_random_engine generator(seed);
 mt19937 mt{ rng() };
 
-//inicializador de random, tanto para int's como para float's
+//inicializador de random, tanto para int's como para double's
 uniform_int_distribution<int> uni;
 uniform_real_distribution<double> uni2;
 
@@ -53,7 +53,7 @@ void sort_bubble(int* array, int largo)
 	}
 }
 
-void sort_BubbleIndex(int* arrayIndex, float* arrayDist, int n, int quorum) {
+void sort_BubbleIndex(int* arrayIndex, double* arrayDist, int n, int quorum) {
 	int temp = 0;
 	//int orderIndex[n];
 	int* orderIndex = new int[n];
@@ -86,9 +86,9 @@ uniform_int_distribution<int> pop_select;
 
 // Encuentra la minima distancia entre los vertices que no han sido guardados
 // dentro del minimum spanning tree
-float minDist(float d[], bool genSet[], int n)
+double minDist(double d[], bool genSet[], int n)
 {
-	float min = FLT_MAX, min_index;
+	double min = FLT_MAX, min_index;
 	for (int v = 0; v < n; v++)
 		if (genSet[v] == false && d[v] < min)
 			min = d[v], min_index = v;
@@ -96,15 +96,15 @@ float minDist(float d[], bool genSet[], int n)
 }
 
 // spanning tree
-void create_crom(int* cromosoma, float** matDis, int n, int quorum, int init_index)
+void create_crom(int* cromosoma, double** matDis, int n, int quorum, int init_index)
 {
 	// Array que almacena los nodos
 	// 
 	//int dparent[n];
 	int* dparent = new int[n];
 	//  Almacena la distancia entre el punto (a,b) de los dparent seleccionados
-	//float d[n]; 
-	float* d = new float[n];
+	//double d[n]; 
+	double* d = new double[n];
 	// Vertices que son partes del mininmum spanning tree
 	//bool genSet[n]; // vertices que se incluyen
 	bool* genSet = new bool[n];
@@ -143,7 +143,7 @@ void create_crom(int* cromosoma, float** matDis, int n, int quorum, int init_ind
 
 
 // Selecciona los n/2+1 nodos mas cercano al nodo inicial
-void minDistEdge(int* arrayIndex, float* arrayDist, int n, int quorum)
+void minDistEdge(int* arrayIndex, double* arrayDist, int n, int quorum)
 {
 	//bool genSet[n]; 
 	bool* genSet = new bool[n];
@@ -160,15 +160,15 @@ void minDistEdge(int* arrayIndex, float* arrayDist, int n, int quorum)
 
 
 //funcion para calcular la distancia entre dos puntos
-float dis_euc(float x1, float y1, float x2, float y2)
+double dis_euc(double x1, double y1, double x2, double y2)
 {
-	float calculo = pow(pow((x2 - x1), 2) + pow((y2 - y1), 2), 1 / (float)2);
+	double calculo = pow(pow((x2 - x1), 2) + pow((y2 - y1), 2), 1 / (double)2);
 	return calculo;
 }
 
 //evaluar los cromosomas y calcular su fitness
-float eval_sol(int* pos, float** mat, int largo) {
-	float suma = 0;
+double eval_sol(int* pos, double** mat, int largo) {
+	double suma = 0;
 	for (size_t i = 0; i <= (largo - 2); i++)
 	{
 
@@ -181,9 +181,9 @@ float eval_sol(int* pos, float** mat, int largo) {
 }
 
 //funcion para suamar los valores de un arreglo
-float suma(float* array, int largo)
+double suma(double* array, int largo)
 {
-	float suma = 0;
+	double suma = 0;
 	for (size_t i = 0; i <= largo; i++)
 	{
 		suma = suma + array[i];
@@ -206,7 +206,7 @@ int suma_bool(bool* array, int largo)
 }
 
 //funcion para obtener la posicion de el primer valor en un arreglo que sea más pequeño que un valor dado
-int smallest_greater(float* seq, int largo, float value)
+int smallest_greater(double* seq, int largo, double value)
 {
 	int i = 0;
 	bool flag = true;
@@ -259,7 +259,7 @@ void sample(int* arreglo, int limite, int largo)
 
 
 //funcion para ordenar un arreglo de menor a mayor y aplica esos cambios a una matriz
-void order(float* fitness, int** cromosoma, int quorum, int m)
+void order(double* fitness, int** cromosoma, int quorum, int m)
 {
 	int temp = 0;
 	int* arrTemp = (int*)malloc(quorum * sizeof(int));
@@ -378,7 +378,7 @@ int maximo(int* array, int largo)
 }
 
 //funcion que retorna la posicion de los valores que sean los mayores de un arreglo
-int which_max(float* array, int largo)
+int which_max(double* array, int largo)
 {
 	int maxi = array[0];
 	for (size_t i = 0; i < largo - 1; i++)
@@ -466,164 +466,77 @@ void sample_arreglo(int* arreglo, int cant, int* valores, int largo)
 
 int main(int argc, char* argv[])
 {
-	//llamada de JSON
-
-	//para camara de diputados chile
-	//ifstream archivo("ejemplo2.json");
-	//json data = json::parse(archivo);
-
-	//para parlamento de estados unidos
-	ifstream archivo("ingles.json");
+	//cargar archivo de votaciones
+	ifstream archivo("inglesRH0941234.json");
 	json data = json::parse(archivo);
-
-	//Poblacion Inicial
-	ofstream poblacionInit;
-	//JSON
-	poblacionInit.open("poblacionInit.json");
-	//poblacionInit.open("poblacionInit.csv");
-	//se crea y abre el archivo de salida
-
-	string pobInit = "{";
-	//string pobInit = "";
-	//de los JSON se obtiene la cantidad de diputados
-	//para parlamento de estados unidos
+	//numero de parlamentario
 	int n = data["rollcalls"][0]["votes"].size();
-
-	//para camara de diputados chile
-	//int n = data["diputados"].size();
-
 	//creacion de la matriz de distancia
-	float** matDis = (float**)malloc(n * sizeof(float*));
+	double** matDis = (double**)malloc(n * sizeof(double*));
 	for (size_t i = 0; i < n; i++)
 	{
-		matDis[i] = (float*)malloc(n * sizeof(float));
+		matDis[i] = (double*)malloc(n * sizeof(double));
 	}
-
+	//Creacion matriz de posiciones
+	double** matPos = (double**)malloc(n * sizeof(double*));
+	for (size_t i = 0; i < n; i++)
+	{
+		matPos[i] = (double*)malloc(2 * sizeof(double));
+		matPos[i][0] = data["rollcalls"][0]["votes"][i]["x"];
+		//cout << fixed << matPos[i][0] << setprecision(9) << ",";
+		matPos[i][1] = data["rollcalls"][0]["votes"][i]["y"];
+		//break;
+	}
 	//rellenado de la matriz de distancia
 	// Matriz rellenando por completo
 	for (size_t i = 0; i < n; i++)
 	{
 		for (size_t j = 0; j < n; j++)
 		{
-			matDis[i][j] = dis_euc(data["rollcalls"][0]["votes"][i]["x"], data["rollcalls"][0]["votes"][i]["y"], data["rollcalls"][0]["votes"][j]["x"], data["rollcalls"][0]["votes"][j]["y"]);
+			matDis[i][j] = dis_euc(matPos[i][0], matPos[i][1], matPos[j][0], matPos[j][1]);
 		}
 	}
-	//para parlamento de estados unidos
-	/*
-	for (size_t i = 0; i <= (n - 2); i++)
-	{
-
-		//cout << i << endl;
-		for (size_t j = i + 1; j <= (n - 1); j++)
-		{
-			matDis[i][j] = dis_euc(data["rollcalls"][0]["votes"][i]["x"], data["rollcalls"][0]["votes"][i]["y"], data["rollcalls"][0]["votes"][j]["x"], data["rollcalls"][0]["votes"][j]["y"]);
-		}
-	}
-	*/
-	//para camara de diputados chile
-	/*for (size_t i = 0; i <= (n - 2); i++)
-	{
-
-		//cout << i << endl;
-		for (size_t j = i + 1; j <= (n - 1); j++)
-		{
-			matDis[i][j] = dis_euc(data["diputados"][i]["coordX"], data["diputados"][i]["coordY"], data["diputados"][j]["coordX"], data["diputados"][j]["coordY"]);
-		}
-	}*/
-
 
 	//inicializacion de quorum
-	//para parlamento de estados unidos
 	int quorum = trunc(n / 2) + 1;
-	//para camara de diputados chile
-	//int quorum = 74;
-
-	//revision de parametros de entrada
-	if (argc > 1)
-	{
-		m = stoi(argv[1]);
-		pmutacion_threshold = stod(argv[2]);
-		pr = stod(argv[3]);
-		seed = stoi(argv[4]);
-	}
-	//inicializacion de semilla
-	mt.seed(seed);
-
-	//generador de float's random entre 0 y 1
-	uni2 = uniform_real_distribution<double>(0, 1);
-
-	//inicializador de Poblacion y fitness
-	int** cromosoma = (int**)malloc(m * sizeof(int*));
-	float* fitnessPob = nullptr;
-	fitnessPob = (float*)malloc(m * sizeof(float));
-
-	//inicializacion de cromosomas
-	for (size_t i = 0; i < m; i++)
-	{
-		cromosoma[i] = (int*)malloc(quorum * sizeof(int));
-	}
-
-	///////////////////////////////////////////
-	// spanning tree Inicio de población
-	///////////////////////////////////////////
-	/*
-	pop_select = uniform_int_distribution<int>(0,n-1);
-	for (int i = 0; i < m; i++){
-		create_crom(cromosoma[i],matDis,n,quorum,pop_select(mt));
-	}
-	for (size_t i = 0; i < m; i++)
-	{
-		//sample(cromosoma[i], n, quorum);
-		//sort_bubble(cromosoma[i], quorum);
-		//cout << eval_sol(cromosoma[i], matDis, quorum) << endl;
-		fitnessPob[i] = eval_sol(cromosoma[i], matDis, quorum);
-	}
-
-	//ordenamiento de fitness y cromosomas
-	order(fitnessPob, cromosoma, quorum, m);
-	*/
 
 
-
+	//Calculo Tiempo Inicial
+	auto tInicial = chrono::high_resolution_clock::now();
 	/////////////////////////////////////
 	////// Ordenamiento algoritmo B
 	/////////////////////////////////////
-	int** cromosoma_n = (int**)malloc(n * sizeof(int*));
+	int** congresistas = (int**)malloc(n * sizeof(int*));
 	for (size_t i = 0; i < n; i++)
 	{
-		cromosoma_n[i] = (int*)malloc(quorum * sizeof(int));
+		congresistas[i] = (int*)malloc(quorum * sizeof(int));
 	}
 
-	float* fitnessPobInit = (float*)malloc(n * sizeof(float));
-	int* fitnessPobInitIndex = (int*)malloc(n * sizeof(int));
+	double* fitnessInit = (double*)malloc(n * sizeof(double));
+	int* fitnessInitIndex = (int*)malloc(n * sizeof(int));
 
 	for (int j = 0; j < n; j++) {
-		minDistEdge(cromosoma_n[j], matDis[j], n, quorum);
-		sort_bubble(cromosoma_n[j], quorum);
-		fitnessPobInit[j] = eval_sol(cromosoma_n[j], matDis, quorum);
+		minDistEdge(congresistas[j], matDis[j], n, quorum);
+		sort_bubble(congresistas[j], quorum);
+		fitnessInit[j] = eval_sol(congresistas[j], matDis, quorum);
 	}
 
 	/// Ordena los resultados
-	sort_BubbleIndex(fitnessPobInitIndex, fitnessPobInit, n, n);
-	// Traspasa los m mejores de toda la población inicial
-	for (int i = 0; i < m; i++) {
-		memcpy(cromosoma[i], cromosoma_n[fitnessPobInitIndex[i]], sizeof(int) * quorum);
-		fitnessPob[i] = fitnessPobInit[fitnessPobInitIndex[i]];
-	}
-	//CREAR JSON
-	for (int i = 0; i < n; i++) {
-		pobInit = pobInit +'"'+ to_string(i) +'"' + ":[";
-		for (int j = 0; j < quorum; j++) {
-			pobInit = pobInit + to_string(cromosoma_n[fitnessPobInitIndex[i]][j]) + ",";
-		}
-		replace(pobInit.end() - 1, pobInit.end(), ',', ']');
-		pobInit = pobInit + "," + "\n";
-	}
-	replace(pobInit.end() - 1, pobInit.end(), ',', ' ');
-	poblacionInit << pobInit << "}";
-	
+	sort_BubbleIndex(fitnessInitIndex, fitnessInit, n, n);
+	//sacar el mejor
+	int* coalicion = (int*)malloc(quorum * sizeof(int));
+	double fitnessCGM;
+
+	memcpy(coalicion, congresistas[fitnessInitIndex[0]], sizeof(int) * quorum);
+	fitnessCGM = fitnessInit[fitnessInitIndex[0]];
+
+	//Poblacion Inicial
+	ofstream poblacionInit;
+	poblacionInit.open("poblacionInit.csv");
+
+	string pobInit = "";
 	//GENERAR CSV
-	/*pobInit = pobInit + "fitness,id_dip,nombre_dip,X,Y,";
+	pobInit = pobInit + "fitness,id_dip,nombre_dip,X,Y,";
 	for (int j = 0; j < quorum; j++) {
 		pobInit = pobInit +"V"+ to_string(j) + ",";
 	}
@@ -631,17 +544,17 @@ int main(int argc, char* argv[])
 	string temp;
 	string empty = "";
 	for (int i = 0; i < n; i++) {
-		pobInit = pobInit + to_string(fitnessPobInit[fitnessPobInitIndex[i]]) + ",";
-		pobInit = pobInit + to_string(fitnessPobInitIndex[i]) +",";
-		temp = to_string(data["rollcalls"][0]["votes"][fitnessPobInitIndex[i]]["name"]);
+		pobInit = pobInit + to_string(fitnessInit[fitnessInitIndex[i]]) + ",";
+		pobInit = pobInit + to_string(fitnessInitIndex[i]) +",";
+		temp = to_string(data["rollcalls"][0]["votes"][fitnessInitIndex[i]]["name"]);
 		temp.erase(remove(temp.begin(), temp.end(), ','), temp.end());
 		pobInit=pobInit+temp + ",";
-		pobInit = pobInit + to_string(data["rollcalls"][0]["votes"][i]["x"])+"," + to_string(data["rollcalls"][0]["votes"][i]["y"]) + ",";
+		pobInit = pobInit + to_string(data["rollcalls"][0]["votes"][fitnessInitIndex[i]]["x"])+"," + to_string(data["rollcalls"][0]["votes"][fitnessInitIndex[i]]["y"]) + ",";
 		for (int j = 0; j < quorum; j++) {
-			pobInit = pobInit + to_string(cromosoma_n[fitnessPobInitIndex[i]][j]) + ",";
+			pobInit = pobInit + to_string(congresistas[fitnessInitIndex[i]][j]) + ",";
 		}
 		replace(pobInit.end() - 1, pobInit.end(), ',', '\n');
-	}*/
+	}
 	poblacionInit << pobInit;
 	return EXIT_SUCCESS;
 }
