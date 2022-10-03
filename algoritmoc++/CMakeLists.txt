@@ -12,17 +12,15 @@ include_directories(
 file(GLOB all_SRCS
 	"${PROJECT_SOURCE_DIR}/src/*.cpp"
 	"${PROJECT_SOURCE_DIR}/src/*.c"
+	"${PROJECT_SOURCE_DIR}/src/*.h"
 )
-
+file(GLOB all_DATA
+	"${PROJECT_SOURCE_DIR}/data/*.json"
+)
 # Agregue un origen al ejecutable de este proyecto.
-add_executable (algortimoc++ ${all_SRCS} ejemplo2.json ingles.json)
+add_executable (algortimoc++ ${all_SRCS} ${all_DATA})
 set_target_properties(algortimoc++ PROPERTIES LINKER_LANGUAGE CXX)
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/data/ejemplo2.json
-	${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
-
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/data/ingles.json
-	${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
-# TODO: Agregue pruebas y destinos de instalación si es necesario.
+file(COPY ${all_DATA} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 include(FetchContent)
 
