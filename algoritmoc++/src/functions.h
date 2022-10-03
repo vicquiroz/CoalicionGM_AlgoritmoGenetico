@@ -13,16 +13,25 @@
 //acortadores
 using namespace std;
 int seed = 2417704;
+// Inicialización de randoms
 uniform_int_distribution<int> uni;
 uniform_real_distribution<double> uni2;
 uniform_int_distribution<int> pop_select;
 random_device rng;
 default_random_engine generator(seed);
 mt19937 mt{ rng() };
-//funcion para ordenar un arreglo de menor a mayor
+struct SolutionStructure {
+	int* coalition;
+	double fitness;
+};
+
 bool array_sort(int const& lvd, int const& rvd)
 {
 	return lvd < rvd;
+}
+bool vector_initial_solutions_sort(SolutionStructure const& lvd, SolutionStructure const& rvd)
+{
+	return lvd.fitness < rvd.fitness;
 }
 
 //***********funciones***********//
@@ -307,42 +316,6 @@ int minimo(int* array, int largo)
 	return mini;
 }
 
-//funcion que retorna el mayor valor de un arreglo
-int maximo(int* array, int largo)
-{
-	int maxi = 0;
-	for (size_t i = 0; i < largo - 1; i++)
-	{
-		if (array[i] > array[i + 1])
-			maxi = array[i];
-		else
-			maxi = array[i + 1];
-	}
-	return maxi;
-}
-
-//funcion que retorna la posicion de los valores que sean los mayores de un arreglo
-int which_max(double* array, int largo)
-{
-	double maxi = array[0];
-	for (size_t i = 0; i < largo - 1; i++)
-	{
-		if (array[i] > array[i + 1])
-		{
-			maxi = array[i];
-		}
-		else
-		{
-			maxi = array[i + 1];
-		}
-	}
-	for (int i = 0; i < largo; i++)
-	{
-		if (array[i] == maxi)
-			return i;
-	}
-	return -1;
-}
 
 //funcion que dado un arreglo de booleanos retorna la posicion de los valores que sean TRUE
 int** which(bool* array, int largo)

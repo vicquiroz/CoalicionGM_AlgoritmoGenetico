@@ -43,9 +43,6 @@ int main(int argc, char* argv[])
 	//para parlamento de estados unidos
 	int n = data["rollcalls"][0]["votes"].size();
 
-	//para camara de diputados chile
-	//int n = data["diputados"].size();
-
 	//creacion de la matriz de distancia
 	double** matDis = (double**)malloc(n * sizeof(double*));
 	for (size_t i = 0; i < n; i++)
@@ -86,31 +83,39 @@ int main(int argc, char* argv[])
 	//generador de double's random entre 0 y 1
 	uni2 = uniform_real_distribution<double>(0, 1);
 
+	vector<SolutionStructure> Solutions;
+
 	//inicializador de Poblacion y fitness
-	int** cromosoma = (int**)malloc(m * sizeof(int*));
-	double* fitnessPob = nullptr;
-	fitnessPob = (double*)malloc(m * sizeof(double));
+	//int** cromosoma = (int**)malloc(m * sizeof(int*));
+	//double* fitnessPob = nullptr;
+	//fitnessPob = (double*)malloc(m * sizeof(double));
 
 	//inicializacion de cromosomas
 	for (size_t i = 0; i < m; i++)
 	{
-		cromosoma[i] = (int*)malloc(quorum * sizeof(int));
+		Solutions.push_back(SolutionStructure());
+		Solutions[i].coalition = (int*)malloc(quorum * sizeof(int));
+		//cromosoma[i] = (int*)malloc(quorum * sizeof(int));
 	}
 
 	for (size_t i = 0; i < m; i++)
 	{
-		sample(cromosoma[i], n, quorum);
-		//sort_bubble(cromosoma[i], quorum);
-		sort(cromosoma[i], cromosoma[i] + quorum, &array_sort);
-		fitnessPob[i] = eval_sol(cromosoma[i], matDis, quorum);
+		//sample(cromosoma[i], n, quorum);
+		sample(Solutions[i].coalition, n, quorum);
+		//sort(cromosoma[i], cromosoma[i] + quorum, &array_sort);
+		sort(Solutions[i].coalition, Solutions[i].coalition + quorum, &array_sort);
+		//fitnessPob[i] = eval_sol(cromosoma[i], matDis, quorum);
+		Solutions[i].fitness = eval_sol(Solutions[i].coalition, matDis, quorum);
 	}
 	
 	//ordenamiento de fitness y cromosomas
-	order(fitnessPob, cromosoma, quorum, m);
+	//order(fitnessPob, cromosoma, quorum, m);
+	sort(Solutions.begin(), Solutions.end(), &vector_initial_solutions_sort);
 	coalicionEvol = coalicionEvol + "[";
 	for (size_t i = 0; i < quorum; i++)
 	{
-		coalicionEvol=coalicionEvol+to_string(cromosoma[0][i])+",";
+		//coalicionEvol=coalicionEvol+to_string(cromosoma[0][i])+",";
+		coalicionEvol = coalicionEvol + to_string(Solutions[0].coalition[i]) + ",";
 	}
 	replace(coalicionEvol.end() - 1, coalicionEvol.end(), ',', ']');
 	coalicionEvol = coalicionEvol + ",";
@@ -185,9 +190,11 @@ int main(int argc, char* argv[])
 	int* cromosoma1 = nullptr;
 	int* cromosoma2 = nullptr;
 	itera = itera + to_string(it+1) + ",";
-	fitnessEvol = fitnessEvol + to_string(fitnessPob[0]) + ",";
+	//fitnessEvol = fitnessEvol + to_string(fitnessPob[0]) + ",";
+	fitnessEvol = fitnessEvol + to_string(Solutions[0].fitness) + ",";
 	//incio de algoritmo
-	fitnessAnt = fitnessPob[0];
+	//fitnessAnt = fitnessPob[0];
+	fitnessAnt = Solutions[0].fitness;
 	//cout << "FitnessPob0" << "   " << "FitnessAnt" << endl;
 	while (k < max_k)
 	{
@@ -202,8 +209,10 @@ int main(int argc, char* argv[])
 		//se guardan los cromosomas a cruzar
 		int* cromosoma1 = (int*)malloc(quorum * sizeof(int));
 		int* cromosoma2 = (int*)malloc(quorum * sizeof(int));
-		memcpy(cromosoma1, cromosoma[cual1], quorum * sizeof(int));
-		memcpy(cromosoma2, cromosoma[cual2], quorum * sizeof(int));
+		//memcpy(cromosoma1, cromosoma[cual1], quorum * sizeof(int));
+		memcpy(cromosoma1, Solutions[cual1].coalition, quorum * sizeof(int));
+		//memcpy(cromosoma2, cromosoma[cual2], quorum * sizeof(int));
+		memcpy(cromosoma2, Solutions[cual2].coalition, quorum * sizeof(int));
 
 		//extraccion de los genes a cruzar
 		mDis12 = notin(cromosoma1, cromosoma2, quorum, quorum);
@@ -273,9 +282,7 @@ int main(int argc, char* argv[])
 			cromosoma2[cual21[a]] = crossover12[a];
 		}
 		//se ordenan
-		//sort_bubble(cromosoma1, quorum);
 		sort(cromosoma1, cromosoma1 + quorum, &array_sort);
-		//sort_bubble(cromosoma2, quorum);
 		sort(cromosoma2, cromosoma2 + quorum, &array_sort);
 
 		//liberacion de memoria
@@ -341,7 +348,6 @@ int main(int argc, char* argv[])
 			sample_arreglo(cualIntroducir, 1, notInCromosoma2, mNotInCromosoma2[1][0]);
 			//se realiza la mutacion y se ordena
 			cromosoma2[cualSacar[0]] = cualIntroducir[0];
-			//sort_bubble(cromosoma2, quorum);
 			sort(cromosoma2, cromosoma2 + quorum, &array_sort);
 			//liberacion de memoria
 			free(ar);
@@ -491,7 +497,8 @@ int main(int argc, char* argv[])
 			{
 				aBoolean1 = nullptr;
 				//guardamos un arreglo de los booleanos si encuentra genes del cromosoma1 en el arreglo de cromosomas en la posición idxpop
-				aBoolean1 = in_boolean(cromosoma[0], cromosomaNuevo[idxpop], quorum, quorum);
+				//aBoolean1 = in_boolean(cromosoma[0], cromosomaNuevo[idxpop], quorum, quorum);
+				aBoolean1 = in_boolean(Solutions[0].coalition, cromosomaNuevo[idxpop], quorum, quorum);
 				//si la suma de estos es igual al quorum
 				if (suma_bool(aBoolean1, quorum) == quorum)
 				{
@@ -520,8 +527,10 @@ int main(int argc, char* argv[])
 			{
 				//cambiamos el peor cromosoma de la poblacion actual por el mejor cromosoma de la poblacion nueva
 				peor = m - 1;
-				memcpy(cromosomaNuevo[peor], cromosoma[0], quorum * sizeof(int));
-				fitnessPobNuevo[peor] = fitnessPob[0];
+				//memcpy(cromosomaNuevo[peor], cromosoma[0], quorum * sizeof(int));
+				memcpy(cromosomaNuevo[peor], Solutions[0].coalition, quorum * sizeof(int));
+				//fitnessPobNuevo[peor] = fitnessPob[0];
+				fitnessPobNuevo[peor] = Solutions[0].fitness;
 				order(fitnessPobNuevo, cromosomaNuevo, quorum, m);
 				memcpy(pNuevo, p, m * sizeof(double));
 				memcpy(cumpNuevo, cump, m * sizeof(double));
@@ -536,23 +545,16 @@ int main(int argc, char* argv[])
 			//cambiamos la poblacion actual por la poblacion nueva
 			for (size_t a = 0; a < m; a++)
 			{
-				memcpy(cromosoma[a], cromosomaNuevo[a], quorum * sizeof(int));
-				fitnessPob[a] = fitnessPobNuevo[a];
+				//memcpy(cromosoma[a], cromosomaNuevo[a], quorum * sizeof(int));
+				memcpy(Solutions[a].coalition, cromosomaNuevo[a], quorum * sizeof(int));
+				//fitnessPob[a] = fitnessPobNuevo[a];
+				Solutions[a].fitness = fitnessPobNuevo[a];
 				p[a] = pNuevo[a];
 				cump[a] = cumpNuevo[a];
 			}
-			//reemplazamos la mitad de la poblacion por nuevos cromosomas
-			//int* cromosomaCambio = (int*)malloc(quorum * sizeof(int));
-			//for (size_t j = m / 2; j < m; j++)
-			//{
-			//	sample(cromosomaCambio, n, quorum);
-			//	sort_bubble(cromosomaCambio, quorum);
-			//	fitnessCambio = eval_sol(cromosomaCambio, matDis, quorum);
-			//	memcpy(cromosoma[j], cromosomaCambio, quorum * sizeof(int));
-			//	fitnessPob[j] = fitnessCambio;
-			//}
 			//ordenamos la poblacion
-			order(fitnessPob, cromosoma, quorum, m);
+			//order(fitnessPob, cromosoma, quorum, m);
+			sort(Solutions.begin(), Solutions.end(), &vector_initial_solutions_sort);
 			//inicializamos la probabilidad y la probabilidad acumulada
 			p[0] = pr;
 			cump[0] = pr;
@@ -567,20 +569,24 @@ int main(int argc, char* argv[])
 			//reinicializamos el contador de iteraciones
 			i = 0;
 			//si el fitness del mejor cromosoma es igual al fitness del mejor cromosoma anterior guardamos el numero de iteraciones y el fitness
-			if (fitnessPob[0] < fitnessAnt) {
+			//if (fitnessPob[0] < fitnessAnt) {
+			if(Solutions[0].fitness<fitnessAnt){
 				itera = itera + to_string(it) + ",";
-				fitnessEvol = fitnessEvol + to_string(fitnessPob[0]) + ",";
+				//fitnessEvol = fitnessEvol + to_string(fitnessPob[0]) + ",";
+				fitnessEvol = fitnessEvol + to_string(Solutions[0].fitness) + ",";
 				coalicionEvol = coalicionEvol + "[";
 				for (size_t i = 0; i < quorum; i++)
 				{
-					coalicionEvol = coalicionEvol + to_string(cromosoma[0][i]) + ",";
+					//coalicionEvol = coalicionEvol + to_string(cromosoma[0][i]) + ",";
+					coalicionEvol = coalicionEvol + to_string(Solutions[0].coalition[i]) + ",";
 				}
 				replace(coalicionEvol.end() - 1, coalicionEvol.end(), ',', ']');
 				coalicionEvol = coalicionEvol + ",";
 				k = 0;
 				//cout << fitnessPob[0] << "   " << fitnessAnt << endl;
 				//guardamos el fitness del mejor cromosoma
-				fitnessAnt = fitnessPob[0];
+				//fitnessAnt = fitnessPob[0];
+				fitnessAnt = Solutions[0].fitness;
 			}
 			//liberamos memoria
 			free(pNuevo);
@@ -609,19 +615,18 @@ int main(int argc, char* argv[])
 	resultados << "\"pr\": " << pr << ",\n";
 	resultados << "\"seed\": " << seed << ",\n";
 	resultados << "\"numero_de_iteraciones\": " << it << ",\n";
-	resultados << "\"fitness\": " << fixed<<fitnessPob[0]<<setprecision(9) << ",\n";
+	//resultados << "\"fitness\": " << fixed<<fitnessPob[0]<<setprecision(9) << ",\n";
+	resultados << "\"fitness\": " << fixed << Solutions[0].fitness << setprecision(9) << ",\n";
 	resultados << "\"tiempo\": " << fixed << tTomado << setprecision(9) << ",\n";
 	resultados << "\"coalicion\": [";
 
 	for (size_t j = 0; j < quorum; j++)
 	{
-		//para el parlamento Chileno
-		//if(j<quorum-1)resultados << data["diputados"][cromosoma[0][j]]["ID"] << ",";
-		//else resultados << data["diputados"][cromosoma[0][j]]["ID"];
-
 		//para el parlamento de estados unidos
-		if (j < quorum - 1)resultados << cromosoma[0][j] << ",";
-		else resultados << cromosoma[0][j];
+		//if (j < quorum - 1)resultados << cromosoma[0][j] << ",";
+		//else resultados << cromosoma[0][j];
+		if (j < quorum - 1)resultados << Solutions[0].coalition[j] << ",";
+		else resultados << Solutions[0].coalition[j];
 	}
 	resultados << "]\n" << "}";
 	resultados.close();
@@ -632,21 +637,21 @@ int main(int argc, char* argv[])
 	histo << "\"coaliciones\": " << coalicionEvol << "\n}";
 	
 	//liberamos memoria
-	free(fitnessPob);
+	//free(fitnessPob);
 	free(fitnessPobNuevo);
 	free(p);
 	free(cump);
 	for (size_t j = 0; j < m; j++)
 	{
 		free(cromosomaNuevo[j]);
-		free(cromosoma[j]);
+		//free(cromosoma[j]);
 	}
 	for (size_t i = 0; i < n; i++)
 	{
 		free(matDis[i]);
 	}
 	free(cromosomaNuevo);
-	free(cromosoma);
+	//free(cromosoma);
 	free(matDis);
 	return EXIT_SUCCESS;
 }
