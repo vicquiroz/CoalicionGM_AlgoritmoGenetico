@@ -16,38 +16,38 @@ using namespace std;
 using json = nlohmann::json;
 
 //parametros iniciales
-int m = 38;
-double pmutacion_threshold = 0.170002;
-double pr = 0.141;
+int sample_size = 38;
+double mutation_threshold = 0.170002;
+double selection_threshold = 0.141;
 
 //funcion principal
 int main(int argc, char* argv[])
 {
 	//llamada de JSON
 	//para parlamento de estados unidos
-	ifstream archivo("votes.json");
-	json data = json::parse(archivo);
+	ifstream file("votes.json");
+	json data = json::parse(file);
 
 
-	//se crea y abre el archivo de salida
-	ofstream resultados;
-	resultados.open("resultados.json");
+	//se crea y abre el file de salida
+	ofstream results;
+	results.open("results.json");
 
-	ofstream histo;
-	histo.open("hist.json");
-	string coalicionEvol = "[\n";
-	string itera = "[";
-	string fitnessEvol = "[";
+	ofstream histogram;
+	histogram.open("hist.json");
+	string evolution_of_coalition = "[\n";
+	string iteration_string = "[";
+	string evolution_of_fitness = "[";
 	
 	//de los JSON se obtiene la cantidad de diputados
 	//para parlamento de estados unidos
 	int n = data["rollcalls"][0]["votes"].size();
 
 	//creacion de la matriz de distancia
-	double** matDis = (double**)malloc(n * sizeof(double*));
+	double** distance_matrix = (double**)malloc(n * sizeof(double*));
 	for (size_t i = 0; i < n; i++)
 	{
-		matDis[i] = (double*)malloc(n * sizeof(double));
+		distance_matrix[i] = (double*)malloc(n * sizeof(double));
 	}
 
 	//rellenado de la matriz de distancia
@@ -58,12 +58,12 @@ int main(int argc, char* argv[])
 		//cout << i << endl;
 		for (size_t j = 0; j <n; j++)
 		{	
-			matDis[i][j] = dis_euc(data["rollcalls"][0]["votes"][i]["x"], data["rollcalls"][0]["votes"][i]["y"], data["rollcalls"][0]["votes"][j]["x"], data["rollcalls"][0]["votes"][j]["y"]);
+			distance_matrix[i][j] = euclidian_distance(data["rollcalls"][0]["votes"][i]["x"], data["rollcalls"][0]["votes"][i]["y"], data["rollcalls"][0]["votes"][j]["x"], data["rollcalls"][0]["votes"][j]["y"]);
 		}
 	}
 
 	//inicializacion de tiempo para calculo de ejecucion
-	auto tInicial = chrono::high_resolution_clock::now();
+	auto initial_time = chrono::high_resolution_clock::now();
 
 	//inicializacion de quorum
 	//para parlamento de estados unidos
@@ -72,586 +72,543 @@ int main(int argc, char* argv[])
 	//revision de parametros de entrada
 	if (argc > 1)
 	{
-		m = stoi(argv[1]);
-		pmutacion_threshold = stod(argv[2]);
-		pr = stod(argv[3]);
+		sample_size = stoi(argv[1]);
+		mutation_threshold = stod(argv[2]);
+		selection_threshold = stod(argv[3]);
 		seed = stoi(argv[4]);
 	}
 	//inicializacion de semilla
 	mt.seed(seed);
 
 	//generador de double's random entre 0 y 1
-	uni2 = uniform_real_distribution<double>(0, 1);
+	uniform_2 = uniform_real_distribution<double>(0, 1);
 
-	vector<SolutionStructure> Solutions;
-
-	//inicializador de Poblacion y fitness
-	//int** cromosoma = (int**)malloc(m * sizeof(int*));
-	//double* fitnessPob = nullptr;
-	//fitnessPob = (double*)malloc(m * sizeof(double));
+	vector<Solution_structure> solutions;
 
 	//inicializacion de cromosomas
-	for (size_t i = 0; i < m; i++)
+	for (size_t i = 0; i < sample_size; i++)
 	{
-		Solutions.push_back(SolutionStructure());
-		Solutions[i].coalition = (int*)malloc(quorum * sizeof(int));
+		solutions.push_back(Solution_structure());
+		solutions[i].coalition = (int*)malloc(quorum * sizeof(int));
 		//cromosoma[i] = (int*)malloc(quorum * sizeof(int));
 	}
 
-	for (size_t i = 0; i < m; i++)
+	for (size_t i = 0; i < sample_size; i++)
 	{
-		//sample(cromosoma[i], n, quorum);
-		sample(Solutions[i].coalition, n, quorum);
-		//sort(cromosoma[i], cromosoma[i] + quorum, &array_sort);
-		sort(Solutions[i].coalition, Solutions[i].coalition + quorum, &array_sort);
-		//fitnessPob[i] = eval_sol(cromosoma[i], matDis, quorum);
-		Solutions[i].fitness = eval_sol(Solutions[i].coalition, matDis, quorum);
+		sample(solutions[i].coalition, n, quorum);
+		sort(solutions[i].coalition, solutions[i].coalition + quorum, &array_sort);
+		solutions[i].fitness = evaluate_solution(solutions[i].coalition, distance_matrix, quorum);
 	}
 	
 	//ordenamiento de fitness y cromosomas
-	//order(fitnessPob, cromosoma, quorum, m);
-	sort(Solutions.begin(), Solutions.end(), &vector_initial_solutions_sort);
-	coalicionEvol = coalicionEvol + "[";
+	sort(solutions.begin(), solutions.end(), &vector_initial_solutions_sort);
+	evolution_of_coalition = evolution_of_coalition + "[";
 	for (size_t i = 0; i < quorum; i++)
 	{
-		//coalicionEvol=coalicionEvol+to_string(cromosoma[0][i])+",";
-		coalicionEvol = coalicionEvol + to_string(Solutions[0].coalition[i]) + ",";
+		evolution_of_coalition = evolution_of_coalition + to_string(solutions[0].coalition[i]) + ",";
 	}
-	replace(coalicionEvol.end() - 1, coalicionEvol.end(), ',', ']');
-	coalicionEvol = coalicionEvol + ",";
+	replace(evolution_of_coalition.end() - 1, evolution_of_coalition.end(), ',', ']');
+	evolution_of_coalition = evolution_of_coalition + ",";
 
 	//inicializacion de variables de probabilidad
-	double* p = (double*)malloc(m * sizeof(double));
-	double* cump = (double*)malloc(m * sizeof(double));
+	double* probability_of_selection = (double*)malloc(sample_size * sizeof(double));
+	double* cumulative_probability = (double*)malloc(sample_size * sizeof(double));
 
-	p[0] = 0.1;
-	cump[0] = 0.1;
+	probability_of_selection[0] = 0.1;
+	cumulative_probability[0] = 0.1;
 
 	//calculo de probabilidad
-	for (size_t i = 1; i < m; i++)
+	for (size_t i = 1; i < sample_size; i++)
 	{
-		p[i] = pr * pow(1 - pr, i);
-		cump[i] = suma(p, i);
+		probability_of_selection[i] = selection_threshold * pow(1 - selection_threshold, i);
+		cumulative_probability[i] = summation(probability_of_selection, i);
 	}
-	cump[m - 1] = 1;
+	cumulative_probability[sample_size - 1] = 1;
 	
 	//inicializador de variables
-	//int max_k = 10 * (m - 21);
-	//int max_k = 10*trunc((n+quorum)/m);
-	int max_k = 200 * trunc((n + quorum) / m);
+	int maximum_k_value = 200 * trunc((n + quorum) / sample_size);
 	int i = 0;
 	int k = 0;
-	int it = 0;
-
-	//itera y fitnessEvol hay que almacenarlos en un archivo
-	int cual1;
-	int cual2;
-
-	double pmutacion;
-	bool flag2;
-	bool flag3;
-
-	int idxpop;
-	int contCromNuevo = 0;
-
-	int peor;
-
-	double fitnessCambio;
-
-	int min;
-
+	int iteration = 0;
+	int selection_1;
+	int selection_2;
+	double probability_of_mutation;
+	bool flag_1;
+	bool flag_2;
+	int index_to_pop;
+	int counter_of_new_chromosomes = 0;
+	int worst_chromosome;
+	int minimum_value;
+	double previous_fitness;
+	
 	//inicializador de variables de las nuevas poblaciones y sus respectivos fitness
-	int** cromosomaNuevo = (int**)malloc(m * sizeof(int*));
-	for (size_t a = 0; a < m; a++)
+	int** new_chromosome = (int**)malloc(sample_size * sizeof(int*));
+	for (size_t a = 0; a < sample_size; a++)
 	{
-		cromosomaNuevo[a] = (int*)malloc(quorum * sizeof(int));
+		new_chromosome[a] = (int*)malloc(quorum * sizeof(int));
 	}
-	double* fitnessPobNuevo = (double*)malloc(m * sizeof(double));
-
-	double fitnessAnt;
-
+	double* new_fitness_value = (double*)malloc(sample_size * sizeof(double));
 
 	// Reservas extras 
 
-	bool* aBoolean1 = nullptr;
-	bool* aBoolean2 = nullptr;
-	int** mDis12 = nullptr;
-	int** mDis21 = nullptr;
-	int* disimilar12 = nullptr;
-	int* disimilar21 = nullptr;
-	int* arrMin = nullptr;
-	int* crossovern = nullptr;
-	int* selecCrossover12 = nullptr;
-	int* selecCrossover21 = nullptr;
-	int* crossover12 = nullptr;
-	int* crossover21 = nullptr;
-	int** mCual12 = nullptr;
-	int** mCual21 = nullptr;
-	int* cromosoma1 = nullptr;
-	int* cromosoma2 = nullptr;
-	itera = itera + to_string(it+1) + ",";
-	//fitnessEvol = fitnessEvol + to_string(fitnessPob[0]) + ",";
-	fitnessEvol = fitnessEvol + to_string(Solutions[0].fitness) + ",";
+	bool* array_of_boolean_1 = nullptr;
+	bool* array_of_boolean_2 = nullptr;
+	int** distance_matrix_12 = nullptr;
+	int** distance_matrix_21 = nullptr;
+	int* dissimilar_12 = nullptr;
+	int* dissimilar_21 = nullptr;
+	int* minimal_matrix = nullptr;
+	int* crossover = nullptr;
+	int* selection_of_crossover_12 = nullptr;
+	int* selection_of_crossover_21 = nullptr;
+	int* crossover_12 = nullptr;
+	int* crossover_21 = nullptr;
+	int** boolean_positions_12 = nullptr;
+	int** boolean_positions_21 = nullptr;
+	int* chromosome_1 = nullptr;
+	int* chromosome_2 = nullptr;
+
+	iteration_string = iteration_string + to_string(iteration+1) + ",";
+	evolution_of_fitness = evolution_of_fitness + to_string(solutions[0].fitness) + ",";
 	//incio de algoritmo
-	//fitnessAnt = fitnessPob[0];
-	fitnessAnt = Solutions[0].fitness;
-	//cout << "FitnessPob0" << "   " << "FitnessAnt" << endl;
-	while (k < max_k)
+	previous_fitness = solutions[0].fitness;
+	while (k < maximum_k_value)
 	{
 		//guardamos fitness e iteraciones
-		it++;
+		iteration++;
 		//se seleciona cromosomas a cruzar
-		cual1 = smallest_greater(cump, m, (double)uni2(mt));
-		cual2 = smallest_greater(cump, m, (double)uni2(mt));
+		selection_1 = smallest_greater(cumulative_probability, sample_size, (double)uniform_2(mt));
+		selection_2 = smallest_greater(cumulative_probability, sample_size, (double)uniform_2(mt));
 		//estos no pueden ser iguales
-		while (cual1 == cual2)cual2 = smallest_greater(cump, m, (double)uni2(mt));
+		while (selection_1 == selection_2) selection_2 = smallest_greater(cumulative_probability, sample_size, (double)uniform_2(mt));
 
 		//se guardan los cromosomas a cruzar
-		int* cromosoma1 = (int*)malloc(quorum * sizeof(int));
-		int* cromosoma2 = (int*)malloc(quorum * sizeof(int));
-		//memcpy(cromosoma1, cromosoma[cual1], quorum * sizeof(int));
-		memcpy(cromosoma1, Solutions[cual1].coalition, quorum * sizeof(int));
-		//memcpy(cromosoma2, cromosoma[cual2], quorum * sizeof(int));
-		memcpy(cromosoma2, Solutions[cual2].coalition, quorum * sizeof(int));
+		int* chromosome_1 = (int*)malloc(quorum * sizeof(int));
+		int* chromosome_2 = (int*)malloc(quorum * sizeof(int));
+		//memcpy(chromosome_1, cromosoma[selection_1], quorum * sizeof(int));
+		memcpy(chromosome_1, solutions[selection_1].coalition, quorum * sizeof(int));
+		//memcpy(chromosome_2, cromosoma[selection_2], quorum * sizeof(int));
+		memcpy(chromosome_2, solutions[selection_2].coalition, quorum * sizeof(int));
 
 		//extraccion de los genes a cruzar
-		mDis12 = notin(cromosoma1, cromosoma2, quorum, quorum);
-		mDis21 = notin(cromosoma2, cromosoma1, quorum, quorum);
+		distance_matrix_12 = not_in(chromosome_1, chromosome_2, quorum, quorum);
+		distance_matrix_21 = not_in(chromosome_2, chromosome_1, quorum, quorum);
 
-		int* disimilar12 = (int*)malloc(mDis12[1][0] * sizeof(int));
-		int* disimilar21 = (int*)malloc(mDis21[1][0] * sizeof(int));
+		int* dissimilar_12 = (int*)malloc(distance_matrix_12[1][0] * sizeof(int));
+		int* dissimilar_21 = (int*)malloc(distance_matrix_21[1][0] * sizeof(int));
 
-		memcpy(disimilar12, mDis12[0], mDis12[1][0] * sizeof(int));
-		memcpy(disimilar21, mDis21[0], mDis21[1][0] * sizeof(int));
+		memcpy(dissimilar_12, distance_matrix_12[0], distance_matrix_12[1][0] * sizeof(int));
+		memcpy(dissimilar_21, distance_matrix_21[0], distance_matrix_21[1][0] * sizeof(int));
 
 		//guardamos la cantidad de genes a cruzar
-		int* arrMin = (int*)malloc(2 * sizeof(int));
-		arrMin[0] = mDis12[1][0];
-		arrMin[1] = mDis21[1][0];
+		int* minimal_matrix = (int*)malloc(2 * sizeof(int));
+		minimal_matrix[0] = distance_matrix_12[1][0];
+		minimal_matrix[1] = distance_matrix_21[1][0];
 
 		//seleccion de cantidad de genes a cruzar
-		int* crossovern = (int*)malloc(sizeof(int));
+		int* crossover = (int*)malloc(sizeof(int));
 
-		min = minimo(arrMin, 2);
-		sample(crossovern, min, 1);
+		minimum_value = minimum_of_array(minimal_matrix, 2);
+		sample(crossover, minimum_value, 1);
 
 		//creamos y rellenamos los arrays de seleccion de genes a cruzar
-		int* selecCrossover12 = (int*)malloc(crossovern[0] * sizeof(int));
-		int* selecCrossover21 = (int*)malloc(crossovern[0] * sizeof(int));
+		int* selection_of_crossover_12 = (int*)malloc(crossover[0] * sizeof(int));
+		int* selection_of_crossover_21 = (int*)malloc(crossover[0] * sizeof(int));
 
-		sample(selecCrossover12, mDis12[1][0], crossovern[0]);
-		sample(selecCrossover21, mDis21[1][0], crossovern[0]);
+		sample(selection_of_crossover_12, distance_matrix_12[1][0], crossover[0]);
+		sample(selection_of_crossover_21, distance_matrix_21[1][0], crossover[0]);
 
 		//guardamos los genes a cruzar
-		int* crossover12 = (int*)malloc(crossovern[0] * sizeof(int));
-		int* crossover21 = (int*)malloc(crossovern[0] * sizeof(int));
+		int* crossover_12 = (int*)malloc(crossover[0] * sizeof(int));
+		int* crossover_21 = (int*)malloc(crossover[0] * sizeof(int));
 
-		for (size_t a = 0; a < crossovern[0]; a++)
+		for (size_t a = 0; a < crossover[0]; a++)
 		{
-			crossover12[a] = disimilar12[selecCrossover12[a]];
-			crossover21[a] = disimilar21[selecCrossover21[a]];
+			crossover_12[a] = dissimilar_12[selection_of_crossover_12[a]];
+			crossover_21[a] = dissimilar_21[selection_of_crossover_21[a]];
 		}
 
 		//ordenamos los arreglos de los genes a cruzar
-		//sort_bubble(crossover12, crossovern[0]);
-		sort(crossover12, crossover12 + crossovern[0], &array_sort);
-		//sort_bubble(crossover21, crossovern[0]);
-		sort(crossover21, crossover21 + crossovern[0], &array_sort);
+		sort(crossover_12, crossover_12 + crossover[0], &array_sort);
+		sort(crossover_21, crossover_21 + crossover[0], &array_sort);
 		//revisamos si los genes seleccionados se encuentran en el cromosoma aislado
-		aBoolean1 = in_boolean(cromosoma1, crossover12, quorum, crossovern[0]);
+		array_of_boolean_1 = in_boolean(chromosome_1, crossover_12, quorum, crossover[0]);
 
-		aBoolean2 = in_boolean(cromosoma2, crossover21, quorum, crossovern[0]);
+		array_of_boolean_2 = in_boolean(chromosome_2, crossover_21, quorum, crossover[0]);
 
-		int** mCual12 = which(aBoolean1, quorum);
-		int** mCual21 = which(aBoolean2, quorum);
+		int** boolean_positions_12 = which(array_of_boolean_1, quorum);
+		int** boolean_positions_21 = which(array_of_boolean_2, quorum);
 
-		free(aBoolean1);
-		free(aBoolean2);
+		free(array_of_boolean_1);
+		free(array_of_boolean_2);
 
-		int* cual12 = nullptr;
-		int* cual21 = nullptr;
+		int* gen_selection_12 = nullptr;
+		int* gen_selection_21 = nullptr;
 		//en base a la posicion de genes sacada anteriormente ahora si realizamos los cruces a los cromosomas aislados
-		cual12 = mCual12[0];
-		cual21 = mCual21[0];
-		for (size_t a = 0; a < mCual12[1][0]; a++)
+		gen_selection_12 = boolean_positions_12[0];
+		gen_selection_21 = boolean_positions_21[0];
+		for (size_t a = 0; a < boolean_positions_12[1][0]; a++)
 		{
-			cromosoma1[cual12[a]] = crossover21[a];
+			chromosome_1[gen_selection_12[a]] = crossover_21[a];
 		}
-		for (size_t a = 0; a < mCual21[1][0]; a++)
+		for (size_t a = 0; a < boolean_positions_21[1][0]; a++)
 		{
-			cromosoma2[cual21[a]] = crossover12[a];
+			chromosome_2[gen_selection_21[a]] = crossover_12[a];
 		}
 		//se ordenan
-		sort(cromosoma1, cromosoma1 + quorum, &array_sort);
-		sort(cromosoma2, cromosoma2 + quorum, &array_sort);
+		sort(chromosome_1, chromosome_1 + quorum, &array_sort);
+		sort(chromosome_2, chromosome_2 + quorum, &array_sort);
 
 		//liberacion de memoria
-		free(arrMin);
-		free(mDis12[0]);
-		free(mDis12[1]);
-		free(mDis12);
-		free(mDis21[0]);
-		free(mDis21[1]);
-		free(mDis21);
-		free(mCual12[0]);
-		free(mCual12[1]);
-		free(mCual12);
-		free(mCual21[0]);
-		free(mCual21[1]);
-		free(mCual21);
-		free(disimilar12);
-		free(disimilar21);
-		free(crossover12);
-		free(crossover21);
-		free(selecCrossover12);
-		free(selecCrossover21);
+		free(minimal_matrix);
+		free(distance_matrix_12[0]);
+		free(distance_matrix_12[1]);
+		free(distance_matrix_12);
+		free(distance_matrix_21[0]);
+		free(distance_matrix_21[1]);
+		free(distance_matrix_21);
+		free(boolean_positions_12[0]);
+		free(boolean_positions_12[1]);
+		free(boolean_positions_12);
+		free(boolean_positions_21[0]);
+		free(boolean_positions_21[1]);
+		free(boolean_positions_21);
+		free(dissimilar_12);
+		free(dissimilar_21);
+		free(crossover_12);
+		free(crossover_21);
+		free(selection_of_crossover_12);
+		free(selection_of_crossover_21);
 		//creamos la probabilidad de mutacion
-		pmutacion = (double)uni2(mt);
-		//comprobamos si se muta el cromosoma1
-		if (pmutacion < pmutacion_threshold) {
+		probability_of_mutation = (double)uniform_2(mt);
+		//comprobamos si se muta el chromosome_1
+		if (probability_of_mutation < mutation_threshold) {
 			//seleccion de genes a mutar
-			int* cualSacar = (int*)malloc(sizeof(int));
-			sample(cualSacar, quorum, 1);
-			int** mNotInCromosoma1 = nullptr;
-			int* ar = crear_arreglo(n);
-			mNotInCromosoma1 = notin(ar, cromosoma1, n, quorum);
-			int* notInCromosoma1 = nullptr;
-			notInCromosoma1 = mNotInCromosoma1[0];
-			int* cualIntroducir = (int*)malloc(sizeof(int));
-			sample_arreglo(cualIntroducir, 1, notInCromosoma1, mNotInCromosoma1[1][0]);
+			int* which_get = (int*)malloc(sizeof(int));
+			sample(which_get, quorum, 1);
+			int** matrix_not_in_chromosome_1 = nullptr;
+			int* base_array = create_array(n);
+			matrix_not_in_chromosome_1 = not_in(base_array, chromosome_1, n, quorum);
+			int* not_in_chromosome_1 = nullptr;
+			not_in_chromosome_1 = matrix_not_in_chromosome_1[0];
+			int* which_insert = (int*)malloc(sizeof(int));
+			sample_array(which_insert, 1, not_in_chromosome_1, matrix_not_in_chromosome_1[1][0]);
+			
 			//se realiza la mutacion y se ordena
-			cromosoma1[cualSacar[0]] = cualIntroducir[0];
-			//sort_bubble(cromosoma1, quorum);
-			sort(cromosoma1, cromosoma1 + quorum, &array_sort);
+			chromosome_1[which_get[0]] = which_insert[0];
+			sort(chromosome_1, chromosome_1 + quorum, &array_sort);
+			
 			//liberacion de memoria
-			free(ar);
-			free(cualSacar);
-			free(mNotInCromosoma1[0]);
-			free(mNotInCromosoma1[1]);
-			free(mNotInCromosoma1);
-			free(cualIntroducir);
+			free(base_array);
+			free(which_get);
+			free(matrix_not_in_chromosome_1[0]);
+			free(matrix_not_in_chromosome_1[1]);
+			free(matrix_not_in_chromosome_1);
+			free(which_insert);
 
 		}
 		//creamos la probabilidad de mutacion
-		pmutacion = (double)uni2(mt);
-		//comprobamos si se muta el cromosoma2
-		if (pmutacion < pmutacion_threshold) {
+		probability_of_mutation = (double)uniform_2(mt);
+		
+		//comprobamos si se muta el chromosome_2
+		if (probability_of_mutation < mutation_threshold) {
 			//seleccion de genes a mutar
-			int* cualSacar = (int*)malloc(sizeof(int));
-			sample(cualSacar, quorum, 1);
-			int** mNotInCromosoma2 = nullptr;
-			int* ar = crear_arreglo(n);
-			mNotInCromosoma2 = notin(ar, cromosoma2, n, quorum);
-			int* notInCromosoma2 = nullptr;
-			notInCromosoma2 = mNotInCromosoma2[0];
-			int* cualIntroducir = (int*)malloc(sizeof(int));
-			sample_arreglo(cualIntroducir, 1, notInCromosoma2, mNotInCromosoma2[1][0]);
+			int* which_get = (int*)malloc(sizeof(int));
+			sample(which_get, quorum, 1);
+			int** matrix_not_in_chromosome_2 = nullptr;
+			int* base_array = create_array(n);
+			matrix_not_in_chromosome_2 = not_in(base_array, chromosome_2, n, quorum);
+			int* not_in_chromosome_2 = nullptr;
+			not_in_chromosome_2 = matrix_not_in_chromosome_2[0];
+			int* which_insert = (int*)malloc(sizeof(int));
+			sample_array(which_insert, 1, not_in_chromosome_2, matrix_not_in_chromosome_2[1][0]);
 			//se realiza la mutacion y se ordena
-			cromosoma2[cualSacar[0]] = cualIntroducir[0];
-			sort(cromosoma2, cromosoma2 + quorum, &array_sort);
+			chromosome_2[which_get[0]] = which_insert[0];
+			sort(chromosome_2, chromosome_2 + quorum, &array_sort);
 			//liberacion de memoria
-			free(ar);
-			free(cualSacar);
-			free(mNotInCromosoma2[0]);
-			free(mNotInCromosoma2[1]);
-			free(mNotInCromosoma2);
-			free(cualIntroducir);
+			free(base_array);
+			free(which_get);
+			free(matrix_not_in_chromosome_2[0]);
+			free(matrix_not_in_chromosome_2[1]);
+			free(matrix_not_in_chromosome_2);
+			free(which_insert);
 
 		}
 		//comprobacion si es la primera iteracion
 		if (i == 0) {
 			//inicializamos la nueva poblacion con los cromosomas aislados y recalculamos su fitness
-			memcpy(cromosomaNuevo[contCromNuevo], cromosoma1, quorum * sizeof(int));
-			fitnessPobNuevo[contCromNuevo] = eval_sol(cromosoma1, matDis, quorum);
-			contCromNuevo++;
-			memcpy(cromosomaNuevo[contCromNuevo], cromosoma2, quorum * sizeof(int));
+			memcpy(new_chromosome[counter_of_new_chromosomes], chromosome_1, quorum * sizeof(int));
+			new_fitness_value[counter_of_new_chromosomes] = evaluate_solution(chromosome_1, distance_matrix, quorum);
+			counter_of_new_chromosomes++;
+			memcpy(new_chromosome[counter_of_new_chromosomes], chromosome_2, quorum * sizeof(int));
 
-			fitnessPobNuevo[contCromNuevo] = eval_sol(cromosoma2, matDis, quorum);
-			contCromNuevo++;
+			new_fitness_value[counter_of_new_chromosomes] = evaluate_solution(chromosome_2, distance_matrix, quorum);
+			counter_of_new_chromosomes++;
 		}
 		//comprobacion si no es la primera iteracion
 		else {
 			//inicializador de bandera y contador
-			flag2 = true;
-			idxpop = 0;
-			while (flag2) {
-				aBoolean1 = nullptr;
-				//guardamos un arreglo de los booleanos si encuentra genes del cromosoma1 en el arreglo de cromosomas en la posición idxpop
-				aBoolean1 = in_boolean(cromosoma1, cromosomaNuevo[idxpop], quorum, quorum);
+			flag_1 = true;
+			index_to_pop = 0;
+			while (flag_1) {
+				array_of_boolean_1 = nullptr;
+				//guardamos un arreglo de los booleanos si encuentra genes del chromosome_1 en el arreglo de cromosomas en la posición index_to_pop
+				array_of_boolean_1 = in_boolean(chromosome_1, new_chromosome[index_to_pop], quorum, quorum);
 				//si la suma de estos es igual al quorum
-				if (suma_bool(aBoolean1, quorum) == quorum) {
-					int* cualSacar = (int*)malloc(sizeof(int));
+				if (summation_of_booleans(array_of_boolean_1, quorum) == quorum) {
+					int* which_get = (int*)malloc(sizeof(int));
 					// elegimos un gen aleatorio del para sacarlo
-					sample(cualSacar, quorum, 1);
-					int** mNotInCromosoma1 = nullptr;
+					sample(which_get, quorum, 1);
+					int** matrix_not_in_chromosome_1 = nullptr;
 					//creamos un arreglo
-					int* ar = crear_arreglo(n);
-					//selecciona los elementos que no estan en cromosoma1
-					mNotInCromosoma1 = notin(ar, cromosoma1, n, quorum);
-					int* notInCromosoma1 = nullptr;
-					notInCromosoma1 = mNotInCromosoma1[0];
-					int* cualIntroducir = (int*)malloc(sizeof(int));
-					//selecciona un arreglo de largo 1 de elementos que no estan en cromosoma1 de manera aleatoria
-					sample_arreglo(cualIntroducir, 1, notInCromosoma1, mNotInCromosoma1[1][0]);
+					int* base_array = create_array(n);
+					//selecciona los elementos que no estan en chromosome_1
+					matrix_not_in_chromosome_1 = not_in(base_array, chromosome_1, n, quorum);
+					int* not_in_chromosome_1 = nullptr;
+					not_in_chromosome_1 = matrix_not_in_chromosome_1[0];
+					int* which_insert = (int*)malloc(sizeof(int));
+					//selecciona un arreglo de largo 1 de elementos que no estan en chromosome_1 de manera aleatoria
+					sample_array(which_insert, 1, not_in_chromosome_1, matrix_not_in_chromosome_1[1][0]);
 					//se realiza la mutacion y se ordena
-					cromosoma1[cualSacar[0]] = cualIntroducir[0];
-					//sort_bubble(cromosoma1, quorum);
-					sort(cromosoma1, cromosoma1 + quorum, &array_sort);
+					chromosome_1[which_get[0]] = which_insert[0];
+					//sort_bubble(chromosome_1, quorum);
+					sort(chromosome_1, chromosome_1 + quorum, &array_sort);
 
 					//limpiar memoria
-					free(ar);
-					free(cualSacar);
-					free(mNotInCromosoma1[0]);
-					free(mNotInCromosoma1[1]);
-					free(mNotInCromosoma1);
-					free(cualIntroducir);
+					free(base_array);
+					free(which_get);
+					free(matrix_not_in_chromosome_1[0]);
+					free(matrix_not_in_chromosome_1[1]);
+					free(matrix_not_in_chromosome_1);
+					free(which_insert);
 					//resetear contador
-					idxpop = 0;
+					index_to_pop = 0;
 				}
 				else
 				{
 					//si ya recorrimos toda la poblacion nueva
-					if (idxpop >= contCromNuevo - 1)
+					if (index_to_pop >= counter_of_new_chromosomes - 1)
 					{
 						//salimos del ciclo
-						flag2 = false;
+						flag_1 = false;
 					}
 					else
 					{
 						//de lo contrario incrementamos el contador
-						idxpop++;
+						index_to_pop++;
 					}
 				}
 				//liberacion de memoria
-				free(aBoolean1);
+				free(array_of_boolean_1);
 			}
-			//lo mismo explicado anteriormente pero para el cromosoma2
-			flag2 = true;
-			idxpop = 0;
-			while (flag2) {
-				aBoolean2 = nullptr;
-				aBoolean2 = in_boolean(cromosoma2, cromosomaNuevo[idxpop], quorum, quorum);
-				if (suma_bool(aBoolean2, quorum) == quorum) {
-					int* cualSacar = (int*)malloc(sizeof(int));
-					sample(cualSacar, quorum, 1);
-					int** mNotInCromosoma2 = nullptr;
-					int* ar = crear_arreglo(n);
-					mNotInCromosoma2 = notin(ar, cromosoma2, n, quorum);
-					int* notInCromosoma2 = nullptr;
-					notInCromosoma2 = mNotInCromosoma2[0];
-					int* cualIntroducir = (int*)malloc(sizeof(int));
-					sample_arreglo(cualIntroducir, 1, notInCromosoma2, mNotInCromosoma2[1][0]);
-					cromosoma2[cualSacar[0]] = cualIntroducir[0];
-					//sort_bubble(cromosoma2, quorum);
-					sort(cromosoma2, cromosoma2 + quorum, &array_sort);
+			//lo mismo explicado anteriormente pero para el chromosome_2
+			flag_1 = true;
+			index_to_pop = 0;
+			while (flag_1) {
+				array_of_boolean_2 = nullptr;
+				array_of_boolean_2 = in_boolean(chromosome_2, new_chromosome[index_to_pop], quorum, quorum);
+				if (summation_of_booleans(array_of_boolean_2, quorum) == quorum) {
+					int* which_get = (int*)malloc(sizeof(int));
+					sample(which_get, quorum, 1);
+					int** matrix_not_in_chromosome_2 = nullptr;
+					int* base_array = create_array(n);
+					matrix_not_in_chromosome_2 = not_in(base_array, chromosome_2, n, quorum);
+					int* not_in_chromosome_2 = nullptr;
+					not_in_chromosome_2 = matrix_not_in_chromosome_2[0];
+					int* which_insert = (int*)malloc(sizeof(int));
+					sample_array(which_insert, 1, not_in_chromosome_2, matrix_not_in_chromosome_2[1][0]);
+					chromosome_2[which_get[0]] = which_insert[0];
+					sort(chromosome_2, chromosome_2 + quorum, &array_sort);
 
-					free(ar);
-					free(cualSacar);
-					free(mNotInCromosoma2[0]);
-					free(mNotInCromosoma2[1]);
-					free(mNotInCromosoma2);
-					free(cualIntroducir);
+					free(base_array);
+					free(which_get);
+					free(matrix_not_in_chromosome_2[0]);
+					free(matrix_not_in_chromosome_2[1]);
+					free(matrix_not_in_chromosome_2);
+					free(which_insert);
 
-					idxpop = 0;
+					index_to_pop = 0;
 				}
 				else
 				{
-					if (idxpop == contCromNuevo - 1)
+					if (index_to_pop == counter_of_new_chromosomes - 1)
 					{
-						flag2 = false;
+						flag_1 = false;
 					}
 					else
 					{
-						idxpop++;
+						index_to_pop++;
 					}
 				}
-				free(aBoolean2);
+				free(array_of_boolean_2);
 			}
 
 			//guardamos los cambios en el arreglo de cromosomas nuevos
-			memcpy(cromosomaNuevo[contCromNuevo], cromosoma1, quorum * sizeof(int));
-			fitnessPobNuevo[contCromNuevo] = eval_sol(cromosoma1, matDis, quorum);
-			contCromNuevo++;
-			memcpy(cromosomaNuevo[contCromNuevo], cromosoma2, quorum * sizeof(int));
-			fitnessPobNuevo[contCromNuevo] = eval_sol(cromosoma2, matDis, quorum);
-			contCromNuevo++;
-
+			memcpy(new_chromosome[counter_of_new_chromosomes], chromosome_1, quorum * sizeof(int));
+			new_fitness_value[counter_of_new_chromosomes] = evaluate_solution(chromosome_1, distance_matrix, quorum);
+			counter_of_new_chromosomes++;
+			memcpy(new_chromosome[counter_of_new_chromosomes], chromosome_2, quorum * sizeof(int));
+			new_fitness_value[counter_of_new_chromosomes] = evaluate_solution(chromosome_2, distance_matrix, quorum);
+			counter_of_new_chromosomes++;
 		}
 		//aumentamos contador de iteraciones
 		i++;
 		//si llegamos a la mitad de la poblacion
-		if (i == m / 2)
+		if (i == sample_size / 2)
 		{
 			//reseteamos contador
 			i = 0;
-			contCromNuevo = 0;
+			counter_of_new_chromosomes = 0;
 			//ordenamos la poblacion nueva
-			order(fitnessPobNuevo, cromosomaNuevo, quorum, m);
+			order(new_fitness_value, new_chromosome, quorum, sample_size);
 			
 			//creacion de bandera
-			flag2 = true;
-			flag3 = false;
-			idxpop = 0;
+			flag_1 = true;
+			flag_2 = false;
+			index_to_pop = 0;
 
-			while (flag2)
+			while (flag_1)
 			{
-				aBoolean1 = nullptr;
-				//guardamos un arreglo de los booleanos si encuentra genes del cromosoma1 en el arreglo de cromosomas en la posición idxpop
-				//aBoolean1 = in_boolean(cromosoma[0], cromosomaNuevo[idxpop], quorum, quorum);
-				aBoolean1 = in_boolean(Solutions[0].coalition, cromosomaNuevo[idxpop], quorum, quorum);
+				array_of_boolean_1 = nullptr;
+				//guardamos un arreglo de los booleanos si encuentra genes del chromosome_1 en el arreglo de cromosomas en la posición index_to_pop
+				array_of_boolean_1 = in_boolean(solutions[0].coalition, new_chromosome[index_to_pop], quorum, quorum);
 				//si la suma de estos es igual al quorum
-				if (suma_bool(aBoolean1, quorum) == quorum)
+				if (summation_of_booleans(array_of_boolean_1, quorum) == quorum)
 				{
 					//cambiamos las banderas
-					flag2 = false;
-					flag3 = true;
+					flag_1 = false;
+					flag_2 = true;
 				}
 				else
 				{
 					//de lo contrario incrementamos el contador
-					idxpop++;
+					index_to_pop++;
 				}
 				//si el contador indexpop llega al tamaño de la poplacion
-				if (idxpop > m - 1)
+				if (index_to_pop > sample_size - 1)
 				{
 					//detenemos el ciclo
-					flag2 = false;
+					flag_1 = false;
 				}
 				//liberamos memoria
-				free(aBoolean1);
+				free(array_of_boolean_1);
 			}
-			double* pNuevo = (double*)malloc(m * sizeof(double));
-			double* cumpNuevo = (double*)malloc(m * sizeof(double));
-			//si despues de terminar el while anterior la bandera flag3 es false
-			if (flag3 == false)
+			double* new_probability_of_selection = (double*)malloc(sample_size * sizeof(double));
+			double* new_cumulative_probability = (double*)malloc(sample_size * sizeof(double));
+			//si despues de terminar el while anterior la bandera flag_2 es false
+			if (flag_2 == false)
 			{
-				//cambiamos el peor cromosoma de la poblacion actual por el mejor cromosoma de la poblacion nueva
-				peor = m - 1;
-				//memcpy(cromosomaNuevo[peor], cromosoma[0], quorum * sizeof(int));
-				memcpy(cromosomaNuevo[peor], Solutions[0].coalition, quorum * sizeof(int));
-				//fitnessPobNuevo[peor] = fitnessPob[0];
-				fitnessPobNuevo[peor] = Solutions[0].fitness;
-				order(fitnessPobNuevo, cromosomaNuevo, quorum, m);
-				memcpy(pNuevo, p, m * sizeof(double));
-				memcpy(cumpNuevo, cump, m * sizeof(double));
-
+				//cambiamos el worst_chromosome cromosoma de la poblacion actual por el mejor cromosoma de la poblacion nueva
+				worst_chromosome = sample_size - 1;
+				memcpy(new_chromosome[worst_chromosome], solutions[0].coalition, quorum * sizeof(int));
+				new_fitness_value[worst_chromosome] = solutions[0].fitness;
+				order(new_fitness_value, new_chromosome, quorum, sample_size);
+				memcpy(new_probability_of_selection, probability_of_selection, sample_size * sizeof(double));
+				memcpy(new_cumulative_probability, cumulative_probability, sample_size * sizeof(double));
 			}
 			else
 			{
 				//de lo contrario mantenemos la probabilidad y la probabilidad acumulada
-				memcpy(pNuevo, p, m * sizeof(double));
-				memcpy(cumpNuevo, cump, m * sizeof(double));
+				memcpy(new_probability_of_selection, probability_of_selection, sample_size * sizeof(double));
+				memcpy(new_cumulative_probability, cumulative_probability, sample_size * sizeof(double));
 			}
 			//cambiamos la poblacion actual por la poblacion nueva
-			for (size_t a = 0; a < m; a++)
+			for (size_t a = 0; a < sample_size; a++)
 			{
-				//memcpy(cromosoma[a], cromosomaNuevo[a], quorum * sizeof(int));
-				memcpy(Solutions[a].coalition, cromosomaNuevo[a], quorum * sizeof(int));
-				//fitnessPob[a] = fitnessPobNuevo[a];
-				Solutions[a].fitness = fitnessPobNuevo[a];
-				p[a] = pNuevo[a];
-				cump[a] = cumpNuevo[a];
+				memcpy(solutions[a].coalition, new_chromosome[a], quorum * sizeof(int));
+				solutions[a].fitness = new_fitness_value[a];
+				probability_of_selection[a] = new_probability_of_selection[a];
+				cumulative_probability[a] = new_cumulative_probability[a];
 			}
 			//ordenamos la poblacion
-			//order(fitnessPob, cromosoma, quorum, m);
-			sort(Solutions.begin(), Solutions.end(), &vector_initial_solutions_sort);
+			sort(solutions.begin(), solutions.end(), &vector_initial_solutions_sort);
 			//inicializamos la probabilidad y la probabilidad acumulada
-			p[0] = pr;
-			cump[0] = pr;
+			probability_of_selection[0] = selection_threshold;
+			cumulative_probability[0] = selection_threshold;
 			//terminamos de rellenar la probabilidad y la probabilidad acumulada
-			for (size_t j = 1; j < m; j++)
+			for (size_t j = 1; j < sample_size; j++)
 			{
-				p[j] = pr * pow(1 - pr, j);
-				cump[j] = suma(p, j);
+				probability_of_selection[j] = selection_threshold * pow(1 - selection_threshold, j);
+				cumulative_probability[j] = summation(probability_of_selection, j);
 			}
 			//dejamos la ultima probabilidad acumulada en 1
-			cump[m - 1] = 1;
+			cumulative_probability[sample_size - 1] = 1;
 			//reinicializamos el contador de iteraciones
 			i = 0;
 			//si el fitness del mejor cromosoma es igual al fitness del mejor cromosoma anterior guardamos el numero de iteraciones y el fitness
-			//if (fitnessPob[0] < fitnessAnt) {
-			if(Solutions[0].fitness<fitnessAnt){
-				itera = itera + to_string(it) + ",";
-				//fitnessEvol = fitnessEvol + to_string(fitnessPob[0]) + ",";
-				fitnessEvol = fitnessEvol + to_string(Solutions[0].fitness) + ",";
-				coalicionEvol = coalicionEvol + "[";
-				for (size_t i = 0; i < quorum; i++)
+			if(solutions[0].fitness<previous_fitness){
+				iteration_string = iteration_string + to_string(iteration) + ",";
+				evolution_of_fitness = evolution_of_fitness + to_string(solutions[0].fitness) + ",";
+				evolution_of_coalition = evolution_of_coalition + "[";
+				for (size_t l = 0; l < quorum; l++)
 				{
-					//coalicionEvol = coalicionEvol + to_string(cromosoma[0][i]) + ",";
-					coalicionEvol = coalicionEvol + to_string(Solutions[0].coalition[i]) + ",";
+					evolution_of_coalition = evolution_of_coalition + to_string(solutions[0].coalition[l]) + ",";
 				}
-				replace(coalicionEvol.end() - 1, coalicionEvol.end(), ',', ']');
-				coalicionEvol = coalicionEvol + ",";
+				replace(evolution_of_coalition.end() - 1, evolution_of_coalition.end(), ',', ']');
+				evolution_of_coalition = evolution_of_coalition + ",";
 				k = 0;
-				//cout << fitnessPob[0] << "   " << fitnessAnt << endl;
+
 				//guardamos el fitness del mejor cromosoma
-				//fitnessAnt = fitnessPob[0];
-				fitnessAnt = Solutions[0].fitness;
+				previous_fitness = solutions[0].fitness;
 			}
 			//liberamos memoria
-			free(pNuevo);
-			free(cumpNuevo);
+			free(new_probability_of_selection);
+			free(new_cumulative_probability);
 			//free(cromosomaCambio);
 			
 		}
 		//liberamos memoria
-		free(cromosoma1);
-		free(cromosoma2);
-		free(crossovern);
+		free(chromosome_1);
+		free(chromosome_2);
+		free(crossover);
 		k = k + 1;
 	}
-	//cerramos el arreglo dentro del archivo json
-	replace(itera.end() - 1, itera.end(), ',', ']');
-	replace(fitnessEvol.end() - 1, fitnessEvol.end(), ',', ']');
-	replace(coalicionEvol.end() - 1, coalicionEvol.end(), ',', ']');
+	//cerramos el arreglo dentro del file json
+	replace(iteration_string.end() - 1, iteration_string.end(), ',', ']');
+	replace(evolution_of_fitness.end() - 1, evolution_of_fitness.end(), ',', ']');
+	replace(evolution_of_coalition.end() - 1, evolution_of_coalition.end(), ',', ']');
 	//calculo de tiempo
-	auto tFinal = chrono::high_resolution_clock::now();
-	double tTomado = chrono::duration_cast<chrono::nanoseconds>(tFinal - tInicial).count();
-	tTomado *= 1e-9;
+	auto final_time = chrono::high_resolution_clock::now();
+	double time_taken = chrono::duration_cast<chrono::nanoseconds>(final_time - initial_time).count();
+	time_taken *= 1e-9;
 
 	//guardamos la informacion recopilada en un json
-	resultados << "{\n\"m\": " << m << ",\n";
-	resultados << "\"pmutacion_threshold\": " << pmutacion_threshold << ",\n";
-	resultados << "\"pr\": " << pr << ",\n";
-	resultados << "\"seed\": " << seed << ",\n";
-	resultados << "\"numero_de_iteraciones\": " << it << ",\n";
-	//resultados << "\"fitness\": " << fixed<<fitnessPob[0]<<setprecision(9) << ",\n";
-	resultados << "\"fitness\": " << fixed << Solutions[0].fitness << setprecision(9) << ",\n";
-	resultados << "\"tiempo\": " << fixed << tTomado << setprecision(9) << ",\n";
-	resultados << "\"coalicion\": [";
+	results << "{\n\"sample_size\": " << sample_size << ",\n";
+	results << "\"mutation_threshold\": " << mutation_threshold << ",\n";
+	results << "\"selection_threshold\": " << selection_threshold << ",\n";
+	results << "\"seed\": " << seed << ",\n";
+	results << "\"number_of_iteration\": " << iteration << ",\n";
+	results << "\"fitness\": " << fixed << solutions[0].fitness << setprecision(9) << ",\n";
+	results << "\"time_taken\": " << fixed << time_taken << setprecision(9) << ",\n";
+	results << "\"coalition\": [";
 
 	for (size_t j = 0; j < quorum; j++)
 	{
 		//para el parlamento de estados unidos
-		//if (j < quorum - 1)resultados << cromosoma[0][j] << ",";
-		//else resultados << cromosoma[0][j];
-		if (j < quorum - 1)resultados << Solutions[0].coalition[j] << ",";
-		else resultados << Solutions[0].coalition[j];
+		if (j < quorum - 1)results << solutions[0].coalition[j] << ",";
+		else results << solutions[0].coalition[j];
 	}
-	resultados << "]\n" << "}";
-	resultados.close();
+	results << "]\n" << "}";
+	results.close();
 	
 	//guardamos datos para el histograma
-	histo << "{\n\"iteraciones\": " << itera << ",\n";
-	histo << "\"fitness\": " << fitnessEvol << ",\n";
-	histo << "\"coaliciones\": " << coalicionEvol << "\n}";
+	histogram << "{\n\"iterations\": " << iteration_string << ",\n";
+	histogram << "\"fitness\": " << evolution_of_fitness << ",\n";
+	histogram << "\"coalition\": " << evolution_of_coalition << "\n}";
 	
 	//liberamos memoria
-	//free(fitnessPob);
-	free(fitnessPobNuevo);
-	free(p);
-	free(cump);
-	for (size_t j = 0; j < m; j++)
+	free(new_fitness_value);
+	free(probability_of_selection);
+	free(cumulative_probability);
+	for (size_t j = 0; j < sample_size; j++)
 	{
-		free(cromosomaNuevo[j]);
-		//free(cromosoma[j]);
+		free(new_chromosome[j]);
 	}
-	for (size_t i = 0; i < n; i++)
+	for (size_t l = 0; l < n; l++)
 	{
-		free(matDis[i]);
+		free(distance_matrix[l]);
 	}
-	free(cromosomaNuevo);
-	//free(cromosoma);
-	free(matDis);
+	free(new_chromosome);
+	free(distance_matrix);
 	return EXIT_SUCCESS;
 }
