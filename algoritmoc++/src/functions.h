@@ -1,4 +1,4 @@
-
+// Calling libraries
 #include <iostream>
 #include <cstdlib>
 #include <fstream>
@@ -10,39 +10,46 @@
 #include <nlohmann/json.hpp>
 #include <chrono>
 #include <cmath>
-//acortadores
+
 using namespace std;
+// Initializing the seed
 int seed = 2417704;
-// Inicialización de randoms
+
+// Initializing the random number generator
 uniform_int_distribution<int> uniform_1;
 uniform_real_distribution<double> uniform_2;
 uniform_int_distribution<int> pop_selection;
 random_device rng;
 default_random_engine generator(seed);
-mt19937 mt{ rng() };
-struct Solution_structure {
-	int* coalition;
+mt19937 mt{rng()};
+
+// Initializing the struct of the solutions
+struct Solution_structure
+{
+	int *coalition;
 	double fitness;
 };
 
-bool array_sort(int const& lvd, int const& rvd)
+// Boolean functions to check if a vector or array is sorted
+bool array_sort(int const &lvd, int const &rvd)
 {
 	return lvd < rvd;
 }
-bool vector_initial_solutions_sort(Solution_structure const& lvd, Solution_structure const& rvd)
+bool vector_initial_solutions_sort(Solution_structure const &lvd, Solution_structure const &rvd)
 {
 	return lvd.fitness < rvd.fitness;
 }
 
-//funcion para calcular la distancia entre dos puntos
+// Function to calculate the distance between two points
 double euclidian_distance(double x1, double y1, double x2, double y2)
 {
 	double calculation = pow(pow((x2 - x1), 2) + pow((y2 - y1), 2), 1 / (double)2);
 	return calculation;
 }
 
-//evaluar los cromosomas y calcular su fitness
-double evaluate_solution(int* pos, double** mat, int length) {
+// Function to evaluate the solutions and return the fitness value
+double evaluate_solution(int *pos, double **mat, int length)
+{
 	double sum = 0;
 	for (size_t i = 0; i <= (length - 2); i++)
 	{
@@ -54,8 +61,8 @@ double evaluate_solution(int* pos, double** mat, int length) {
 	return sum;
 }
 
-//funcion para suamar los valores de un array_of_int
-double summation(double* array, int length)
+// Function to sum the values of an array_of_int
+double summation(double *array, int length)
 {
 	double sum = 0;
 	for (size_t i = 0; i <= length; i++)
@@ -65,8 +72,8 @@ double summation(double* array, int length)
 	return sum;
 }
 
-//funcion para obtener el numero de booleanos "TRUE" en un array_of_int
-int summation_of_booleans(bool* array, int length)
+// Function to get the number of boolean "TRUE" in an array
+int summation_of_booleans(bool *array, int length)
 {
 	int sum = 0;
 	for (size_t i = 0; i < length; i++)
@@ -79,8 +86,8 @@ int summation_of_booleans(bool* array, int length)
 	return sum;
 }
 
-//funcion para obtener la posicion de el primer value en un array_of_int que sea más pequeño que un value dado
-int smallest_greater(double* seq, int length, double value)
+// Function to get the position of the first value in an array that is smaller than a given value
+int smallest_greater(double *seq, int length, double value)
 {
 	int i = 0;
 	bool flag = true;
@@ -99,19 +106,21 @@ int smallest_greater(double* seq, int length, double value)
 			}
 		}
 	}
-	return(int)EXIT_FAILURE;
+	return (int)EXIT_FAILURE;
 }
 
-//funcion para llenar un array_of_int con numeros aleatorios entre un rango dado
-void sample(int* array_of_int, int limit, int length)
+// Function to fill an array with random numbers between a given range
+void sample(int *array_of_int, int limit, int length)
 {
 	int i = 0;
 	bool repeated = false;
 	int value = 0;
-	if (limit == 0) {
+	if (limit == 0)
+	{
 		uniform_1 = uniform_int_distribution<int>(0, limit);
 	}
-	else {
+	else
+	{
 		uniform_1 = uniform_int_distribution<int>(0, limit - 1);
 	}
 	while (i < length)
@@ -131,12 +140,11 @@ void sample(int* array_of_int, int limit, int length)
 	}
 }
 
-
-//funcion para ordenar un array_of_int de menor a mayor y aplica esos cambios a una matriz
-void order(double* fitness, int** chromosome, int quorum, int sample_size)
+// Function to sort an array from smallest to largest and apply those changes to a matrix
+void order(double *fitness, int **chromosome, int quorum, int sample_size)
 {
 	double temporal_variable = 0;
-	int* arrTemp = (int*)malloc(quorum * sizeof(int));
+	int *arrTemp = (int *)malloc(quorum * sizeof(int));
 	for (size_t i = 0; i < sample_size; i++)
 	{
 		bool already_sorted = true;
@@ -154,15 +162,16 @@ void order(double* fitness, int** chromosome, int quorum, int sample_size)
 				already_sorted = false;
 			}
 		}
-		if (already_sorted) break;
+		if (already_sorted)
+			break;
 	}
 	free(arrTemp);
 }
 
-//funcion para retornar los valores que estan en el arreglo1 pero no en el arreglo2 (valores)
-int** not_in(int* array_1, int* array_2, int length_1, int length_2)
+// Function to return the values that are in array1 but not in array2 (values)
+int **not_in(int *array_1, int *array_2, int length_1, int length_2)
 {
-	int* temporal_variable = (int*)malloc(sizeof(int) * length_1);
+	int *temporal_variable = (int *)malloc(sizeof(int) * length_1);
 	int counter_1 = 0;
 	bool flag = false;
 	for (int i = 0; i < length_1; i++)
@@ -181,9 +190,9 @@ int** not_in(int* array_1, int* array_2, int length_1, int length_2)
 		}
 		flag = false;
 	}
-	int** indexes = (int**)malloc(sizeof(int*) * 2);
-	indexes[0] = (int*)malloc(sizeof(int) * counter_1);
-	indexes[1] = (int*)malloc(sizeof(int) * 1);
+	int **indexes = (int **)malloc(sizeof(int *) * 2);
+	indexes[0] = (int *)malloc(sizeof(int) * counter_1);
+	indexes[1] = (int *)malloc(sizeof(int) * 1);
 	indexes[1][0] = counter_1;
 	for (size_t i = 0; i < counter_1; i++)
 	{
@@ -194,10 +203,10 @@ int** not_in(int* array_1, int* array_2, int length_1, int length_2)
 	return indexes;
 }
 
-//funcion para retornar un array_of_int de booleanos, donde TRUE significa que estan en ambos arreglos y FALSE significa que esta en el arreglo1 pero no en el arreglo2
-bool* in_boolean(int* array_1, int* array_2, int length_1, int length_2)
+// Function to return an array of booleans, where TRUE means that they are in both arrays and FALSE means that it is in the array1 but not in the array2
+bool *in_boolean(int *array_1, int *array_2, int length_1, int length_2)
 {
-	bool* result = (bool*)malloc(sizeof(bool) * length_1);
+	bool *result = (bool *)malloc(sizeof(bool) * length_1);
 	int result_len = 0;
 	bool flag = false;
 	for (size_t i = 0; i < length_1; i++)
@@ -221,8 +230,8 @@ bool* in_boolean(int* array_1, int* array_2, int length_1, int length_2)
 	return result;
 }
 
-//funcion que retorna el menor value de un array_of_int
-int minimum_of_array(int* array, int length)
+// Function to return the smallest value of an array
+int minimum_of_array(int *array, int length)
 {
 	int index_of_minimum_of_array = 0;
 	for (size_t i = 0; i < length - 1; i++)
@@ -235,9 +244,8 @@ int minimum_of_array(int* array, int length)
 	return index_of_minimum_of_array;
 }
 
-
-//funcion que dado un array_of_int de booleanos retorna la posicion de los valores que sean TRUE
-int** which(bool* array, int length)
+// Function that given an array of booleans returns the position of the values that are TRUE
+int **which(bool *array, int length)
 {
 	int counter_1 = 0;
 	for (size_t i = 0; i < length; i++)
@@ -245,10 +253,10 @@ int** which(bool* array, int length)
 		if (array[i])
 			counter_1++;
 	}
-	int** indexes = nullptr;
-	indexes = (int**)malloc(sizeof(int*) * 2);
-	indexes[0] = (int*)malloc(sizeof(int) * counter_1);
-	indexes[1] = (int*)malloc(sizeof(int));
+	int **indexes = nullptr;
+	indexes = (int **)malloc(sizeof(int *) * 2);
+	indexes[0] = (int *)malloc(sizeof(int) * counter_1);
+	indexes[1] = (int *)malloc(sizeof(int));
 	int counter_2 = 0;
 	for (size_t i = 0; i < length; i++)
 	{
@@ -262,10 +270,10 @@ int** which(bool* array, int length)
 	return indexes;
 }
 
-//funcion que crea y retorna un array_of_int de enteros
-int* create_array(int length)
+// Function that creates and returns an array integers
+int *create_array(int length)
 {
-	int* array_of_int = (int*)malloc(sizeof(int) * length);
+	int *array_of_int = (int *)malloc(sizeof(int) * length);
 	for (size_t i = 0; i < length; i++)
 	{
 		array_of_int[i] = i;
@@ -274,8 +282,8 @@ int* create_array(int length)
 	return array_of_int;
 }
 
-//funcion que dado un array_of_int este es rellenado con valores aleatorios
-void sample_array(int* array_of_int, int quantity, int* valores, int length)
+// Function that given an array is filled with random values
+void sample_array(int *array_of_int, int quantity, int *valores, int length)
 {
 	int index = 0;
 	int value = 0;
