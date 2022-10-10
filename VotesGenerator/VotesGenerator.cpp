@@ -6,7 +6,7 @@ using namespace std;
 uniform_real_distribution<double> uniform;
 random_device rng;
 mt19937 mt{ rng() };
-int sample_size = 500;
+int sample_size = 20;
 int main(int argc, char* argv[])
 {
 	if (argc > 1)
