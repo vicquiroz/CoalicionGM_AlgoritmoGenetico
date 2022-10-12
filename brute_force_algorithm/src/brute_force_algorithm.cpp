@@ -1,5 +1,5 @@
 ﻿#include "brute_force_algorithm.h"
-
+#include <chrono>
 #define pb push_back
 
 using namespace std;
@@ -11,6 +11,7 @@ int main() {
     json data = json::parse(file);
 
     int n = data["votes"].size();
+    n = 30;
     int quorum = trunc(n / 2)+1;
     // Initialize the distance matrix
     double** distance_matrix = (double**)malloc(n * sizeof(double*));
@@ -27,34 +28,24 @@ int main() {
             distance_matrix[i][j] = euclidian_distance(data["votes"][i]["x"], data["votes"][i]["y"], data["votes"][j]["x"], data["votes"][j]["y"]);
         }
     }
-
-    vector <int> s(n);
-    iota(s.begin(), s.end(), 0);
-    map <vector<int>, int> m; // To check if we already have that variation
-    vector <double> fitness;
-    vector <vector <int>> v; // Variations
-    do {
-        vector <int> var;
-        for (int i = 0; i < quorum; i++) var.pb(s[i]);
-        sort(var.begin(), var.end(), &vector_sort);
-        if (m[var] == 0) {
-            m[var] = 1;
-            v.pb(var);
-        }
-    } while (next_permutation(s.begin(), s.end()));
-    for (vector<int> coalition:v )
-    {
-        fitness.pb(evaluate_solution(coalition, distance_matrix, quorum));
-    }
-    for (double currentFitness : fitness) {
-        cout << currentFitness << endl;
-    }
-    int minIndex = distance(begin(fitness), min_element(begin(fitness), end(fitness)));
-    cout << "Minimum Fitness:" << fitness[minIndex] << endl;
+    // Time variable initialization for execution calculation
+    auto initial_time = chrono::high_resolution_clock::now();
+    cout << "Generando combinatoria!" << endl;
+    double fitness;
+    int* coalition = (int*)malloc(quorum * sizeof(int));
+    tie(fitness,coalition)=comb(n, quorum,distance_matrix);
+    cout << "Fin Combinatoria!" << endl;
+    // Stop the clock
+    auto final_time = chrono::high_resolution_clock::now();
+    double time_taken = chrono::duration_cast<chrono::nanoseconds>(final_time - initial_time).count();
+    // Convert the time taken by the algorithm to seconds
+    time_taken *= 1e-9;
+    cout << "Time:"<< fixed << time_taken << setprecision(9) << endl;
+    cout << "Minimum Fitness:" << fitness << endl;
     cout << "Coalition:" << endl;
     for (size_t i = 0; i < quorum; i++)
     {
-        cout << v[minIndex][i] << ",";
+        cout << coalition[i] << ",";
     }
     return 0;
 }
